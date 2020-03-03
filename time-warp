@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+app_name="$(basename $0)"
+version="$(git describe --always --first-parent HEAD || "v0.0.0")"
+
+project=$(dirname $(perl -e "use Cwd 'abs_path'; print abs_path(@ARGV[0])" -- "$0"))
+
+. "$project/.env"
+
+src="$project/src"
+var="$project/var"
+
+# build an array of params to pass to make
+params=(
+    config="$HOME/.config/$app_name"
+    var="$var"
+    errored_path="$var/$errored_file"
+    excluded_path="$var/$excluded_file"
+    queue="/tmp/$org_id.$app_name"
+)
+make build ${params[*]}
+
+# declare all the params as variables, then trash the array
+declare ${params[*]}
+unset params
+
+. "$src/index" $@

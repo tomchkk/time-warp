@@ -1,3 +1,4 @@
-TODO.md
-bin
-bin/*
+/TODO.md
+/.env
+/bin/
+/var/

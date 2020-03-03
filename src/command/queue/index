@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+
+_queue_usage() {
+    cat << EOF
+$app_name ($version) - Queue
+
+Consume or produce $app_name queue items.
+
+Usage:  $app_name queue [options] <args>
+
+Options:
+    -h, --help      Print usage information
+    -c, --consume   Consume queue items
+    -k, --kill      Kill running queue services
+    -l, --list      List running queue services
+    -p, --produce   Produce queue items
+
+EOF
+
+    exit 0
+}
+
+
+opt="$1" && shift
+args="$@"
+
+case "$opt" in
+    -c|--consume)
+        # - runs watchexec --resolved-options -- /path/2/consumer
+        #   - watches for changes to time-warp.q/exclude file
+        #   - pops an item off the exclude stack
+        #   - excludes item from backups
+        #   - on success, pushes item to time-warp/excluded.q
+        #   - on fail, pushes item to time-warp/errored.q
+
+        watchexec \
+            --watch "$excluding_path" \
+            --no-ignore \
+            --no-vcs-ignore \
+            --no-default-ignore \
+            --no-shell \
+            -- "$service/queue/consumer" "$excluding_path" "$excluded_path"
+    ;;
+    -k|--kill)
+        echo "kill running queue services"
+    ;;
+    -l|--list)
+        echo "list running queue services"
+    ;;
+    -p|--produce)
+        # - runs `watchexec --resolved-options -- /path/2/producer`
+        #   - watches for changes to given paths gets filters from profiles
+        #   - ignores changes caused by itself
+        #   - passes normalised path to `time-warp match $path` to match the path to a
+        #     configured profile
+        #   - on successful match, pushes message (timestamp and path) to time-warp/excluding.q file
+
+        watchexec \
+            --watch /Users/tom/ \
+            --filter '**/vendor' \
+            --ignore '**/vendor/**/vendor/**' \
+            --no-vcs-ignore \
+            --no-default-ignore \
+            --no-shell \
+            -- "$service/queue/producer"
+    ;;
+    -h|--help|*)
+        _queue_usage
+    ;;
+esac

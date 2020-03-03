@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+_watch_usage() {
+    cat << EOF
+$app_name ($version) - Watch
+
+Recursively watch a path, or paths, for changes to files matching configured
+file profile filters.
+
+Usage:  $app_name watch [options] <args>
+
+Options:
+    -h, --help      Print usage information
+    -p, --path      Watch a path for relevant changes.  This may be specified
+                    multiple times to monitor multiple paths.
+
+EOF
+
+    exit 0
+}
+
+# set defaults
+paths=""
+
+# handle empty args
+[[ -z "$@" ]] && set -- "--help"
+
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        -p|--path)
+            path="$2"; shift
+
+            [[ -z "$path" ]] && echo "A path must be set" && exit 1
+
+            if [[ -d "$path" ]]; then
+                paths+=("$path");
+            else
+                echo "Path '$path' does not exist" && exit 1
+            fi
+        ;;
+        -h|--help|*)
+            _watch_usage
+        ;;
+    esac
+    shift
+done
+
+echo "paths ${paths[*]}"
+
+# resolve options and consume"
+time-warp queue --consume
+
+# resolve options and produce
+time-warp queue --produce

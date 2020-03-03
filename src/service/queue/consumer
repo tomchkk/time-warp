@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+printenv | grep -E 'WATCHEXEC_'
+
+[[ -n "$WATCHEXEC_WRITTEN_PATH" ]] && event="write"
+[[ -n "$WATCHEXEC_RENAMED_PATH" ]] && event="rename"
+
+if  [[ -n "$WATCHEXEC_WRITTEN_PATH" ]] ||
+    # not clear why, but if this case isn't handled the process seems to get stuck
+    [[ -n "$WATCHEXEC_RENAMED_PATH" ]]
+then
+    count=0
+
+    # as long as $1 has content
+    while [[ -s "$1" ]]; do
+        # append line 1 of "$1" to $2
+        head -1 "$1" >> "$2"
+        # cut line 1 from file
+        sed -i '' -e '1d' "$1" # <-- err... this is editing the very file we're watching for changes!?
+        count=$((count+1))
+    done
+
+    echo "emptied '$count' items from queue '$1' on '$event'"
+fi

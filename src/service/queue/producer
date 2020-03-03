@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+events=('created' 'removed' 'renamed' 'written' 'meta')
+modifications=(
+    'WATCHEXEC_CREATED_PATH'
+    'WATCHEXEC_REMOVED_PATH'
+    'WATCHEXEC_RENAMED_PATH'
+    'WATCHEXEC_WRITTEN_PATH'
+    'WATCHEXEC_META_CHANGED_PATH'
+)
+
+for key in ${!modifications[*]}; do
+    event="${events[$key]}"
+    modification="${modifications[$key]}"
+    paths="${!modification}"
+
+    if  [[ -n "$paths" ]] &&
+        # presently, for the purposes of this script, we're only interested in
+        # created or renamed events
+        [[ "$event" =~ ^created|renamed$ ]]
+    then
+        IFS=":"
+        for path in $paths; do
+            # $path will be a path stub if $WATCHEXEC_COMMON_PATH is set,
+            # otherwise it will be a full path. So, either way, the two can be
+            # concatenated to get a full path to a changed file
+            path="${WATCHEXEC_COMMON_PATH}${path}"
+
+            # we're only concerned with paths that exist
+            if [[ -e "$path" ]]; then
+                # TODO: here we will try to match $path using something like
+                # if $(time-warp match $path); then push to the queue - i.e.:
+                if [[ -d "$path" ]] && [[ -f "$path/"../composer.json ]]; then
+                    echo "$(date +"%Y-%m-%d %H:%M:%S") $path $event" \
+                        >> ~/Developer/watcher/watchexec/sandbox/tmp/excluding.q
+                fi
+            fi
+        done
+        unset IFS
+    fi
+done
