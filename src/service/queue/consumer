@@ -1,24 +1,28 @@
 #!/usr/bin/env bash
 
-printenv | grep -E 'WATCHEXEC_'
+# opens a fifo pipe at the given path and then executes the given command using
+# arguments pushed to the pipe, or echos the arguments, if no command is given
 
-[[ -n "$WATCHEXEC_WRITTEN_PATH" ]] && event="write"
-[[ -n "$WATCHEXEC_RENAMED_PATH" ]] && event="rename"
+fifo="$1"
+cmd="$2"
+kill_switch="kill"
 
-if  [[ -n "$WATCHEXEC_WRITTEN_PATH" ]] ||
-    # not clear why, but if this case isn't handled the process seems to get stuck
-    [[ -n "$WATCHEXEC_RENAMED_PATH" ]]
-then
-    count=0
+# rm fifo_name at exit
+trap "rm -f $fifo" EXIT
 
-    # as long as $1 has content
-    while [[ -s "$1" ]]; do
-        # append line 1 of "$1" to $2
-        head -1 "$1" >> "$2"
-        # cut line 1 from file
-        sed -i '' -e '1d' "$1" # <-- err... this is editing the very file we're watching for changes!?
-        count=$((count+1))
-    done
+[[ -p "$fifo" ]] || mkfifo "$fifo"
 
-    echo "emptied '$count' items from queue '$1' on '$event'"
-fi
+while true; do
+    if read -r arg < $fifo; then
+        [[ "$arg" = "$kill_switch" ]] && break
+
+        if [[ -n "$cmd" ]]; then
+            # execute the given command using the received argument
+            /usr/bin/env bash -c "$cmd $arg"
+        else
+            echo "$arg"
+        fi
+    fi
+done
+
+exit 0

@@ -26,23 +26,13 @@ args="$@"
 
 case "$opt" in
     -c|--consume)
-        # - runs watchexec --resolved-options -- /path/2/consumer
-        #   - watches for changes to time-warp.q/exclude file
-        #   - pops an item off the exclude stack
-        #   - excludes item from backups
-        #   - on success, pushes item to time-warp/excluded.q
-        #   - on fail, pushes item to time-warp/errored.q
-
-        watchexec \
-            --watch "$excluding_path" \
-            --no-ignore \
-            --no-vcs-ignore \
-            --no-default-ignore \
-            --no-shell \
-            -- "$service/queue/consumer" "$excluding_path" "$excluded_path"
+        # opens a fifo at the given a path and then executes the given bash
+        # command for each item pushed to the pipe
+        . "$service/queue/consumer" "$queue/$excluding_fifo" "time-warp exclude"
     ;;
     -k|--kill)
         echo "kill running queue services"
+        echo "kill" > "$queue/$excluding_fifo"
     ;;
     -l|--list)
         echo "list running queue services"

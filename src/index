@@ -31,6 +31,14 @@ opt="$1" && shift
 args="$@"
 
 case "$opt" in
+    exclude)
+        # excludes item from backups
+        # TODO:
+        #  - on success, pushes item to time-warp/excluded.q
+        #  - on fail, pushes item to time-warp/errored.q
+
+        echo "path(s) to exclude:" $args
+    ;;
     queue)
         . "$command/queue/index" $args
     ;;

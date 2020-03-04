@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 app_name="$(basename $0)"
-version="$(git describe --always --first-parent HEAD || "v0.0.0")"
+# TODO: fix this when run from other dirs
+version="$(git describe --always --first-parent HEAD || echo "v0.0.0")"
 
 project=$(dirname $(perl -e "use Cwd 'abs_path'; print abs_path(@ARGV[0])" -- "$0"))
 
@@ -18,10 +19,9 @@ params=(
     excluded_path="$var/$excluded_file"
     queue="/tmp/$org_id.$app_name"
 )
-make build ${params[*]}
+make --file="$project/Makefile" --warn-undefined-variables build ${params[*]}
 
 # declare all the params as variables, then trash the array
-declare ${params[*]}
-unset params
+declare ${params[*]} && unset params
 
 . "$src/index" $@
