@@ -18,7 +18,7 @@ while true; do
 
         if [[ -n "$cmd" ]]; then
             # execute the given command using the received argument
-            /usr/bin/env bash -c "$cmd $arg"
+            /usr/bin/env bash -c "$cmd $arg &"
         else
             echo "$arg"
         fi

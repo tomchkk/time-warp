@@ -10,7 +10,7 @@ Usage:  $app_name queue [options] <args>
 
 Options:
     -h, --help      Print usage information
-    -c, --consume   Consume queue items
+    -c, --consume   Open a FIFO pipe to consume items pushed to the queue
     -k, --kill      Kill running queue services
     -l, --list      List running queue services
     -p, --produce   Produce queue items
