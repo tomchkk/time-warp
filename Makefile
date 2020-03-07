@@ -10,10 +10,10 @@
 # clean:
 	# @rm -rf ./bin
 
-build: config files com
+build: user_config files com
 
-config:
-	@mkdir -p ${config}
+user_config:
+	@mkdir -p ${user_config}
 
 files: var
 	@touch ${errored_path}

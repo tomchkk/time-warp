@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+actions="$1"
+
+if [[ ! -d "$actions" ]]; then
+    echo "Error: An existing actions directory is required"
+    return 1
+fi
+
+__handle_message() {
+    local message="${1:-[empty]}" && shift
+    local args="$@"
+
+    action="$actions/$message-action"
+
+    if [[ ! -f "$action" ]]; then
+        echo "Error: An action could not be found for a '$message' message." && exit 1
+    fi
+
+    source $action && __process_action $args
+}

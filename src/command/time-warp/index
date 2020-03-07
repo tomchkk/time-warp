@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 
-command="$src/command"
-service="$src/service"
-
-_usage() {
+__command_usage() {
     cat << EOF
 $app_name ($version)
 
@@ -23,8 +20,6 @@ Commands:
                 configured file profile filters.
 
 EOF
-
-    exit 0
 }
 
 opt="$1" && shift
@@ -40,19 +35,18 @@ case "$opt" in
         echo "path(s) to exclude:" $args
     ;;
     queue)
-        . "$command/queue/index" $args
+        source $(__container_get "queue-command") $args
     ;;
     watch)
-        . "$command/watch/index" $args
+        source $(__container_get "watch-command") $args
     ;;
     -l|--list)
-        echo "-l --list -v --version -h --help" && \
-        echo "watch"
+        echo "-l --list -v --version -h --help queue watch"
     ;;
     -v|--version)
         echo "$version"
     ;;
     -h|--help|*)
-        _usage
+        __command_usage && exit 0
     ;;
 esac

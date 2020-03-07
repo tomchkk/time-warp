@@ -2,26 +2,28 @@
 
 app_name="$(basename $0)"
 # TODO: fix this when run from other dirs
-version="$(git describe --always --first-parent HEAD || echo "v0.0.0")"
+version="$(git describe --always --first-parent HEAD || echo "v0.0.0")" 2>/dev/null
 
 project=$(dirname $(perl -e "use Cwd 'abs_path'; print abs_path(@ARGV[0])" -- "$0"))
 
-. "$project/.env"
-
+config="$project/config"
 src="$project/src"
 var="$project/var"
 
+source "$project/.env"
+
 # build an array of params to pass to make
-params=(
-    config="$HOME/.config/$app_name"
+make_params=(
+    user_config="$HOME/.config/$app_name"
     var="$var"
     errored_path="$var/$errored_file"
     excluded_path="$var/$excluded_file"
     queue="/tmp/$org_id.$app_name"
 )
-make --file="$project/Makefile" --warn-undefined-variables build ${params[*]}
 
-# declare all the params as variables, then trash the array
-declare ${params[*]} && unset params
+make --file="$project/Makefile" --warn-undefined-variables build ${make_params[*]}
 
-. "$src/index" $@
+# declare all the make_params as variables, then trash the array
+declare ${make_params[*]} && unset make_params
+
+source "$src/kernel" $@

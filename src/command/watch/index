@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-_watch_usage() {
+__command_usage() {
     cat << EOF
 $app_name ($version) - Watch
 
@@ -15,8 +15,6 @@ Options:
                     multiple times to monitor multiple paths.
 
 EOF
-
-    exit 0
 }
 
 # set defaults
@@ -28,7 +26,7 @@ paths=""
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         -p|--path)
-            path="$2"; shift
+            path="$2" && shift
 
             [[ -z "$path" ]] && echo "A path must be set" && exit 1
 
@@ -39,7 +37,7 @@ while [[ "$#" -gt 0 ]]; do
             fi
         ;;
         -h|--help|*)
-            _watch_usage
+            __command_usage && exit 0
         ;;
     esac
     shift
@@ -48,7 +46,7 @@ done
 echo "paths ${paths[*]}"
 
 # resolve options and consume"
-time-warp queue --consume
+# time-warp queue --consume
 
 # resolve options and produce
-time-warp queue --produce
+# time-warp queue --produce

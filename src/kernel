@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+source "$config/container"
+source "$config/services" && __define_services "$src"
+
+source $(__container_get "time-warp-command") $@

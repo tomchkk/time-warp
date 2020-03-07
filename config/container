@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+names=() && definitions=()
+
+__container_add() {
+    local name="$1" && shift
+    local definition="$@"
+
+    names+=("$name")
+    definitions+=("$definition")
+}
+
+__container_get() {
+    local name="$1" && shift
+
+    for key in ${!names[*]}; do
+        if [[ $name == ${names[$key]} ]]; then
+            echo "${definitions[$key]}" && exit 0
+        fi
+    done
+
+    echo "Error: No definition exists for the '$name' service." && exit 1
+}

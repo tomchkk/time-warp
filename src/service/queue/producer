@@ -31,6 +31,7 @@ for key in ${!modifications[*]}; do
                 # TODO: here we will try to match $path using something like
                 # if $(time-warp match $path); then push to the queue - i.e.:
                 if [[ -d "$path" ]] && [[ -f "$path/"../composer.json ]]; then
+                    # echo "process --timestamp=%% --event=%% --path=%%"
                     echo "$(date +"%Y-%m-%d %H:%M:%S") $path $event" \
                         >> ~/Developer/watcher/watchexec/sandbox/tmp/excluding.q
                 fi

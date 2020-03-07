@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-_queue_usage() {
+__command_usage() {
     cat << EOF
 $app_name ($version) - Queue
 
@@ -16,26 +16,63 @@ Options:
     -p, --produce   Produce queue items
 
 EOF
-
-    exit 0
 }
 
+pipe=$(__container_get "excluding-pipe")
+bus=$(__container_get "message-bus")
 
 opt="$1" && shift
 args="$@"
 
 case "$opt" in
     -c|--consume)
-        # opens a fifo at the given a path and then executes the given bash
-        # command for each item pushed to the pipe
-        . "$service/queue/consumer" "$queue/$excluding_fifo" "time-warp exclude"
+        source $(__container_get "excluding-consumer")
     ;;
     -k|--kill)
-        echo "kill running queue services"
-        echo "kill" > "$queue/$excluding_fifo"
+        if [[ -e "$pipe" ]]; then
+            source $bus && __dispatch_message "kill"
+            echo "The queue at '$pipe' has been killed."
+        else
+            echo "Only an open queue can be killed!"
+        fi
     ;;
     -l|--list)
-        echo "list running queue services"
+        echo "list running queue services..."
+    ;;
+    -r|--report)
+        if [[ -e "$pipe" ]]; then
+            source $bus && __dispatch_message "report"
+        else
+            echo "Only an open queue can issue a report!"
+        fi
+
+        # if [[ -p "$pipe" ]]; then
+        #     echo "report --target=$(tty) --foo" > $pipe
+        # else
+        #     echo "No queues open to report"
+        # fi
+
+
+
+
+        # target=$(echo "$args" | grep -oE '/dev/ttys\d+')
+        # echo -e "\nreporting $args" &>$target
+
+        # FIFO="$queue/$reporting_fifo"
+        # trap "rm -f $FIFO" EXIT
+
+        # if [ ! -e "$FIFO" ]; then
+        #     mkfifo "$FIFO"
+        # fi
+
+        # # for report in $args; do
+        #     echo $args > $FIFO &
+        # # done
+
+        # while read -r report; do
+        #     target=$(echo "$report" | grep -oE '/dev/ttys\d+')
+        #     echo "reporting $report" &>$target
+        # done < $FIFO
     ;;
     -p|--produce)
         # - runs `watchexec --resolved-options -- /path/2/producer`
@@ -45,16 +82,16 @@ case "$opt" in
         #     configured profile
         #   - on successful match, pushes message (timestamp and path) to time-warp/excluding.q file
 
-        watchexec \
-            --watch /Users/tom/ \
-            --filter '**/vendor' \
-            --ignore '**/vendor/**/vendor/**' \
-            --no-vcs-ignore \
-            --no-default-ignore \
-            --no-shell \
-            -- "$service/queue/producer"
+        # watchexec \
+        #     --watch /Users/tom/ \
+        #     --filter '**/vendor' \
+        #     --ignore '**/vendor/**/vendor/**' \
+        #     --no-vcs-ignore \
+        #     --no-default-ignore \
+        #     --no-shell \
+        #     -- "$service/queue/producer"
     ;;
     -h|--help|*)
-        _queue_usage
+        __command_usage && exit 0
     ;;
 esac

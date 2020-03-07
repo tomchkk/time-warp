@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+__send_message() {
+    echo "kill"
+}
