@@ -6,6 +6,7 @@ app_name="$(basename $0)"
 version="$(cat $project/version)"
 
 config="$project/config"
+lib="$project/lib"
 src="$project/src"
 var="$project/var"
 
@@ -24,5 +25,8 @@ make --file="$project/Makefile" --warn-undefined-variables build ${make_params[*
 
 # declare all the make_params as variables, then trash the array
 declare ${make_params[*]} && unset make_params
+
+source "$config/container"
+source "$config/services" && __define_services "$project"
 
 source "$src/kernel" $@

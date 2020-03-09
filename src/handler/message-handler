@@ -1,21 +1,30 @@
 #!/usr/bin/env bash
 
 actions="$1"
+bash_clash="$2"
 
 if [[ ! -d "$actions" ]]; then
     echo "Error: An existing actions directory is required"
 
-    return 1
+    exit 1
 fi
 
 __handle_message() {
     local message="${1:-[EMPTY]}" && shift
     local args="$@"
+    local enquirer="$(source $bash_clash $args && echo $enquirer)"
 
     action="$actions/$(echo $message | tr '[:upper:]' '[:lower:]')-action"
 
     if [[ ! -f "$action" ]]; then
+        # TODO: add a logger to handle these messages
         echo "Error: An action could not be found for a '$message' message."
+
+        return 1
+    fi
+
+    if [[ ! -w "$enquirer" ]]; then
+        echo "Error: the enquirer '$enquirer' does not exist."
 
         return 1
     fi

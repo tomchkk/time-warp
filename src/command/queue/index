@@ -29,45 +29,13 @@ case "$opt" in
         source $(__container_get "excluding-consumer")
     ;;
     -k|--kill)
-        source $bus && job=$(__dispatch_message KILL)
-        echo "Job: $job"
-        # TODO: if the job errors, display the error, otherwise:
-        # - echo "The queue at '$pipe' has been killed."
+        source $bus && echo $(__dispatch_message KILL)
     ;;
     -l|--list)
         echo "list running queue services..."
     ;;
     -r|--report)
-        source $bus && job=$(__dispatch_message REPORT)
-        echo "job: $job"
-
-        # if [[ -p "$pipe" ]]; then
-        #     echo "report --target=$(tty) --foo" > $pipe
-        # else
-        #     echo "No queues open to report"
-        # fi
-
-
-
-
-        # target=$(echo "$args" | grep -oE '/dev/ttys\d+')
-        # echo -e "\nreporting $args" &>$target
-
-        # FIFO="$queue/$reporting_fifo"
-        # trap "rm -f $FIFO" EXIT
-
-        # if [ ! -e "$FIFO" ]; then
-        #     mkfifo "$FIFO"
-        # fi
-
-        # # for report in $args; do
-        #     echo $args > $FIFO &
-        # # done
-
-        # while read -r report; do
-        #     target=$(echo "$report" | grep -oE '/dev/ttys\d+')
-        #     echo "reporting $report" &>$target
-        # done < $FIFO
+        source $bus && echo $(__dispatch_message REPORT)
     ;;
     -p|--produce)
         # - runs `watchexec --resolved-options -- /path/2/producer`

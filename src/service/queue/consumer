@@ -15,7 +15,7 @@ handler="$@"
 [[ -e "$fifo" ]] || mkfifo "$fifo"
 
 # record the time the fifo came up
-uptime=$(date +"%s")
+start_time=$(date +"%s")
 
 # remove the pipe on exit
 trap "rm -f $fifo" EXIT
@@ -34,7 +34,7 @@ while true; do
             --pipe="$fifo"
             --queue-pid="$$"
             --timestamp="$timestamp"
-            --uptime="$uptime"
+            --uptime="$(($timestamp - $start_time))"
         )
 
         __handle_message $message "${context[*]}"

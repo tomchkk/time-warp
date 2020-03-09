@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 
+bash_clash=$(__container_get "bash-clash")
+view_dir=$(__container_get "view-dir")
+
 __process_action() {
-    source $(__container_get "action-dir")/arguments-trait "$@"
+    source "$bash_clash" "$@"
 
-    # TODO: configure uptime
+    local uptime=$(date -r $(($uptime - 3600)) +"%-Hh %-Mm %-Ss")
 
-    echo "Queue report: $queue_pid $uptime" > $enquirer
+    echo -e "$(source $view_dir/report-view)" > $enquirer
 }

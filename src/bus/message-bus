@@ -38,5 +38,5 @@ __dispatch_message() {
 
     source $message && __send_message > $target
 
-    echo "Message dispatched"
+    echo "'$action' Message dispatched"
 }

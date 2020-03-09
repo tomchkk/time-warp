@@ -3,22 +3,26 @@
 __define_services() {
     local base="$1"
 
-    __container_add "time-warp-command" "$base/command/time-warp/index"
-    __container_add "queue-command" "$base/command/queue/index"
-    __container_add "watch-command" "$base/command/watch/index"
+    __container_add "bash-clash" "$base/lib/bash-clash/index"
 
-    __container_add "action-dir" "$base/action"
-    __container_add "message-handler" "$base/handler/message-handler $(__container_get "action-dir")"
+    __container_add "time-warp-command" "$base/src/command/time-warp/index"
+    __container_add "queue-command" "$base/src/command/queue/index"
+    __container_add "watch-command" "$base/src/command/watch/index"
+
+    __container_add "view-dir" "$base/src/view"
+
+    __container_add "action-dir" "$base/src/action"
+    __container_add "message-handler" "$base/src/handler/message-handler $(__container_get "action-dir") $(__container_get "bash-clash")"
 
     __container_add "excluding-pipe" "$queue/$excluding_fifo"
-    __container_add "excluding-consumer" "$base/service/queue/consumer $(__container_get "excluding-pipe") $(__container_get "message-handler")"
+    __container_add "excluding-consumer" "$base/src/service/queue/consumer $(__container_get "excluding-pipe") $(__container_get "message-handler")"
 
     local routing_map=(
-        "$base/message/kill-message::$(__container_get "excluding-pipe")"
-        "$base/message/report-message::$(__container_get "excluding-pipe")"
+        "$base/src/message/kill-message::$(__container_get "excluding-pipe")"
+        "$base/src/message/report-message::$(__container_get "excluding-pipe")"
     )
     __container_add "message-routing" ${routing_map[*]}
 
-    __container_add "message-dir" "$base/message"
-    __container_add "message-bus" "$base/bus/message-bus $(__container_get "message-dir") $(__container_get "message-routing")"
+    __container_add "message-dir" "$base/src/message"
+    __container_add "message-bus" "$base/src/bus/message-bus $(__container_get "message-dir") $(__container_get "message-routing")"
 }

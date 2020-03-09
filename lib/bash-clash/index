@@ -1,5 +1,15 @@
 #!/usr/bin/env bash
 
+# Bash Clash! A simple bash argument parser
+
+# _source_ this file in your bash script, passing in your arguments and they
+# will be parsed and declared as variables within the context of your current
+# shell process. e.g.:
+# - source "$bash_clash" "$@"
+
+#
+# Parse given arguments into variables with in the context of the current shell
+# process.
 __parse_arguments() {
     local parameters=()
     local switch
