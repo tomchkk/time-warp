@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 
-app_name="$(basename $0)"
-# TODO: fix this when run from other dirs
-version="$(git describe --always --first-parent HEAD || echo "v0.0.0")" 2>/dev/null
-
 project=$(dirname $(perl -e "use Cwd 'abs_path'; print abs_path(@ARGV[0])" -- "$0"))
+
+app_name="$(basename $0)"
+version="$(cat $project/version)"
 
 config="$project/config"
 src="$project/src"

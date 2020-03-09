@@ -1,5 +1,4 @@
-
-# all: install
+all: clean version
 
 # install: bin
 # 	@cp ./src/* ./bin
@@ -7,8 +6,12 @@
 # bin: clean
 # 	@mkdir ./bin
 
-# clean:
-	# @rm -rf ./bin
+clean:
+	@rm -rf ./bin
+	@rm ./version
+
+version:
+	@git describe --always --first-parent HEAD > ./version
 
 build: user_config files com
 
