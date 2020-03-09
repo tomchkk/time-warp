@@ -4,17 +4,20 @@ actions="$1"
 
 if [[ ! -d "$actions" ]]; then
     echo "Error: An existing actions directory is required"
+
     return 1
 fi
 
 __handle_message() {
-    local message="${1:-[empty]}" && shift
+    local message="${1:-[EMPTY]}" && shift
     local args="$@"
 
-    action="$actions/$message-action"
+    action="$actions/$(echo $message | tr '[:upper:]' '[:lower:]')-action"
 
     if [[ ! -f "$action" ]]; then
-        echo "Error: An action could not be found for a '$message' message." && exit 1
+        echo "Error: An action could not be found for a '$message' message."
+
+        return 1
     fi
 
     source $action && __process_action $args

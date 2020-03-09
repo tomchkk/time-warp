@@ -14,7 +14,7 @@ fi
 __dispatch_message() {
     local action="${1:-[empty]}"
 
-    local message="$messages/$action-message"
+    local message="$messages/$(echo $action | tr '[:upper:]' '[:lower:]')-message"
 
     if [[ ! -f "$message" ]]; then
         echo "Error: A message could not be found for the '$action' action." && exit 1
@@ -22,18 +22,21 @@ __dispatch_message() {
 
     local target
     for route in ${routing[*]}; do
-        if [[ "$route" == "$action"* ]]; then
+        if [[ "$route" == "$message::"* ]]; then
             target=$(echo "$route" | sed -E "s/.*::(.*)/\1/") && break;
         fi
     done
 
     if [[ -z "$target" ]]; then
+        echo "$target"
         echo "Error: A message route is not defined for the '$action' message." && exit 1
     fi
 
-    if [[ ! -e "/tmp/com.tomchkk.time-warp/excluding" ]]; then
-        echo "Error: The target file '$target' does not exist." && exit 1
+    if [[ ! -e "$target" ]]; then
+        echo "Error: The target '$target' does not exist." && exit 1
     fi
 
     source $message && __send_message > $target
+
+    echo "Message dispatched"
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 __send_message() {
-    local message="KILL --enquirer $(tty)"
+    local message="REPORT --enquirer $(tty)"
 
     echo "$message"
 }

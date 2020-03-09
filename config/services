@@ -14,8 +14,8 @@ __define_services() {
     __container_add "excluding-consumer" "$base/service/queue/consumer $(__container_get "excluding-pipe") $(__container_get "message-handler")"
 
     local routing_map=(
-        "kill::$(__container_get "excluding-pipe")"
-        "report::$(tty)"
+        "$base/message/kill-message::$(__container_get "excluding-pipe")"
+        "$base/message/report-message::$(__container_get "excluding-pipe")"
     )
     __container_add "message-routing" ${routing_map[*]}
 

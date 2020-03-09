@@ -22,6 +22,18 @@ source $handler
 while true; do
     # TODO: can we do a while read?
     if read -r message < $fifo; then
-        __handle_message $message
+        timestamp=$(date +"%s")
+        # timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+
+        # TODO: move logging to middleware
+        echo " -> [$(date -r $timestamp +"%Y-%m-%d %H:%M:%S")] - $message"
+
+        context=(
+            --pipe="$fifo"
+            --queue-pid="$$"
+            --timestamp="$timestamp"
+        )
+
+        __handle_message $message "${context[*]}"
     fi
 done

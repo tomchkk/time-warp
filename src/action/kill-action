@@ -1,33 +1,10 @@
 #!/usr/bin/env bash
 
 __process_action() {
-    echo "$(date +"%Y-%m-%d %H:%M:%S") - killing current queue" && exit 0
+    source $(__container_get "action-dir")/arguments-trait "$@"
+
+    echo "Killing queue: $queue_pid" > $enquirer
+
+    # exit the current process (the consumer)
+    exit 0
 }
-
-# # TODO: need the `function specifier`
-# function handle() {
-#     local action="$1" && shift
-#     local args="$@"
-
-#     case "$action" in
-#         kill) exit 0 ;;
-#         report)
-#             while [[ "$#" -gt 0 ]]; do
-#                 case $1 in
-#                     --target=?)
-#                         # add target value to command
-#                     ;;
-#                 esac
-#             done
-#         ;;
-#         process)
-#             while [[ "$#" -gt 0 ]]; do
-#                 case $1 in
-#                     --timestamp=?) ;;
-#                     --event=?) ;;
-#                     --path=?) ;;
-#                 esac
-#             done
-#         ;;
-#     esac
-# }

@@ -29,22 +29,17 @@ case "$opt" in
         source $(__container_get "excluding-consumer")
     ;;
     -k|--kill)
-        if [[ -e "$pipe" ]]; then
-            source $bus && __dispatch_message "kill"
-            echo "The queue at '$pipe' has been killed."
-        else
-            echo "Only an open queue can be killed!"
-        fi
+        source $bus && job=$(__dispatch_message KILL)
+        echo "Job: $job"
+        # TODO: if the job errors, display the error, otherwise:
+        # - echo "The queue at '$pipe' has been killed."
     ;;
     -l|--list)
         echo "list running queue services..."
     ;;
     -r|--report)
-        if [[ -e "$pipe" ]]; then
-            source $bus && __dispatch_message "report"
-        else
-            echo "Only an open queue can issue a report!"
-        fi
+        source $bus && job=$(__dispatch_message REPORT)
+        echo "job: $job"
 
         # if [[ -p "$pipe" ]]; then
         #     echo "report --target=$(tty) --foo" > $pipe
