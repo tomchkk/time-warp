@@ -14,6 +14,9 @@ handler="$@"
 # make the pipe if it doesn't exist already
 [[ -e "$fifo" ]] || mkfifo "$fifo"
 
+# record the time the fifo came up
+uptime=$(date +"%s")
+
 # remove the pipe on exit
 trap "rm -f $fifo" EXIT
 
@@ -23,7 +26,6 @@ while true; do
     # TODO: can we do a while read?
     if read -r message < $fifo; then
         timestamp=$(date +"%s")
-        # timestamp=$(date +"%Y-%m-%d %H:%M:%S")
 
         # TODO: move logging to middleware
         echo " -> [$(date -r $timestamp +"%Y-%m-%d %H:%M:%S")] - $message"
@@ -32,6 +34,7 @@ while true; do
             --pipe="$fifo"
             --queue-pid="$$"
             --timestamp="$timestamp"
+            --uptime="$uptime"
         )
 
         __handle_message $message "${context[*]}"

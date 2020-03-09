@@ -3,6 +3,7 @@
 __process_action() {
     source $(__container_get "action-dir")/arguments-trait "$@"
 
-    # TODO: Add uptime to consumer??
-    echo "Queue report: $queue_pid" > $enquirer
+    # TODO: configure uptime
+
+    echo "Queue report: $queue_pid $uptime" > $enquirer
 }
