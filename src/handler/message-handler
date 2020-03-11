@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 
 actions="$1"
-bash_clash="$2"
+logger="$2 $3" && shift 3
+
+bash_clash="$@"
+
+source $logger "$(tty)"
 
 if [[ ! -d "$actions" ]]; then
-    echo "Error: An existing actions directory is required"
-
-    exit 1
+    __log_error "An existing actions directory is required" && exit 1
 fi
 
 __handle_message() {
@@ -17,18 +19,18 @@ __handle_message() {
     action="$actions/$(echo $message | tr '[:upper:]' '[:lower:]')-action"
 
     if [[ ! -f "$action" ]]; then
-        # TODO: add a logger to handle these messages
-        echo "Error: An action could not be found for a '$message' message."
+        __log_error "An action could not be found for a '$message' message."
 
-        return 1
+        # TODO: can we only use return statements, instead of exits (except
+        # where absolutely necessary?)
+        return 1 # return to continue execution
     fi
 
     if [[ ! -w "$enquirer" ]]; then
-        echo "Error: the enquirer '$enquirer' does not exist."
+        __log_error "The enquirer '$enquirer' does not exist."
 
-        return 1
+        return 1 # return to continue execution
     fi
 
-    # TODO: define actions as services?
     source $action && __process_action $args
 }

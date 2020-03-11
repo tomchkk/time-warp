@@ -4,12 +4,21 @@
 # arguments pushed to the pipe, or echos the arguments, if no command is given
 
 # the fifo pipe to consume
-fifo="$1" && shift
-[[ -z "$fifo" ]] && echo "A fifo pipe path must be provided" && exit 1
-
+fifo="$1" && shift 1
 # the piped message handler
-handler="$@"
-[[ -z "$handler" ]] && echo "A message handler must be provided" && exit 1
+
+# TODO: todo todo: avoid this mess....?
+handler="$1 $2 $3 $4 $5" && shift 5 && source $handler
+
+logger="$1 $2" && shift 2 && source $logger "$(tty)"
+
+if [[ -z "$fifo" ]]; then
+    __log_error "A fifo pipe path must be provided" && exit 1
+fi
+
+if [[ -z "$handler" ]]; then
+    __log_error "A message handler must be provided" && exit 1
+fi
 
 # make the pipe if it doesn't exist already
 [[ -e "$fifo" ]] || mkfifo "$fifo"
@@ -20,15 +29,14 @@ start_time=$(date +"%s")
 # remove the pipe on exit
 trap "rm -f $fifo" EXIT
 
-source $handler
-
 while true; do
     # TODO: can we do a while read?
     if read -r message < $fifo; then
         timestamp=$(date +"%s")
 
-        # TODO: move logging to middleware
-        echo " -> [$(date -r $timestamp +"%Y-%m-%d %H:%M:%S")] - $message"
+        # TODO: add event dispatcher?
+
+        __log_info "Message received: $message"
 
         context=(
             --pipe="$fifo"

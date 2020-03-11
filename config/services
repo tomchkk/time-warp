@@ -39,7 +39,8 @@ __define_services() {
     __container_add "bash-clash" "$(__container_get "lib-dir")/bash-clash/index"
 
     # commands
-    __container_add "time-warp-command" "$(__container_get "command-dir")/time-warp/index"
+    __container_add "time-warp-command" \
+        "$(__container_get "command-dir")/time-warp/index"
     __container_add "queue-command" "$(__container_get "command-dir")/queue/index"
     __container_add "watch-command" "$(__container_get "command-dir")/watch/index"
 
@@ -47,13 +48,15 @@ __define_services() {
     __container_add "message-handler" \
         "$(__container_get "handler-dir")/message-handler" \
         "$(__container_get "action-dir")" \
+        "$(__container_get "logger")" \
         "$(__container_get "bash-clash")"
 
     # consumers
     __container_add "excluding-consumer" \
         "$(__container_get "service-dir")/queue/consumer" \
         "$(__container_get "excluding-pipe")" \
-        "$(__container_get "message-handler")"
+        "$(__container_get "message-handler")" \
+        "$(__container_get "logger")"
 
     # buses
     __container_add "message-bus" \
