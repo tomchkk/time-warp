@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 max_level="$1"
-output="$2"
+channel="$2"
 
-if [[ -z "$max_level" ]] || [[ ! -w "$output" ]]; then
-    echo "Error: both 'max_level' and 'output' parameters are required."
+if [[ -z "$max_level" ]] || [[ ! -w "$channel" ]]; then
+    echo "Error: both 'max_level' and 'channel' parameters are required."
     exit 1
 fi
 
@@ -40,7 +40,7 @@ __log() {
     local separator="-"
 
     if $(__log_level_reached $level); then
-        echo "$prefix $timestamp $level $separator $message $context" > $output
+        echo "$prefix $timestamp $level $separator $message $context" > $channel
     fi
 }
 
