@@ -5,6 +5,7 @@ bash_clash=$(__container_get "bash-clash")
 __process_action() {
     source "$bash_clash" "$@"
 
+    # TODO: add the logger and log this message
     echo -e "\nKilling the queue at '$pipe' (pid: $queue_pid)" > $enquirer
 
     # exit the current process (the consumer)
