@@ -1,32 +1,28 @@
 #!/usr/bin/env bash
 
-project=$(dirname $(perl -e "use Cwd 'abs_path'; print abs_path(@ARGV[0])" -- "$0"))
+project_dir=$(dirname $(perl -e "use Cwd 'abs_path'; print abs_path(@ARGV[0])" -- "$0"))
+version="$(cat $project_dir/version)"
 
-app_name="$(basename $0)"
-version="$(cat $project/version)"
+source "$project_dir/.env"
 
-config="$project/config"
-lib="$project/lib"
-src="$project/src"
-var="$project/var"
+app_name="${APP_NAME:-$(basename $0)}"
+org_id="${ORG_ID:-org}"
+org_tmp="/tmp/$org_id.$app_name"
 
-source "$project/.env"
-
-# build an array of params to pass to make
-make_params=(
+# build an array of config
+config=(
     user_config="$HOME/.config/$app_name"
-    var="$var"
-    errored_path="$var/$errored_file"
-    excluded_path="$var/$excluded_file"
-    queue="/tmp/$org_id.$app_name"
+    var="$project_dir/var"
+    org_tmp="$org_tmp"
+    log_level="${LOG_LEVEL:-DEBUG}"
+    excluding_fifo="${EXCLUDING_FIFO:-fifo}"
 )
 
-make --file="$project/Makefile" --warn-undefined-variables build ${make_params[*]}
+make --file="$project_dir/Makefile" --warn-undefined-variables build ${config[*]}
 
-# declare all the make_params as variables, then trash the array
-declare ${make_params[*]} && unset make_params
+source "$project_dir/lib/container/index"
+source "$project_dir/config/services" "$project_dir" ${config[*]} && __define
 
-source "$config/container"
-source "$config/services" && __define_services "$project"
+unset config
 
-source "$src/kernel" $@
+source "$project_dir/src/kernel" $@

@@ -29,5 +29,6 @@ __handle_message() {
         return 1
     fi
 
+    # TODO: define actions as services?
     source $action && __process_action $args
 }

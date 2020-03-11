@@ -13,17 +13,18 @@ clean:
 version:
 	@git describe --always --first-parent HEAD > ./version
 
-build: user_config files com
+
+build: user_config files org_tmp
 
 user_config:
 	@mkdir -p ${user_config}
 
 files: var
-	@touch ${errored_path}
-	@touch ${excluded_path}
+	@touch ${var}/errored
+	@touch ${var}/excluded
 
 var:
 	@mkdir -p ${var}
 
-com:
-	@mkdir -p ${queue}
+org_tmp:
+	@mkdir -p ${org_tmp}

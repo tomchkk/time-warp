@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
 
-messages="$1" && shift
+messages="$1"
+logger="$2 $3" && shift 3
+
 routing="$@"
 
+# TODO: should the target be configurable in the container?
+source $logger "$(tty)"
+
 if [[ ! -d "$messages" ]]; then
-    echo "Error: An existing messages directory is required" && exit 1
+    __log_error "An existing message directory is required" && exit 1
 fi
 
 if [[ -z "$routing" ]]; then
-    echo "Error: No message routing is defined" && exit 1
+    __log_error "No message routing is defined" && exit 1
 fi
 
 __dispatch_message() {
@@ -17,7 +22,8 @@ __dispatch_message() {
     local message="$messages/$(echo $action | tr '[:upper:]' '[:lower:]')-message"
 
     if [[ ! -f "$message" ]]; then
-        echo "Error: A message could not be found for the '$action' action." && exit 1
+        __log_error "A message could not be found for the '$action' action."
+        exit 1
     fi
 
     local target
@@ -28,15 +34,15 @@ __dispatch_message() {
     done
 
     if [[ -z "$target" ]]; then
-        echo "$target"
-        echo "Error: A message route is not defined for the '$action' message." && exit 1
+        __log_error "A message route is not defined for the '$action' message."
+        exit 1
     fi
 
     if [[ ! -e "$target" ]]; then
-        echo "Error: The target '$target' does not exist." && exit 1
+        __log_error " The target '$target' does not exist." && exit 1
     fi
 
     source $message && __send_message > $target
 
-    echo "'$action' Message dispatched"
+    __log_info "'$action' message was dispatched."
 }

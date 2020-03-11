@@ -13,6 +13,7 @@ Options:
     -c, --consume   Open a FIFO pipe to consume items pushed to the queue
     -k, --kill      Kill running queue services
     -l, --list      List running queue services
+    -r, --report    View a report from running services
     -p, --produce   Produce queue items
 
 EOF

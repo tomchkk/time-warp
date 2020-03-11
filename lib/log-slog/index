@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+
+# TODO: add leveling
+max_level="$1"
+output="$2"
+
+if [[ -z "$max_level" ]] || [[ ! -w "$output" ]]; then
+    echo "Error: both 'max_level' and 'output' parameters are required."
+    exit 1
+fi
+
+__get_level_value() {
+    local level="$1"
+    local levels=(
+        "EMERGENCY" "ALERT" "CRITICAL" "ERROR" "WARNING" "NOTICE" "INFO" "DEBUG"
+    )
+
+    for i in ${!levels[*]}; do
+        if [[ "$level" == "${levels[$i]}" ]]; then
+            echo "$i" && break
+        fi
+    done
+}
+
+__log_level_reached() {
+    local level="$1"
+
+    local required="$(__get_level_value $level)"
+    local max="$(__get_level_value $max_level)"
+
+    [[ $required -le $max ]] && echo true || echo false
+}
+
+__log() {
+    local level="$1"
+    local message="$2"
+    local context="$3"
+
+    local prefix=" ->"
+    local timestamp="[$(date +"%Y-%m-%d %H:%M:%S")]"
+    local separator="-"
+
+    if $(__log_level_reached $level); then
+        echo "$prefix $timestamp $level $separator $message $context" > $output
+    fi
+}
+
+__log_emergency() {
+    __log "EMERGENCY" "$1" "$2"
+}
+__log_alert() {
+    __log "ALERT" "$1" "$2"
+}
+__log_critical() {
+    __log "CRITICAL" "$1" "$2"
+}
+__log_error() {
+    __log "ERROR" "$1" "$2"
+}
+__log_warning() {
+    __log "WARNING" "$1" "$2"
+}
+__log_notice() {
+    __log "NOTICE" "$1" "$2"
+}
+__log_info() {
+    __log "INFO" "$1" "$2"
+}
+__log_debug() {
+    __log "DEBUG" "$1" "$2"
+}

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+services="$1"
+
 names=() && definitions=()
 
 __container_add() {

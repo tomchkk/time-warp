@@ -1,28 +1,73 @@
 #!/usr/bin/env bash
 
+base="$1" && shift
+config="$@"
+
+__define_config() {
+    for item in ${config[*]}; do
+        [[ "$item" =~ ^(.*)=(.*)$ ]]
+        key="$(echo ${BASH_REMATCH[1]} | sed "s/_/-/g")"
+        value="${BASH_REMATCH[2]}"
+
+        __container_add "$key" "$value"
+    done
+}
+
+__define_parameters() {
+    __container_add "excluding-pipe" \
+        "$(__container_get "org-tmp")/$(__container_get "excluding-fifo")"
+
+    __container_add "config-dir" "$base/config"
+    __container_add "lib-dir" "$base/lib"
+    __container_add "src-dir" "$base/src"
+
+    # add all src dirs as container parameters
+    for dir in $(find $base/src -mindepth 1 -maxdepth 1 -type d); do
+        __container_add "$(basename $dir)-dir" "$dir"
+    done
+
+    __container_add "message-routing" \
+        "$(__container_get "message-dir")/kill-message::$(__container_get "excluding-pipe")" \
+        "$(__container_get "message-dir")/report-message::$(__container_get "excluding-pipe")"
+}
+
 __define_services() {
-    local base="$1"
+    # lib
+    __container_add "logger" \
+        "$(__container_get "lib-dir")/log-slog/index" \
+        "$(__container_get "log-level")"
+    __container_add "bash-clash" "$(__container_get "lib-dir")/bash-clash/index"
 
-    __container_add "bash-clash" "$base/lib/bash-clash/index"
+    # commands
+    __container_add "time-warp-command" "$(__container_get "command-dir")/time-warp/index"
+    __container_add "queue-command" "$(__container_get "command-dir")/queue/index"
+    __container_add "watch-command" "$(__container_get "command-dir")/watch/index"
 
-    __container_add "time-warp-command" "$base/src/command/time-warp/index"
-    __container_add "queue-command" "$base/src/command/queue/index"
-    __container_add "watch-command" "$base/src/command/watch/index"
+    # handlers
+    __container_add "message-handler" \
+        "$(__container_get "handler-dir")/message-handler" \
+        "$(__container_get "action-dir")" \
+        "$(__container_get "bash-clash")"
 
-    __container_add "view-dir" "$base/src/view"
+    # consumers
+    __container_add "excluding-consumer" \
+        "$(__container_get "service-dir")/queue/consumer" \
+        "$(__container_get "excluding-pipe")" \
+        "$(__container_get "message-handler")"
 
-    __container_add "action-dir" "$base/src/action"
-    __container_add "message-handler" "$base/src/handler/message-handler $(__container_get "action-dir") $(__container_get "bash-clash")"
+    # buses
+    __container_add "message-bus" \
+        "$(__container_get "bus-dir")/message-bus" \
+        "$(__container_get "message-dir")" \
+        "$(__container_get "logger")" \
+        "$(__container_get "message-routing")"
+}
 
-    __container_add "excluding-pipe" "$queue/$excluding_fifo"
-    __container_add "excluding-consumer" "$base/src/service/queue/consumer $(__container_get "excluding-pipe") $(__container_get "message-handler")"
+__define() {
+    __define_config
+    __define_parameters
+    __define_services
 
-    local routing_map=(
-        "$base/src/message/kill-message::$(__container_get "excluding-pipe")"
-        "$base/src/message/report-message::$(__container_get "excluding-pipe")"
-    )
-    __container_add "message-routing" ${routing_map[*]}
-
-    __container_add "message-dir" "$base/src/message"
-    __container_add "message-bus" "$base/src/bus/message-bus $(__container_get "message-dir") $(__container_get "message-routing")"
+    unset base
+    unset config
 }
