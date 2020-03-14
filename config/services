@@ -1,76 +1,114 @@
 #!/usr/bin/env bash
 
-base="$1" && shift
-config="$@"
+##
+# Defining services
+#
+# The different define methods are just convenience: there is no difference to
+# the serivces or how they are defined.
+#
+# The syntax for adding items to the container is as follows:
+# - a scalar parameter:
+#   container::add "parameter-name" "parameter-value"
+# - an array-like parameter:
+#   container::add "parameter-name" "--" "parameter-value-1" "parameter-value-2"
+# - a service:
+#   container::add "service-name" "path/2/service" "@dependency-alias" [,...]
+#
+# Using a dependency alias to resolve the path to a service is a bit buggy, so
+# best to avoid this, at time of writing. However, a value can be concatenated
+# to the end of a resolved scalar parameter using '::' as the glue - e.g.:
+#   "@parameter-value::concatenated-value"
+##
 
-__define_config() {
-    for item in ${config[*]}; do
+__services_base="$1" && shift
+__services_config="$@"
+
+##
+# Defines available config.
+##
+__services::define_config() {
+    local key
+    local value
+
+    for item in ${__services_config[*]}; do
         [[ "$item" =~ ^(.*)=(.*)$ ]]
         key="$(echo ${BASH_REMATCH[1]} | sed "s/_/-/g")"
         value="${BASH_REMATCH[2]}"
 
-        __container_add "$key" "$value"
+        container::add "$key" "$value"
     done
 }
 
-__define_parameters() {
-    __container_add "excluding-pipe" \
-        "$(__container_get "org-tmp")/$(__container_get "excluding-fifo")"
-
-    __container_add "config-dir" "$base/config"
-    __container_add "lib-dir" "$base/lib"
-    __container_add "src-dir" "$base/src"
+##
+# Defines available parameters.
+##
+__services::define_parameters() {
+    container::add "config-dir" "$__services_base/config"
+    container::add "lib-dir" "$__services_base/lib"
+    container::add "src-dir" "$__services_base/src"
 
     # add all src dirs as container parameters
-    for dir in $(find $base/src -mindepth 1 -maxdepth 1 -type d); do
-        __container_add "$(basename $dir)-dir" "$dir"
+    for dir in $(find $__services_base/src -mindepth 1 -maxdepth 1 -type d); do
+        container::add "$(basename $dir)-dir" "$dir"
     done
 
-    __container_add "message-routing" \
-        "$(__container_get "message-dir")/kill-message::$(__container_get "excluding-pipe")" \
-        "$(__container_get "message-dir")/report-message::$(__container_get "excluding-pipe")"
+    local excluding_pipe=$(container::resolve "excluding-pipe")
+    container::add "message-routing" \
+        "--" \
+            "$__services_base/src/message/kill-message|$excluding_pipe" \
+            "$__services_base/src/message/report-message|$excluding_pipe"
 }
 
-__define_services() {
+##
+# Defines available services.
+##
+__services::define_services() {
     # lib
-    __container_add "logger" \
-        "$(__container_get "lib-dir")/log-slog/index" \
-        "$(__container_get "log-level")"
-    __container_add "bash-clash" "$(__container_get "lib-dir")/bash-clash/index"
+    container::add "stdout-logger" \
+        "$__services_base/lib/log-slog/index" \
+            "@log-level" \
+            "$(tty)"
+    container::add "bash-clash" \
+        "$__services_base/lib/bash-clash/index"
 
     # commands
-    __container_add "time-warp-command" \
-        "$(__container_get "command-dir")/time-warp/index"
-    __container_add "queue-command" "$(__container_get "command-dir")/queue/index"
-    __container_add "watch-command" "$(__container_get "command-dir")/watch/index"
+    container::add "time-warp-command" \
+        "$__services_base/src/command/time-warp/index"
+    container::add "queue-command" \
+        "$__services_base/src/command/queue/index"
+    container::add "watch-command" \
+        "$__services_base/src/command/watch/index"
 
     # handlers
-    __container_add "message-handler" \
-        "$(__container_get "handler-dir")/message-handler" \
-        "$(__container_get "action-dir")" \
-        "$(__container_get "logger")" \
-        "$(__container_get "bash-clash")"
+    container::add "message-handler" \
+        "$__services_base/src/handler/message-handler" \
+            "@action-dir" \
+            "@stdout-logger" \
+            "@bash-clash"
 
     # consumers
-    __container_add "excluding-consumer" \
-        "$(__container_get "service-dir")/queue/consumer" \
-        "$(__container_get "excluding-pipe")" \
-        "$(__container_get "message-handler")" \
-        "$(__container_get "logger")"
+    container::add "excluding-consumer" \
+        "$__services_base/src/service/queue/consumer" \
+            "@excluding-pipe" \
+            "@message-handler" \
+            "@stdout-logger"
 
     # buses
-    __container_add "message-bus" \
-        "$(__container_get "bus-dir")/message-bus" \
-        "$(__container_get "message-dir")" \
-        "$(__container_get "logger")" \
-        "$(__container_get "message-routing")"
+    container::add "message-bus" \
+        "$__services_base/src/bus/message-bus" \
+            "@message-dir" \
+            "@stdout-logger" \
+            "@message-routing"
 }
 
-__define() {
-    __define_config
-    __define_parameters
-    __define_services
+##
+# Defines all configured services.
+##
+services::define() {
+    __services::define_config
+    __services::define_parameters
+    __services::define_services
 
-    unset base
-    unset config
+    unset __services_base
+    unset __services_config
 }

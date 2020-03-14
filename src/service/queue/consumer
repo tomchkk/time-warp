@@ -3,48 +3,51 @@
 # opens a fifo pipe at the given path and then executes the given command using
 # arguments pushed to the pipe, or echos the arguments, if no command is given
 
-# the fifo pipe to consume
-fifo="$1" && shift 1
-# the piped message handler
+__consumer_fifo=$(container::resolve "$1")
+# TODO: this seems to be wrong, the consumer shouldn't be calling
+# container::get_definition. It means in way that the consumer has to know how
+# to construct the handler, which is bad and wrong!
+__consumer_message_handler=$(container::get_definition "$2")
+__consumer_logger=$(container::resolve "$3")
 
-# TODO: todo todo: avoid this mess....?
-handler="$1 $2 $3 $4 $5" && shift 5 && source $handler
+source $__consumer_logger
 
-logger="$1 $2" && shift 2 && source $logger "$(tty)"
-
-if [[ -z "$fifo" ]]; then
-    __log_error "A fifo pipe path must be provided" && exit 1
+if [[ -z "$__consumer_fifo" ]]; then
+    log_slog::error "A fifo pipe path must be provided" && exit 1
 fi
 
-if [[ -z "$handler" ]]; then
-    __log_error "A message handler must be provided" && exit 1
+if [[ -z "$__consumer_message_handler" ]]; then
+    log_slog::error "A message handler must be provided" && exit 1
 fi
+
+source $__consumer_message_handler
 
 # make the pipe if it doesn't exist already
-[[ -e "$fifo" ]] || mkfifo "$fifo"
-
-# record the time the fifo came up
-start_time=$(date +"%s")
+[[ -e "$__consumer_fifo" ]] || mkfifo "$__consumer_fifo"
 
 # remove the pipe on exit
-trap "rm -f $fifo" EXIT
+trap "rm -f $__consumer_fifo" EXIT
+
+# record the time the process came up
+__consumer_start_time=$(date +"%s")
 
 while true; do
     # TODO: can we do a while read?
-    if read -r message < $fifo; then
-        timestamp=$(date +"%s")
+    if read -r __consumer_message < $__consumer_fifo; then
+        __consumer_timestamp=$(date +"%s")
 
         # TODO: add event dispatcher?
 
-        __log_info "Message received: $message"
+        log_slog::info "Message received: $__consumer_message"
 
-        context=(
-            --pipe="$fifo"
+        __consumer_context=(
+            --pipe="$__consumer_fifo"
             --queue-pid="$$"
-            --timestamp="$timestamp"
-            --uptime="$(($timestamp - $start_time))"
+            --timestamp="$__consumer_timestamp"
+            --uptime="$(($__consumer_timestamp - $__consumer_start_time))"
         )
 
-        __handle_message $message "${context[*]}"
+        message_handler::handle_message $__consumer_message \
+            "${__consumer_context[*]}"
     fi
 done

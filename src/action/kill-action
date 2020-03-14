@@ -1,12 +1,21 @@
 #!/usr/bin/env bash
 
-bash_clash=$(__container_get "bash-clash")
+# TODO: add action scripts to the container
+__kill_action_bash_clash=$(container::resolve "@bash-clash")
+__kill_action_logger=$(container::resolve "@stdout-logger")
 
-__process_action() {
-    source "$bash_clash" "$@"
+##
+# Exits the current process.
+##
+action::process_action() {
+    source $__kill_action_bash_clash "$@"
 
-    # TODO: add the logger and log this message
-    echo -e "\nKilling the queue at '$pipe' (pid: $queue_pid)" > $enquirer
+    local pipe=$(bash_clash::get "pipe")
+    local queue_pid=$(bash_clash::get "queue_pid")
+    local enquirer=$(bash_clash::get "enquirer")
+
+    source $__kill_action_logger && log_slog::info \
+        "Killing the queue at '$pipe' (pid: $queue_pid)"
 
     # exit the current process (the consumer)
     exit 0

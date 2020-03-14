@@ -6,4 +6,5 @@ Queue Report
 
 Queue PID\tQueue Uptime
 $queue_pid\t\t$uptime
+
 VIEW

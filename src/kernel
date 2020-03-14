@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-source $(__container_get "time-warp-command") $@
+source $(container::resolve "time-warp-command") $@

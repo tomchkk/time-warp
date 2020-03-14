@@ -1,28 +1,35 @@
 #!/usr/bin/env bash
 
-project_dir=$(dirname $(perl -e "use Cwd 'abs_path'; print abs_path(@ARGV[0])" -- "$0"))
-version="$(cat $project_dir/version)"
+__project_dir=$(dirname $(perl -e "use Cwd 'abs_path'; print abs_path(@ARGV[0])" -- "$0"))
+APP_VERSION="$(cat $__project_dir/version)"
 
-source "$project_dir/.env"
+source "$__project_dir/.env"
 
-app_name="${APP_NAME:-$(basename $0)}"
-org_id="${ORG_ID:-org}"
-org_tmp="/tmp/$org_id.$app_name"
+APP_NAME="${APP_NAME:-$(basename $0)}"
+__org_id="${ORG_ID:-org}"
+__org_tmp="/tmp/$__org_id.$APP_NAME"
 
 # build an array of config
-config=(
-    user_config="$HOME/.config/$app_name"
-    var="$project_dir/var"
-    org_tmp="$org_tmp"
+__config=(
+    user_config="$HOME/.config/$APP_NAME"
+    var="$__project_dir/var"
+    org_tmp="$__org_tmp"
     log_level="${LOG_LEVEL:-DEBUG}"
-    excluding_fifo="${EXCLUDING_FIFO:-fifo}"
+    excluding_pipe="$__org_tmp/${EXCLUDING_FIFO:-fifo}"
 )
 
-make --file="$project_dir/Makefile" --warn-undefined-variables build ${config[*]}
+make --file="$__project_dir/Makefile" --warn-undefined-variables build ${__config[*]}
 
-source "$project_dir/lib/container/index"
-source "$project_dir/config/services" "$project_dir" ${config[*]} && __define
+source "$__project_dir/lib/container/index"
+source "$__project_dir/config/services" "$__project_dir" ${__config[*]} \
+    && services::define
 
-unset config
+unset __config
 
-source "$project_dir/src/kernel" $@
+source "$__project_dir/src/kernel" $@
+
+unset APP_VERSION
+unset __project_dir
+
+# TODO: go through each point of exit and run `declare -p` to check for memory
+# leaks

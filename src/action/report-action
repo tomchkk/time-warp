@@ -2,13 +2,20 @@
 
 # TODO: define actions as services
 # - move these, and other statements like it, to the container
-bash_clash=$(__container_get "bash-clash")
-view_dir=$(__container_get "view-dir")
+__report_action_bash_clash=$(container::resolve "@bash-clash")
+__report_action_view_dir=$(container::resolve "@view-dir")
 
-__process_action() {
-    source "$bash_clash" "$@"
+##
+# Echos a report view to the $enquirer.
+##
+action::process_action() {
+    source $__report_action_bash_clash "$@"
 
-    local uptime=$(date -r $(($uptime - 3600)) +"%-Hh %-Mm %-Ss")
+    local uptime=$(bash_clash::get "uptime")
+    local queue_pid=$(bash_clash::get "queue_pid")
+    local enquirer=$(bash_clash::get "enquirer")
 
-    echo -e "$(source $view_dir/report-view)" > $enquirer
+    uptime=$(date -r $(( $uptime - 3600 )) +"%-Hh %-Mm %-Ss")
+
+    echo -e "$(source $__report_action_view_dir/report-view)" > $enquirer
 }

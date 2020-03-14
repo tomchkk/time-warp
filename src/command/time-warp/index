@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 
-__command_usage() {
+__time_warp_command::usage() {
     cat << EOF
-$app_name ($version)
+
+$APP_NAME ($APP_VERSION)
 
 A MacOS Time Machine Tinkerer.
 
-Usage:  $app_name [option]
-        $app_name <command> [args]
+Usage:  $APP_NAME [option]
+        $APP_NAME <command> [args]
 
 Options:
     -h, --help      Print usage information
@@ -35,18 +36,18 @@ case "$opt" in
         echo "path(s) to exclude:" $args
     ;;
     queue)
-        source $(__container_get "queue-command") $args
+        source $(container::resolve "queue-command") $args
     ;;
     watch)
-        source $(__container_get "watch-command") $args
+        source $(container::resolve "watch-command") $args
     ;;
     -l|--list)
         echo "-l --list -v --version -h --help queue watch"
     ;;
     -v|--version)
-        echo "$version"
+        echo "__version"
     ;;
     -h|--help|*)
-        __command_usage && exit 0
+        __time_warp_command::usage && exit 0
     ;;
 esac

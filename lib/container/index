@@ -1,25 +1,117 @@
 #!/usr/bin/env bash
 
-services="$1"
+__service_names=() && __service_definitions=()
 
-names=() && definitions=()
-
-__container_add() {
+##
+# Add items to the container
+#
+# The first argument should be the name of the item. The remaining arguments are
+# all treated as sequential. However, in the case of a service that points to a
+# script or file, the first of the remaining arguments is treated as the file
+# path/location and, the remaining arguments, as its input arguments.
+##
+container::add() {
     local name="$1" && shift
     local definition="$@"
 
-    names+=("$name")
-    definitions+=("$definition")
+    __service_names+=("$name")
+    __service_definitions+=("$definition")
 }
 
-__container_get() {
-    local name="$1" && shift
+##
+# Gets the name and any existing suffix for a given service alias.
+##
+__container::get_alias_name_and_suffix() {
+    local name="$1"
+    local service_alias
 
-    for key in ${!names[*]}; do
-        if [[ $name == ${names[$key]} ]]; then
-            echo "${definitions[$key]}" && exit 0
+    # TODO: handle multiple joined aliases?
+    if [[ "$name" =~ ^@(.*)::(.*)$ ]]; then
+        # name is an alias joined by a suffix, separated by '::' - i.e.:
+        # '@example-parameter::example-suffix'
+        service_alias=("${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}")
+    elif [[ "$name" =~ ^@(.*)$ ]]; then
+        # name is an alias without a suffix - i.e.: '@example-service'
+        service_alias=("${BASH_REMATCH[1]}")
+    fi
+
+    echo ${service_alias[*]}
+}
+
+##
+# Get the definition of a given parameter or service
+##
+container::get_definition() {
+    local name="$1"
+    local service_alias=$(__container::get_alias_name_and_suffix "$name")
+
+    if [[ -n "$service_alias" ]]; then
+        name="${service_alias[0]}"
+    fi
+
+    for key in ${!__service_names[*]}; do
+        if [[ $name == ${__service_names[$key]} ]]; then
+            echo "${__service_definitions[$key]}" && exit 0
         fi
     done
 
     echo "Error: No definition exists for the '$name' service." && exit 1
+}
+
+##
+# Recursively resolves the definition of a given parameter, optionally returning
+# option handles for each named service defined as a dependency.
+##
+container::resolve() {
+    local name="$1"
+    local optionHandles=${2:-false}
+    local depth=${3:-0}
+
+    local suffix
+
+    local service_alias=$(__container::get_alias_name_and_suffix "$name")
+    if [[ -n "$service_alias" ]]; then
+        name="${service_alias[0]}"
+        suffix="${service_alias[1]}"
+    fi
+
+    for key in ${!__service_names[*]}; do
+        if [[ ${__service_names[$key]} != "$name" ]]; then
+            continue
+        fi
+
+        local defined
+        local switch
+
+        if $optionHandles; then
+            # add an argument handle to resolved service value
+            [[ $depth > 0 ]] && switch="--$name "
+        fi
+
+        for definition in $(container::get_definition "$name"); do
+            local args=("$definition" $optionHandles $(( $depth + 1 )))
+
+            defined="$(container::resolve ${args[*]})"
+
+            if [[ $? -eq 1 ]]; then
+                # container::get_definition threw an error, meaning that no
+                # service was found for the definition; we'll just use its
+                # current value
+                defined="$definition"
+            fi
+
+            if ! $optionHandles && [[ "$defined" =~ ^--\s*(.*) ]]; then
+                defined="${BASH_REMATCH[1]}"
+            fi
+
+            echo "${switch}${defined}${suffix}"
+
+            unset switch
+            unset args
+        done
+
+        exit 0 # exit here because the name has been matched
+    done
+
+    echo "Error: The '$name' service cannot be resolved." && exit 1
 }

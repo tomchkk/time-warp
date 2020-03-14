@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-__send_message() {
+##
+# Echos a kill message for the given enquirer
+##
+message::send_message() {
     local message="KILL --enquirer $(tty)"
 
     echo "$message"

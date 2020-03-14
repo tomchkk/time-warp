@@ -1,25 +1,38 @@
 #!/usr/bin/env bash
 
-actions="$1"
-logger="$2 $3" && shift 3
+__message_handler_actions_dir=$(container::resolve "$1")
+__message_handler_logger=$(container::resolve "$2")
+__message_handler_bash_clash=$(container::resolve "$3")
 
-bash_clash="$@"
+source $__message_handler_logger
 
-source $logger "$(tty)"
-
-if [[ ! -d "$actions" ]]; then
-    __log_error "An existing actions directory is required" && exit 1
+if [[ ! -d "$__message_handler_actions_dir" ]]; then
+    log_slog::error "An existing actions directory is required" && exit 1
 fi
 
-__handle_message() {
+##
+# Gets the value of the --enquirer option from the given arguments
+##
+__message_handler::get_enquirer() {
+    echo $(
+        source "$__message_handler_bash_clash" $@ && bash_clash::get "enquirer"
+    )
+}
+
+##
+# Handles message pushed to a consumer pipe.
+#
+message_handler::handle_message() {
     local message="${1:-[EMPTY]}" && shift
     local args="$@"
-    local enquirer="$(source $bash_clash $args && echo $enquirer)"
 
-    action="$actions/$(echo $message | tr '[:upper:]' '[:lower:]')-action"
+    local enquirer=$(__message_handler::get_enquirer "$args")
+    local action="$__message_handler_actions_dir/$(
+        echo $message | tr '[:upper:]' '[:lower:]'
+    )-action"
 
     if [[ ! -f "$action" ]]; then
-        __log_error "An action could not be found for a '$message' message."
+        log_slog::error "An action could not be found for a '$message' message."
 
         # TODO: can we only use return statements, instead of exits (except
         # where absolutely necessary?)
@@ -27,10 +40,10 @@ __handle_message() {
     fi
 
     if [[ ! -w "$enquirer" ]]; then
-        __log_error "The enquirer '$enquirer' does not exist."
+        log_slog::error "The enquirer '$enquirer' does not exist."
 
         return 1 # return to continue execution
     fi
 
-    source $action && __process_action $args
+    source $action && action::process_action $args
 }

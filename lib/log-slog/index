@@ -1,14 +1,17 @@
 #!/usr/bin/env bash
 
-max_level="$1"
-channel="$2"
+__log_slog_max_level="$1"
+__log_slog_channel="$2"
 
-if [[ -z "$max_level" ]] || [[ ! -w "$channel" ]]; then
-    echo "Error: both 'max_level' and 'channel' parameters are required."
+if [[ -z "$__log_slog_max_level" ]] || [[ ! -w "$__log_slog_channel" ]]; then
+    echo "Error: both 'max level' and 'channel' parameters are required."
     exit 1
 fi
 
-__get_level_value() {
+##
+# Gets the numerical value for a log level
+##
+__log_slog::get_level_value() {
     local level="$1"
     local levels=(
         "EMERGENCY" "ALERT" "CRITICAL" "ERROR" "WARNING" "NOTICE" "INFO" "DEBUG"
@@ -21,16 +24,23 @@ __get_level_value() {
     done
 }
 
-__log_level_reached() {
+##
+# Determines if, given a set maximum allowable level, the given level has been
+# reached.
+##
+__log_slog::level_reached() {
     local level="$1"
 
-    local required="$(__get_level_value $level)"
-    local max="$(__get_level_value $max_level)"
+    local required="$(__log_slog::get_level_value $level)"
+    local max="$(__log_slog::get_level_value $__log_slog_max_level)"
 
     [[ $required -le $max ]] && echo true || echo false
 }
 
-__log() {
+##
+# Attempt to log a message.
+#
+log_slog::log() {
     local level="$1"
     local message="$2"
     local context="$3"
@@ -39,32 +49,36 @@ __log() {
     local timestamp="[$(date +"%Y-%m-%d %H:%M:%S")]"
     local separator="-"
 
-    if $(__log_level_reached $level); then
-        echo "$prefix $timestamp $level $separator $message $context" > $channel
+    if $(__log_slog::level_reached $level); then
+        echo "$prefix $timestamp $level $separator $message $context" > $__log_slog_channel
     fi
 }
 
-__log_emergency() {
-    __log "EMERGENCY" "$1" "$2"
+##
+# Proxy methods for the main log_slog::log method
+##
+
+log_slog::emergency() {
+    log_slog::log "EMERGENCY" "$1" "$2"
 }
-__log_alert() {
-    __log "ALERT" "$1" "$2"
+log_slog::alert() {
+    log_slog::log "ALERT" "$1" "$2"
 }
-__log_critical() {
-    __log "CRITICAL" "$1" "$2"
+log_slog::critical() {
+    log_slog::log "CRITICAL" "$1" "$2"
 }
-__log_error() {
-    __log "ERROR" "$1" "$2"
+log_slog::error() {
+    log_slog::log "ERROR" "$1" "$2"
 }
-__log_warning() {
-    __log "WARNING" "$1" "$2"
+log_slog::warning() {
+    log_slog::log "WARNING" "$1" "$2"
 }
-__log_notice() {
-    __log "NOTICE" "$1" "$2"
+log_slog::notice() {
+    log_slog::log "NOTICE" "$1" "$2"
 }
-__log_info() {
-    __log "INFO" "$1" "$2"
+log_slog::info() {
+    log_slog::log "INFO" "$1" "$2"
 }
-__log_debug() {
-    __log "DEBUG" "$1" "$2"
+log_slog::debug() {
+    log_slog::log "DEBUG" "$1" "$2"
 }

@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 
-__command_usage() {
+__watch_command::usage() {
     cat << EOF
-$app_name ($version) - Watch
+
+$APP_NAME ($APP_VERSION) - Watch
 
 Recursively watch a path, or paths, for changes to files matching configured
 file profile filters.
 
-Usage:  $app_name watch [options] <args>
+Usage:  $APP_NAME watch [options] <args>
 
 Options:
     -h, --help      Print usage information
@@ -37,7 +38,7 @@ while [[ "$#" -gt 0 ]]; do
             fi
         ;;
         -h|--help|*)
-            __command_usage && exit 0
+            __watch_command::usage && exit 0
         ;;
     esac
     shift
