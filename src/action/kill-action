@@ -4,6 +4,25 @@
 __kill_action_bash_clash=$(container::resolve "@bash-clash")
 __kill_action_logger=$(container::resolve "@stdout-logger")
 
+# TODO: see if this can work
+# function __kill_action::construct() {
+#     local parameters=(
+#         __kill_action_bash_clash
+#         __kill_action_logger
+#     )
+
+#     for i in ${!parameters[*]}; do
+#         key=$(( i + 1 ))
+#         parameters[$i]="${parameters[$i]}"=$(
+#             container::resolve "${!key}" "$(basename $0)"
+#         )
+#         parameters[$i]="${parameters[$i]}"="${!key}"
+#     done
+
+#     echo ${parameters[*]}
+# }
+# declare $(__kill_action::construct "@bash-clash" "@stdout-logger")
+
 ##
 # Exits the current process.
 ##

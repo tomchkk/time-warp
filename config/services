@@ -99,6 +99,15 @@ __services::define_services() {
             "@message-dir" \
             "@stdout-logger" \
             "@message-routing"
+
+    # messages
+    # TODO: this :point
+
+    # actions
+    # container::add "kill-action" \
+    #     "$__services_base/src/action/kill-action" \
+    #         "@bash-clash" \
+    #         "@logger::@stdout-logger" TODO: explore this
 }
 
 ##
