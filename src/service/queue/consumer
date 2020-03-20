@@ -21,11 +21,21 @@ fi
 # make the pipe if it doesn't exist already
 [[ -e "$__consumer_fifo" ]] || mkfifo "$__consumer_fifo"
 
+##
+# Performs actions on exit of the consumer
+##
+__consumer::exit() {
+    rm -f $__consumer_fifo
+    log_slog::info "Queue consumer exited"
+}
+
 # remove the pipe on exit
-trap "rm -f $__consumer_fifo" EXIT
+trap __consumer::exit exit
 
 # record the time the process came up
 __consumer_start_time=$(date +"%s")
+
+log_slog::info "Queue consumer started"
 
 while true; do
     # TODO: can we do a while read?
