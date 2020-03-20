@@ -1,27 +1,14 @@
 #!/usr/bin/env bash
 
-# TODO: add action scripts to the container
-__kill_action_bash_clash=$(container::resolve "@bash-clash")
-__kill_action_logger=$(container::resolve "@stdout-logger")
-
-# TODO: see if this can work
-# function __kill_action::construct() {
-#     local parameters=(
-#         __kill_action_bash_clash
-#         __kill_action_logger
-#     )
-
-#     for i in ${!parameters[*]}; do
-#         key=$(( i + 1 ))
-#         parameters[$i]="${parameters[$i]}"=$(
-#             container::resolve "${!key}" "$(basename $0)"
-#         )
-#         parameters[$i]="${parameters[$i]}"="${!key}"
-#     done
-
-#     echo ${parameters[*]}
-# }
-# declare $(__kill_action::construct "@bash-clash" "@stdout-logger")
+# construct the script's dependencies
+{
+    __parameters=(
+        __kill_action_bash_clash=@bash-clash
+        @stdout-logger
+    )
+    source "$SERVICE_LOADER" "$BASH_SOURCE" ${__parameters[*]}
+    unset __parameters
+}
 
 ##
 # Exits the current process.
@@ -33,8 +20,7 @@ action::process_action() {
     local queue_pid=$(bash_clash::get "queue_pid")
     local enquirer=$(bash_clash::get "enquirer")
 
-    source $__kill_action_logger && log_slog::info \
-        "Killing the queue at '$pipe' (pid: $queue_pid)"
+    log_slog::info "Killing the queue at '$pipe' (pid: $queue_pid)"
 
     # exit the current process (the consumer)
     exit 0

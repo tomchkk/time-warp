@@ -1,5 +1,18 @@
 #!/usr/bin/env bash
 
+# construct the script's dependencies
+{
+    __parameters=(
+        __time_warp_command_queue_command=@queue-command
+        __time_warp_command_watch_command=@watch-command
+    )
+    source "$SERVICE_LOADER" "$BASH_SOURCE" ${__parameters[*]}
+    unset __parameters
+}
+
+##
+# Cats the command's usage documentation.
+##
 __time_warp_command::usage() {
     cat << EOF
 
@@ -36,10 +49,10 @@ case "$opt" in
         echo "path(s) to exclude:" $args
     ;;
     queue)
-        source $(container::resolve "queue-command") $args
+        source $__time_warp_command_queue_command $args
     ;;
     watch)
-        source $(container::resolve "watch-command") $args
+        source $__time_warp_command_watch_command $args
     ;;
     -l|--list)
         echo "-l --list -v --version -h --help queue watch"

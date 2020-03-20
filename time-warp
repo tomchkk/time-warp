@@ -18,16 +18,18 @@ __config=(
     excluding_pipe="$__org_tmp/${EXCLUDING_FIFO:-fifo}"
 )
 
+# build all the files that will be needed for the project to work
 make --file="$__project_dir/Makefile" --warn-undefined-variables build ${__config[*]}
 
 source "$__project_dir/lib/container/index"
 source "$__project_dir/config/services" "$__project_dir" ${__config[*]} \
     && services::define
 
-unset __config
+SERVICE_LOADER="$__project_dir/lib/container/loader"
 
 source "$__project_dir/src/kernel" $@
 
+unset __config
 unset APP_VERSION
 unset __project_dir
 

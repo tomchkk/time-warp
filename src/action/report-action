@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
 
-# TODO: define actions as services
-# - move these, and other statements like it, to the container
-__report_action_bash_clash=$(container::resolve "@bash-clash")
-__report_action_view_dir=$(container::resolve "@view-dir")
+# construct the script's dependencies
+{
+    __parameters=(
+        __report_action_bash_clash=@bash-clash
+        __report_action_view_dir=@view-dir
+    )
+    source "$SERVICE_LOADER" "$BASH_SOURCE" ${__parameters[*]}
+    unset __parameters
+}
 
 ##
 # Echos a report view to the $enquirer.

@@ -1,5 +1,22 @@
 #!/usr/bin/env bash
 
+##
+# Defining container items
+#
+# The syntax for adding items to the container is as follows:
+# - a scalar parameter:
+#   container::add "parameter-name" "parameter-value"
+# - an array-like parameter:
+#   container::add "parameter-name" "--" "parameter-value-1" "parameter-value-2"
+# - a service:
+#   container::add "service-name" "path/2/service" "@dependency-alias" [,...]
+#
+# Using a dependency alias to resolve the path to a service is a bit buggy, so
+# best to avoid this, at time of writing. However, a value can be concatenated
+# to the end of a resolved scalar parameter using '::' as the glue - e.g.:
+#   "@parameter-value::concatenated-value"
+##
+
 __service_names=() && __service_definitions=()
 
 ##
@@ -21,7 +38,7 @@ container::add() {
 ##
 # Gets the name and any existing suffix for a given service alias.
 ##
-__container::get_alias_name_and_suffix() {
+__container::parse_alias() {
     local name="$1"
     local service_alias
 
@@ -41,9 +58,9 @@ __container::get_alias_name_and_suffix() {
 ##
 # Get the definition of a given parameter or service
 ##
-container::get_definition() {
+__container::get_definition() {
     local name="$1"
-    local service_alias=$(__container::get_alias_name_and_suffix "$name")
+    local service_alias=$(__container::parse_alias "$name")
 
     if [[ -n "$service_alias" ]]; then
         name="${service_alias[0]}"
@@ -60,7 +77,7 @@ container::get_definition() {
 
 ##
 # Recursively resolves the definition of a given parameter, optionally returning
-# option handles for each named service defined as a dependency.
+# handles - e.g.: --handle - for each named service defined as a dependency.
 ##
 container::resolve() {
     local name="$1"
@@ -68,8 +85,8 @@ container::resolve() {
     local depth=${3:-0}
 
     local suffix
+    local service_alias=$(__container::parse_alias "$name")
 
-    local service_alias=$(__container::get_alias_name_and_suffix "$name")
     if [[ -n "$service_alias" ]]; then
         name="${service_alias[0]}"
         suffix="${service_alias[1]}"
@@ -88,20 +105,16 @@ container::resolve() {
             [[ $depth > 0 ]] && switch="--$name "
         fi
 
-        for definition in $(container::get_definition "$name"); do
+        for definition in $(__container::get_definition "$name"); do
             local args=("$definition" $optionHandles $(( $depth + 1 )))
 
             defined="$(container::resolve ${args[*]})"
 
             if [[ $? -eq 1 ]]; then
-                # container::get_definition threw an error, meaning that no
+                # __container::get_definition threw an error, meaning that no
                 # service was found for the definition; we'll just use its
                 # current value
                 defined="$definition"
-            fi
-
-            if ! $optionHandles && [[ "$defined" =~ ^--\s*(.*) ]]; then
-                defined="${BASH_REMATCH[1]}"
             fi
 
             echo "${switch}${defined}${suffix}"
@@ -114,4 +127,15 @@ container::resolve() {
     done
 
     echo "Error: The '$name' service cannot be resolved." && exit 1
+}
+
+##
+# Gets the source path of a given service or the elements, if the service is
+# an array-like structure - i.e. begins with '--'.
+##
+container::get_source() {
+    local name="$1"
+    local src=($(__container::get_definition "$name"))
+
+    echo ${src[0]}
 }

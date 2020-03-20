@@ -1,3 +1,12 @@
 #!/usr/bin/env bash
 
-source $(container::resolve "time-warp-command") $@
+# construct the script's dependencies
+{
+    __parameters=(
+        __kernel_time_warp_command=@time-warp-command
+    )
+    source "$SERVICE_LOADER" "$BASH_SOURCE" ${__parameters[*]}
+    unset __parameters
+}
+
+source $__kernel_time_warp_command $@

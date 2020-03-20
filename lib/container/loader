@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+##
+# Builds an array of services and their resolved dependencies with an command
+# for creating the service, or config, that can be called dynamically using
+# `eval`
+##
+__loader::init() {
+    local originator="$1" && shift
+    local parameters="$@"
+
+    for parameter in ${parameters[*]}; do
+        local prefix=""
+        local assignment=""
+        local name=""
+        local service=""
+
+        if [[ "$parameter" =~ ^(.+=)(.+)$ ]]; then
+            # prefix a variable assignment
+            prefix="declare "
+            assignment="${BASH_REMATCH[1]}"
+            name="${BASH_REMATCH[2]}"
+        else
+            name="$parameter"
+        fi
+
+        # resolve the actual service
+        service="$(container::resolve $name)"
+
+        if [[ ${service[*]} =~ ^--\s*(.*)$ ]]; then
+            # add a flag to and parenthesize array-like assignments
+            prefix="$prefix -a "
+            service="("$(echo ${BASH_REMATCH[1]} | xargs)")"
+        elif [[ -z "$assignment" ]] && [[ -e $(container::get_source "$name") ]]
+        then
+            # service source is a valid path
+            prefix="source "
+        fi
+
+        services+=("${prefix}${assignment}${service[*]}")
+    done
+}
+
+originator="$1" && shift
+services=()
+
+__loader::init "$originator" $@
+
+# echo "## Loading '$(basename $(dirname $originator))/$(basename $originator)' services:"
+
+for key in ${!services[*]}; do
+    # echo " # loading service:" ${services[$key]}
+    eval ${services[$key]}
+done
+
+# echo -e " ##\n"
+
+unset originator
+unset services
+unset key

@@ -3,24 +3,20 @@
 # opens a fifo pipe at the given path and then executes the given command using
 # arguments pushed to the pipe, or echos the arguments, if no command is given
 
-__consumer_fifo=$(container::resolve "$1")
-# TODO: this seems to be wrong, the consumer shouldn't be calling
-# container::get_definition. It means in way that the consumer has to know how
-# to construct the handler, which is bad and wrong!
-__consumer_message_handler=$(container::get_definition "$2")
-__consumer_logger=$(container::resolve "$3")
-
-source $__consumer_logger
+# construct the script's dependencies
+{
+    __parameters=(
+        __consumer_fifo=@excluding-pipe
+        @stdout-logger
+        @message-handler
+    )
+    source "$SERVICE_LOADER" "$BASH_SOURCE" ${__parameters[*]}
+    unset __parameters
+}
 
 if [[ -z "$__consumer_fifo" ]]; then
     log_slog::error "A fifo pipe path must be provided" && exit 1
 fi
-
-if [[ -z "$__consumer_message_handler" ]]; then
-    log_slog::error "A message handler must be provided" && exit 1
-fi
-
-source $__consumer_message_handler
 
 # make the pipe if it doesn't exist already
 [[ -e "$__consumer_fifo" ]] || mkfifo "$__consumer_fifo"

@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
 
-__message_bus_message_dir=$(container::resolve "$1")
-__message_bus_logger=$(container::resolve "$2")
-__message_bus_routing=$(container::resolve "$3")
-
-source $__message_bus_logger
+# construct the script's dependencies
+{
+    __parameters=(
+        @stdout-logger
+        __message_bus_message_dir=@message-dir
+        __message_bus_routing=@message-routing
+    )
+    source "$SERVICE_LOADER" "$BASH_SOURCE" ${__parameters[*]}
+    unset __parameters
+}
 
 # TODO: do we still need these; can we do them better?
 if [[ ! -d "$__message_bus_message_dir" ]]; then
@@ -30,11 +35,12 @@ message_bus::dispatch_message() {
         exit 1
     fi
 
+    # TODO: consider making a message registry, in case it convers benefits
     local channel
     for route in ${__message_bus_routing[*]}; do
         # expected routing format:
-        # - path/2/action-message|/channel/to/write/2
-        if [[ "$route" =~ ^"$message"\|(.+)$ ]]; then
+        # - path/2/action-message::/channel/to/write/2
+        if [[ "$route" =~ ^"$message"::(.+)$ ]]; then
             channel=${BASH_REMATCH[1]}
             break
         fi

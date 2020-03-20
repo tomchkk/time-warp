@@ -1,5 +1,18 @@
 #!/usr/bin/env bash
 
+# construct the script's dependencies
+{
+    __parameters=(
+        __queue_command_excluding_consumer=@excluding-consumer
+        __queue_command_message_bus=@message-bus
+    )
+    source "$SERVICE_LOADER" "$BASH_SOURCE" ${__parameters[*]}
+    unset __parameters
+}
+
+##
+# Cats the command's usage documentation.
+##
 __queue_command::usage() {
     cat << EOF
 
@@ -20,23 +33,23 @@ Options:
 EOF
 }
 
-message_bus=$(container::get_definition "message-bus")
-
 opt="$1" && shift
 args="$@"
 
 case "$opt" in
     -c|--consume)
-        source $(container::get_definition "excluding-consumer")
+        source $__queue_command_excluding_consumer
     ;;
     -k|--kill)
-        source $message_bus && message_bus::dispatch_message "KILL"
+        source $__queue_command_message_bus
+        message_bus::dispatch_message "KILL"
     ;;
     -l|--list)
         echo "list running queue services..."
     ;;
     -r|--report)
-        source $message_bus && message_bus::dispatch_message "REPORT"
+        source $__queue_command_message_bus
+        message_bus::dispatch_message "REPORT"
     ;;
     -p|--produce)
         echo "produce"

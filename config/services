@@ -1,25 +1,5 @@
 #!/usr/bin/env bash
 
-##
-# Defining services
-#
-# The different define methods are just convenience: there is no difference to
-# the serivces or how they are defined.
-#
-# The syntax for adding items to the container is as follows:
-# - a scalar parameter:
-#   container::add "parameter-name" "parameter-value"
-# - an array-like parameter:
-#   container::add "parameter-name" "--" "parameter-value-1" "parameter-value-2"
-# - a service:
-#   container::add "service-name" "path/2/service" "@dependency-alias" [,...]
-#
-# Using a dependency alias to resolve the path to a service is a bit buggy, so
-# best to avoid this, at time of writing. However, a value can be concatenated
-# to the end of a resolved scalar parameter using '::' as the glue - e.g.:
-#   "@parameter-value::concatenated-value"
-##
-
 __services_base="$1" && shift
 __services_config="$@"
 
@@ -55,8 +35,8 @@ __services::define_parameters() {
     local excluding_pipe=$(container::resolve "excluding-pipe")
     container::add "message-routing" \
         "--" \
-            "$__services_base/src/message/kill-message|$excluding_pipe" \
-            "$__services_base/src/message/report-message|$excluding_pipe"
+            "$__services_base/src/message/kill-message::$excluding_pipe" \
+            "$__services_base/src/message/report-message::$excluding_pipe"
 }
 
 ##
@@ -79,35 +59,36 @@ __services::define_services() {
     container::add "watch-command" \
         "$__services_base/src/command/watch/index"
 
-    # handlers
-    container::add "message-handler" \
-        "$__services_base/src/handler/message-handler" \
-            "@action-dir" \
-            "@stdout-logger" \
-            "@bash-clash"
-
     # consumers
     container::add "excluding-consumer" \
-        "$__services_base/src/service/queue/consumer" \
-            "@excluding-pipe" \
-            "@message-handler" \
-            "@stdout-logger"
+        "$__services_base/src/service/queue/consumer"
 
     # buses
     container::add "message-bus" \
-        "$__services_base/src/bus/message-bus" \
-            "@message-dir" \
-            "@stdout-logger" \
-            "@message-routing"
+        "$__services_base/src/bus/message-bus"
 
     # messages
-    # TODO: this :point
+    container::add "kill-message" \
+        "$__services_base/src/message/kill-message"
+    container::add "report-action" \
+        "$__services_base/src/message/report-message"
+
+    # handlers
+    container::add "message-handler" \
+        "$__services_base/src/handler/message-handler"
 
     # actions
-    # container::add "kill-action" \
-    #     "$__services_base/src/action/kill-action" \
-    #         "@bash-clash" \
-    #         "@logger::@stdout-logger" TODO: explore this
+    container::add "kill-action" \
+        "$__services_base/src/action/kill-action"
+    container::add "report-action" \
+        "$__services_base/src/action/report-action"
+
+    # TODO: these definitions should allow a service to be use more interface
+    # -like functionality, so I can call @logger, but get the logger configured
+    # for this service - e.g.:
+    # - @logger->@std-logger
+    # meaning a call to @logger, which is abstract, will return a concrete
+    # implementation of a @std-logger
 }
 
 ##

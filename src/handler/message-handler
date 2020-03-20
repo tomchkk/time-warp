@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
 
-__message_handler_actions_dir=$(container::resolve "$1")
-__message_handler_logger=$(container::resolve "$2")
-__message_handler_bash_clash=$(container::resolve "$3")
-
-source $__message_handler_logger
+# construct the script's dependencies
+{
+    __parameters=(
+        __message_handler_actions_dir=@action-dir
+        __message_handler_bash_clash=@bash-clash
+        @stdout-logger
+    )
+    source "$SERVICE_LOADER" "$BASH_SOURCE" ${__parameters[*]}
+    unset __parameters
+}
 
 if [[ ! -d "$__message_handler_actions_dir" ]]; then
     log_slog::error "An existing actions directory is required" && exit 1
