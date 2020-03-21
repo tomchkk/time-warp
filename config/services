@@ -61,7 +61,8 @@ __services::define_services() {
 
     # consumers
     container::add "excluding-consumer" \
-        "$__services_base/src/service/queue/consumer"
+        "$__services_base/src/service/queue/consumer" \
+            # "@fifo-pipe->@std-logger"
 
     # buses
     container::add "message-bus" \

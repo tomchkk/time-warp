@@ -16,7 +16,8 @@ __loader::init() {
         local service=""
 
         if [[ "$parameter" =~ ^(.+=)(.+)$ ]]; then
-            # prefix a variable assignment
+            # here be variable assignments
+
             prefix="declare "
             assignment="${BASH_REMATCH[1]}"
             name="${BASH_REMATCH[2]}"
@@ -27,13 +28,19 @@ __loader::init() {
         # resolve the actual service
         service="$(container::resolve $name)"
 
-        if [[ ${service[*]} =~ ^--\s*(.*)$ ]]; then
-            # add a flag to and parenthesize array-like assignments
+        if  [[ -n "$assignment" ]] &&
+            [[ ${service[*]} =~ ^--\s*(.*)$ ]]
+        then
+            # here be array-like assignments
+
             prefix="$prefix -a "
             service="("$(echo ${BASH_REMATCH[1]} | xargs)")"
-        elif [[ -z "$assignment" ]] && [[ -e $(container::get_source "$name") ]]
+
+        elif [[ -z "$assignment" ]] &&
+             [[ -e $(container::get_source "$name") ]]
         then
-            # service source is a valid path
+            # here be services for sourcing
+
             prefix="source "
         fi
 
