@@ -1,15 +1,5 @@
 #!/usr/bin/env bash
 
-# construct the script's dependencies
-{
-    __parameters=(
-        __time_warp_command_queue_command=@queue-command
-        __time_warp_command_watch_command=@watch-command
-    )
-    source "$SERVICE_LOADER" "$BASH_SOURCE" ${__parameters[*]}
-    unset __parameters
-}
-
 ##
 # Cats the command's usage documentation.
 ##
@@ -36,8 +26,10 @@ Commands:
 EOF
 }
 
-opt="$1" && shift
-args="$@"
+__time_warp_command_queue_command="$1"
+__time_warp_command_watch_command="$2"
+
+opt="$3" && shift 3
 
 case "$opt" in
     exclude)
@@ -46,19 +38,19 @@ case "$opt" in
         #  - on success, pushes item to time-warp/excluded.q
         #  - on fail, pushes item to time-warp/errored.q
 
-        echo "path(s) to exclude:" $args
+        echo "path(s) to exclude:" $@
     ;;
     queue)
-        source $__time_warp_command_queue_command $args
+        $LOAD $__time_warp_command_queue_command $@
     ;;
     watch)
-        source $__time_warp_command_watch_command $args
+        $LOAD $__time_warp_command_watch_command $@
     ;;
     -l|--list)
         echo "-l --list -v --version -h --help queue watch"
     ;;
     -v|--version)
-        echo "__version"
+        echo "$APP_VERSION"
     ;;
     -h|--help|*)
         __time_warp_command::usage && exit 0

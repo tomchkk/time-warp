@@ -6,32 +6,27 @@ APP_VERSION="$(cat $__project_dir/version)"
 source "$__project_dir/.env"
 
 APP_NAME="${APP_NAME:-$(basename $0)}"
-__org_id="${ORG_ID:-org}"
-__org_tmp="/tmp/$__org_id.$APP_NAME"
+__var_dir="$__project_dir/var"
+__log_dir="$__var_dir/log"
+__org_tmp="/tmp/${ORG_ID:-org}.$APP_NAME"
 
-# build an array of config
-__config=(
+__make_config=(
     user_config="$HOME/.config/$APP_NAME"
-    var="$__project_dir/var"
+    var_dir="$__var_dir"
+    log_dir="$__log_dir"
     org_tmp="$__org_tmp"
-    log_level="${LOG_LEVEL:-DEBUG}"
-    excluding_pipe="$__org_tmp/${EXCLUDING_FIFO:-fifo}"
 )
 
 # build all the files that will be needed for the project to work
-make --file="$__project_dir/Makefile" --warn-undefined-variables build ${__config[*]}
+make --file="$__project_dir/Makefile" --warn-undefined-variables build ${__make_config[*]}
 
-source "$__project_dir/lib/container/index"
-source "$__project_dir/config/services" "$__project_dir" ${__config[*]} \
-    && services::define
+source "$__project_dir/src/kernel" $APP_ENV $DEBUG $@
 
-SERVICE_LOADER="$__project_dir/lib/container/loader"
-
-source "$__project_dir/src/kernel" $@
-
-unset __config
-unset APP_VERSION
-unset __project_dir
+unset \
+    __project_dir \
+    APP_VERSION \
+    __org_tmp \
+    __make_config \
 
 # TODO: go through each point of exit and run `declare -p` to check for memory
 # leaks

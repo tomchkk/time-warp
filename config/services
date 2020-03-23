@@ -32,6 +32,10 @@ __services::define_parameters() {
         container::add "$(basename $dir)-dir" "$dir"
     done
 
+    container::add "log-file" "@log-dir::/$(date '+%Y-%m-%d').log"
+
+    container::add "excluding-pipe" "$(container::resolve "@org-tmp::/excluding-pipe")"
+
     local excluding_pipe=$(container::resolve "excluding-pipe")
     container::add "message-routing" \
         "--" \
@@ -44,52 +48,72 @@ __services::define_parameters() {
 ##
 __services::define_services() {
     # lib
+    container::add "file-logger" \
+        "$__services_base/lib/log-slog/index" \
+            "@log-level" \
+            "@log-file"
+
     container::add "stdout-logger" \
         "$__services_base/lib/log-slog/index" \
             "@log-level" \
-            "$(tty)"
+            "$(tty)" \
+            " -> "
+
     container::add "bash-clash" \
         "$__services_base/lib/bash-clash/index"
 
     # commands
-    container::add "time-warp-command" \
-        "$__services_base/src/command/time-warp/index"
     container::add "queue-command" \
-        "$__services_base/src/command/queue/index"
+        "$__services_base/src/command/queue/index" \
+            "@excluding-consumer" \
+            "@message-bus"
+
     container::add "watch-command" \
         "$__services_base/src/command/watch/index"
+
+    container::add "time-warp-command" \
+        "$__services_base/src/command/time-warp/index" \
+            "@queue-command" \
+            "@watch-command"
 
     # consumers
     container::add "excluding-consumer" \
         "$__services_base/src/service/queue/consumer" \
-            # "@fifo-pipe->@std-logger"
+            "@stdout-logger" \
+            "@excluding-pipe" \
+            "@message-handler"
 
     # buses
     container::add "message-bus" \
-        "$__services_base/src/bus/message-bus"
+        "$__services_base/src/bus/message-bus" \
+            "@stdout-logger" \
+            "@message-dir" \
+            "@message-routing"
+
 
     # messages
     container::add "kill-message" \
         "$__services_base/src/message/kill-message"
-    container::add "report-action" \
+
+    container::add "report-message" \
         "$__services_base/src/message/report-message"
 
     # handlers
     container::add "message-handler" \
-        "$__services_base/src/handler/message-handler"
+        "$__services_base/src/handler/message-handler" \
+            "@bash-clash" \
+            "@stdout-logger"
 
     # actions
     container::add "kill-action" \
-        "$__services_base/src/action/kill-action"
-    container::add "report-action" \
-        "$__services_base/src/action/report-action"
+        "$__services_base/src/action/kill-action" \
+            "@bash-clash" \
+            "@stdout-logger"
 
-    # TODO: these definitions should allow a service to be use more interface
-    # -like functionality, so I can call @logger, but get the logger configured
-    # for this service - e.g.:
-    # - @logger->@std-logger
-    # meaning a call to @logger, which is abstract, will return a concrete
-    # implementation of a @std-logger
+    container::add "report-action" \
+        "$__services_base/src/action/report-action" \
+            "@bash-clash" \
+            "@view-dir"
 }
 
 ##

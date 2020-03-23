@@ -1,15 +1,8 @@
 #!/usr/bin/env bash
 
-# construct the script's dependencies
-{
-    __parameters=(
-        @stdout-logger
-        __message_bus_message_dir=@message-dir
-        __message_bus_routing=@message-routing
-    )
-    source "$SERVICE_LOADER" "$BASH_SOURCE" ${__parameters[*]}
-    unset __parameters
-}
+__message_bus_logger="$1" && $LOAD $__message_bus_logger
+__message_bus_message_dir="$2"
+__message_bus_routing=${@:4} # skip one item of arg in routing
 
 # TODO: do we still need these; can we do them better?
 if [[ ! -d "$__message_bus_message_dir" ]]; then

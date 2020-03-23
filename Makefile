@@ -14,17 +14,20 @@ version:
 	@git describe --always --first-parent HEAD > ./version
 
 
-build: user_config files org_tmp
+build: user_config files log_dir org_tmp
 
 user_config:
 	@mkdir -p ${user_config}
 
-files: var
-	@touch ${var}/errored
-	@touch ${var}/excluded
+var_dir:
+	@mkdir -p ${var_dir}
 
-var:
-	@mkdir -p ${var}
+files: var_dir
+	@touch ${var_dir}/errored
+	@touch ${var_dir}/excluded
+
+log_dir: var_dir
+	@mkdir -p ${log_dir}
 
 org_tmp:
 	@mkdir -p ${org_tmp}

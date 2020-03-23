@@ -60,8 +60,9 @@ __container::parse_alias() {
 ##
 # Get the definition of a given parameter or service
 ##
-__container::get_definition() {
+container::get_definition() {
     local name="$1"
+    local default="${2:-}"
     local service_alias=$(__container::parse_alias "$name")
 
     if [[ -n "$service_alias" ]]; then
@@ -74,7 +75,11 @@ __container::get_definition() {
         fi
     done
 
-    echo "Error: No definition exists for the '$name' service." && exit 1
+    if [[ -n $default ]]; then
+        echo "$default"
+    else
+        echo "Error: No definition exists for the '$name' service." && exit 1
+    fi
 }
 
 ##
@@ -87,11 +92,11 @@ container::resolve() {
     local depth=${3:-0}
 
     local suffix
-    local service_alias=$(__container::parse_alias "$name")
+    local service_alias=($(__container::parse_alias "$name"))
 
-    if [[ -n "$service_alias" ]]; then
-        name="${service_alias[0]}"
-        suffix="${service_alias[1]}"
+    if [[ -n $service_alias ]]; then
+        name=${service_alias[0]}
+        suffix=${service_alias[1]}
     fi
 
     for key in ${!__service_names[*]}; do
@@ -107,13 +112,13 @@ container::resolve() {
             [[ $depth > 0 ]] && switch="--$name "
         fi
 
-        for definition in $(__container::get_definition "$name"); do
+        for definition in $(container::get_definition "$name"); do
             local args=("$definition" $optionHandles $(( $depth + 1 )))
 
             defined="$(container::resolve ${args[*]})"
 
             if [[ $? -eq 1 ]]; then
-                # __container::get_definition threw an error, meaning that no
+                # container::get_definition threw an error, meaning that no
                 # service was found for the definition; we'll just use its
                 # current value
                 defined="$definition"
@@ -137,7 +142,7 @@ container::resolve() {
 ##
 container::get_source() {
     local name="$1"
-    local src=($(__container::get_definition "$name"))
+    local src=($(container::get_definition "$name"))
 
     echo ${src[0]}
 }

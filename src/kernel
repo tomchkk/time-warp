@@ -1,12 +1,34 @@
 #!/usr/bin/env bash
 
-# construct the script's dependencies
-{
-    __parameters=(
-        __kernel_time_warp_command=@time-warp-command
-    )
-    source "$SERVICE_LOADER" "$BASH_SOURCE" ${__parameters[*]}
-    unset __parameters
-}
+# build an array of config
+__kernel_config=(
+    app_env="$1"
+    debug="$2"
+    var_dir="$__var_dir"
+    log_dir="$__log_dir"
+    org_tmp="$__org_tmp"
+    log_level="${LOG_LEVEL:-"DEBUG"}"
+)
+__kernel_args=${@:3}
 
-source $__kernel_time_warp_command $@
+source "$__project_dir/lib/container/index"
+source "$__project_dir/config/services" "$__project_dir" ${__kernel_config[*]}
+
+services::define
+
+LOAD="source $__project_dir/lib/container/initializer"
+
+# TODO: get rid of this?
+# SERVICE_LOADER="$__project_dir/lib/container/loader"
+
+# TODO: use this (or alternative?)
+# sourcey () {
+#     source "$__project_dir/lib/container/initializer" $@
+# }
+
+$LOAD @time-warp-command $__kernel_args
+
+unset \
+    __kernel_config \
+    __kernel_args \
+    LOAD \

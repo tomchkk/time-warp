@@ -1,20 +1,13 @@
 #!/usr/bin/env bash
 
-# construct the script's dependencies
-{
-    __parameters=(
-        __report_action_bash_clash=@bash-clash
-        __report_action_view_dir=@view-dir
-    )
-    source "$SERVICE_LOADER" "$BASH_SOURCE" ${__parameters[*]}
-    unset __parameters
-}
+__report_action_bash_clash="$1"
+__report_action_view_dir="$2"
 
 ##
 # Echos a report view to the $enquirer.
 ##
 action::process_action() {
-    source $__report_action_bash_clash "$@"
+    $LOAD $__report_action_bash_clash $@
 
     local uptime=$(bash_clash::get "uptime")
     local queue_pid=$(bash_clash::get "queue_pid")

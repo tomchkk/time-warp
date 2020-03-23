@@ -3,16 +3,9 @@
 # opens a fifo pipe at the given path and then executes the given command using
 # arguments pushed to the pipe, or echos the arguments, if no command is given
 
-# construct the script's dependencies
-{
-    __parameters=(
-        __consumer_fifo=@excluding-pipe
-        @stdout-logger
-        @message-handler
-    )
-    source "$SERVICE_LOADER" "$BASH_SOURCE" ${__parameters[*]}
-    unset __parameters
-}
+__consumer_logger="$1" && $LOAD $__consumer_logger
+__consumer_fifo="$2"
+__consumer_message_handler="$3" && $LOAD $__consumer_message_handler
 
 if [[ -z "$__consumer_fifo" ]]; then
     log_slog::error "A fifo pipe path must be provided" && exit 1

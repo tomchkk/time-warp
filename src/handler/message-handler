@@ -1,48 +1,19 @@
 #!/usr/bin/env bash
 
-# construct the script's dependencies
-{
-    __parameters=(
-        __message_handler_actions_dir=@action-dir
-        __message_handler_bash_clash=@bash-clash
-        @stdout-logger
-    )
-    source "$SERVICE_LOADER" "$BASH_SOURCE" ${__parameters[*]}
-    unset __parameters
-}
-
-if [[ ! -d "$__message_handler_actions_dir" ]]; then
-    log_slog::error "An existing actions directory is required" && exit 1
-fi
-
-##
-# Gets the value of the --enquirer option from the given arguments
-##
-__message_handler::get_enquirer() {
-    echo $(
-        source "$__message_handler_bash_clash" $@ && bash_clash::get "enquirer"
-    )
-}
+__message_handler_bash_clash="$1"
+__message_handler_logger="$2" && $LOAD $__message_handler_logger
 
 ##
 # Handles message pushed to a consumer pipe.
 #
 message_handler::handle_message() {
-    local message="${1:-[EMPTY]}" && shift
-    local args="$@"
+    local message="${1:-[EMPTY]}"
+    local args=${@:2}
 
-    local enquirer=$(__message_handler::get_enquirer "$args")
-    local action="$__message_handler_actions_dir/$(
-        echo $message | tr '[:upper:]' '[:lower:]'
-    )-action"
+    local action="@$(echo $message | tr '[:upper:]' '[:lower:]')-action"
 
-    if [[ ! -f "$action" ]]; then
-        log_slog::error "An action could not be found for a '$message' message."
-
-        # TODO: can we only use return statements, instead of exits (except
-        # where absolutely necessary?)
-        return 1 # return to continue execution
-    fi
+    $LOAD "$__message_handler_bash_clash" $args
+    local enquirer=$(bash_clash::get "enquirer")
 
     if [[ ! -w "$enquirer" ]]; then
         log_slog::error "The enquirer '$enquirer' does not exist."
@@ -50,5 +21,5 @@ message_handler::handle_message() {
         return 1 # return to continue execution
     fi
 
-    source $action && action::process_action $args
+    $LOAD $action && action::process_action $args
 }

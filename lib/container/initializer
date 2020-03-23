@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+# TODO: try to make this work for ordinary sourcing to...
+
+__origin="${BASH_SOURCE[1]/$__project_dir/.}"
+
+__service_alias=$1
+__service_args=${@:2}
+
+__service_definition=($(container::get_definition "$__service_alias"))
+__service_source=${__service_definition[0]}
+__service_dependencies=${__service_definition[*]:1}
+
+source $(container::resolve "@file-logger")
+
+log_slog::debug "Loading '$__service_alias' for '$__origin'" "source:$__service_source"
+
+__service_dependencies=()
+for __service_dependency in ${__service_definition[*]:1}; do
+    __dependency_definition=(
+        $(container::get_definition "$__service_dependency" "$__service_dependency")
+    )
+
+    if [[ -f ${__dependency_definition[0]} ]]; then
+        # the dependency is a file that can be loaded
+        # TODO: Can we do this to recursively load dependencies:
+        # - $LOAD $__service_dependency
+        log_slog::debug "Loadable dependency '$__service_dependency'" "source:${__dependency_definition[0]}"
+        __service_dependencies+=($__service_dependency)
+    else
+        log_slog::debug "Non-loadable dependency '$__service_dependency'" "resolved:'${__dependency_definition[*]}'"
+        __service_dependencies+=(${__dependency_definition[*]})
+    fi
+done
+
+source $__service_source ${__service_dependencies[*]} $__service_args
+
+unset \
+    __origin \
+    __service_alias \
+    __service_args \
+    __service_definition \
+    __service_source \
+    __service_dependencies \
+    __service_dependency \
+    __dependency_definition
