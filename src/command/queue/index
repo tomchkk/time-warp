@@ -30,17 +30,17 @@ opt="$3" && shift 3
 
 case "$opt" in
     -c|--consume)
-        $LOAD $__queue_command_excluding_consumer
+        source $__queue_command_excluding_consumer
     ;;
     -k|--kill)
-        $LOAD $__queue_command_message_bus
+        source $__queue_command_message_bus
         message_bus::dispatch_message "KILL"
     ;;
     -l|--list)
         echo "list running queue services..."
     ;;
     -r|--report)
-        $LOAD $__queue_command_message_bus
+        source $__queue_command_message_bus
         message_bus::dispatch_message "REPORT"
     ;;
     -p|--produce)

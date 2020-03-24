@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
 
-__message_bus_logger="$1" && $LOAD $__message_bus_logger
-__message_bus_message_dir="$2"
-__message_bus_routing=${@:4} # skip one item of arg in routing
+__message_bus_logger="$1" && source $__message_bus_logger
+__message_bus_routing=${@:2}
 
 # TODO: do we still need these; can we do them better?
-if [[ ! -d "$__message_bus_message_dir" ]]; then
-    log_slog::error "An existing message directory is required" && exit 1
-fi
-
 if [[ -z "$__message_bus_routing" ]]; then
     log_slog::error "No message routing is defined" && exit 1
 fi
@@ -19,14 +14,7 @@ fi
 message_bus::dispatch_message() {
     local action="${1:-[empty]}"
 
-    local message="$__message_bus_message_dir/$(
-        echo $action | tr '[:upper:]' '[:lower:]'
-    )-message"
-
-    if [[ ! -f "$message" ]]; then
-        log_slog::error "A message could not be found for the '$action' action."
-        exit 1
-    fi
+    local message="@$(echo $action | tr '[:upper:]' '[:lower:]')-message"
 
     # TODO: consider making a message registry, in case it convers benefits
     local channel

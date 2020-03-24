@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 
 __message_handler_bash_clash="$1"
-__message_handler_logger="$2" && $LOAD $__message_handler_logger
+__message_handler_logger="$2" && source $__message_handler_logger
 
 ##
 # Handles message pushed to a consumer pipe.
-#
+##
 message_handler::handle_message() {
     local message="${1:-[EMPTY]}"
     local args=${@:2}
 
     local action="@$(echo $message | tr '[:upper:]' '[:lower:]')-action"
 
-    $LOAD "$__message_handler_bash_clash" $args
+    source "$__message_handler_bash_clash" $args
     local enquirer=$(bash_clash::get "enquirer")
 
     if [[ ! -w "$enquirer" ]]; then
@@ -21,5 +21,5 @@ message_handler::handle_message() {
         return 1 # return to continue execution
     fi
 
-    $LOAD $action && action::process_action $args
+    source $action && action::process_action $args
 }

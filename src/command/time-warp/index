@@ -41,10 +41,10 @@ case "$opt" in
         echo "path(s) to exclude:" $@
     ;;
     queue)
-        $LOAD $__time_warp_command_queue_command $@
+        source $__time_warp_command_queue_command $@
     ;;
     watch)
-        $LOAD $__time_warp_command_watch_command $@
+        source $__time_warp_command_watch_command $@
     ;;
     -l|--list)
         echo "-l --list -v --version -h --help queue watch"

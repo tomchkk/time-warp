@@ -34,13 +34,13 @@ __services::define_parameters() {
 
     container::add "log-file" "@log-dir::/$(date '+%Y-%m-%d').log"
 
-    container::add "excluding-pipe" "$(container::resolve "@org-tmp::/excluding-pipe")"
+    container::add "excluding-pipe" $(container::resolve "@org-tmp::/excluding-pipe")
 
     local excluding_pipe=$(container::resolve "excluding-pipe")
     container::add "message-routing" \
         "--" \
-            "$__services_base/src/message/kill-message::$excluding_pipe" \
-            "$__services_base/src/message/report-message::$excluding_pipe"
+            "@kill-message::$excluding_pipe" \
+            "@report-message::$excluding_pipe"
 }
 
 ##
@@ -87,9 +87,7 @@ __services::define_services() {
     container::add "message-bus" \
         "$__services_base/src/bus/message-bus" \
             "@stdout-logger" \
-            "@message-dir" \
             "@message-routing"
-
 
     # messages
     container::add "kill-message" \

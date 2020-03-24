@@ -7,7 +7,7 @@ __report_action_view_dir="$2"
 # Echos a report view to the $enquirer.
 ##
 action::process_action() {
-    $LOAD $__report_action_bash_clash $@
+    source $__report_action_bash_clash $@
 
     local uptime=$(bash_clash::get "uptime")
     local queue_pid=$(bash_clash::get "queue_pid")

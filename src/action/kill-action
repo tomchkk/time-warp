@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
 __kill_action_bash_clash="$1"
-__kill_action_logger="$2" && $LOAD $__kill_action_logger
+__kill_action_logger="$2" && source $__kill_action_logger
 
 ##
 # Exits the current process.
 ##
 action::process_action() {
-    $LOAD "$__kill_action_bash_clash" $@
+    source "$__kill_action_bash_clash" $@
 
     local pipe=$(bash_clash::get "pipe")
     local queue_pid=$(bash_clash::get "queue_pid")

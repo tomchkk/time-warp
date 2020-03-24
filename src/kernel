@@ -16,19 +16,10 @@ source "$__project_dir/config/services" "$__project_dir" ${__kernel_config[*]}
 
 services::define
 
-LOAD="source $__project_dir/lib/container/initializer"
+source $__project_dir/lib/container/initializer
 
-# TODO: get rid of this?
-# SERVICE_LOADER="$__project_dir/lib/container/loader"
-
-# TODO: use this (or alternative?)
-# sourcey () {
-#     source "$__project_dir/lib/container/initializer" $@
-# }
-
-$LOAD @time-warp-command $__kernel_args
+source @time-warp-command $__kernel_args
 
 unset \
     __kernel_config \
-    __kernel_args \
-    LOAD \
+    __kernel_args
