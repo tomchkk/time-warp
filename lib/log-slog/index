@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 
-# TODO:  add origin context to logger?
-
 __log_slog_max_level="$1"
 __log_slog_channel="$2"
-__log_slog_prefix="${3:-""}"
+__log_slog_prefix=${3:-""}
+__log_slog_prefix=$([[ -n $3 ]] && echo " $3 ")
 
 # TODO: separate these into two messages, or find a better way of handling this
 if [[ -z "$__log_slog_max_level" ]] || [[ -z "$__log_slog_channel" ]]; then
@@ -49,13 +48,8 @@ log_slog::log() {
     local message="$2"
     local context=${@:3}
 
-    local contextMsg
-
     if [[ -n "$context" ]]; then
-        for item in ${context[*]}; do
-            contextMsg+="$item, "
-        done
-        contextMsg="{ $(echo $contextMsg | sed 's/,*$//g') }"
+        contextMsg="{ "context:" $(echo $context | sed 's/;*$//g') }"
     fi
 
     local timestamp="[$(date +"%Y-%m-%d %H:%M:%S")]"
@@ -66,7 +60,7 @@ log_slog::log() {
     fi
 
     if $(__log_slog::level_reached $level) && [[ -w "$__log_slog_channel" ]]; then
-        echo "$__log_slog_prefix $timestamp $level $separator $message $contextMsg" >> "$__log_slog_channel"
+        echo "$__log_slog_prefix$timestamp $level $separator $message $contextMsg" >> "$__log_slog_channel"
     fi
 }
 

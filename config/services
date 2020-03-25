@@ -57,7 +57,7 @@ __services::define_services() {
         "$__services_base/lib/log-slog/index" \
             "@log-level" \
             "$(tty)" \
-            " -> "
+            "->"
 
     container::add "bash-clash" \
         "$__services_base/lib/bash-clash/index"
