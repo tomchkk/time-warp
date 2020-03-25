@@ -11,13 +11,17 @@ __kernel_config=(
 )
 __kernel_args=${@:3}
 
+# import container functionality
 source "$__project_dir/lib/container/index"
-source "$__project_dir/config/services" "$__project_dir" ${__kernel_config[*]}
 
+# boot app config, parameters and services
+source "$__project_dir/config/services" "$__project_dir" ${__kernel_config[*]}
 services::define
 
-source $__project_dir/lib/container/initializer
+# replace the 'source' builtin with dependency-loader functionality
+source $__project_dir/lib/container/dependency-loader
 
+# handle the request
 source @time-warp-command $__kernel_args
 
 unset \

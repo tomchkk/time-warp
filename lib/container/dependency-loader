@@ -3,7 +3,7 @@
 __origin="${BASH_SOURCE[1]/$__project_dir/.}"
 
 ##
-# Overrides the builtin source function to enable dependency loading
+# Overrides the builtin source function to enable dependency loading.
 ##
 source () {
     __service_source="$1"
