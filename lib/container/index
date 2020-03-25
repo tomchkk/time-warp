@@ -42,9 +42,6 @@ __container::parse_alias() {
     local name="$1"
     local service_alias
 
-    # TODO: test for @something->@something-else?
-    # TODO: handle multiple joined aliases?
-
     if [[ "$name" =~ ^@(.*)::(.*)$ ]]; then
         # name is an alias joined by a suffix, separated by '::' - i.e.:
         # '@example-parameter::example-suffix'
