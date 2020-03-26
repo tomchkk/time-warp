@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-__kill_action_bash_clash="$1"
-__kill_action_logger="$2" && source $__kill_action_logger
+__kill_action_bash_clash="${1:?"bash-clash is a required parameter"}"
+__kill_action_logger="${2:?"logger is a required parameter"}" \
+    && source $__kill_action_logger
 
 ##
 # Exits the current process.

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-__services_base="$1" && shift
-__services_config="$@"
+__services_base="${1:?"A services base directory is required"}"
+__services_config="${@:2}"
 
 ##
 # Defines available config.

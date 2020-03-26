@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-__message_bus_logger="$1" && source $__message_bus_logger
+__message_bus_logger="${1:?"Logger is a required parameter"}" \
+    && source $__message_bus_logger
 __message_bus_routing=${@:2}
 
-# TODO: do we still need these; can we do them better?
 if [[ -z "$__message_bus_routing" ]]; then
     log_slog::error "No message routing is defined" && exit 1
 fi
@@ -12,15 +12,13 @@ fi
 # Dispatches a message for an action via a given channel.
 ##
 message_bus::dispatch_message() {
-    local action="${1:-[empty]}"
-
+    local action="${1:?"An action type is required"}"
     local message="@$(echo $action | tr '[:upper:]' '[:lower:]')-message"
 
-    # TODO: consider making a message registry, in case it convers benefits
     local channel
     for route in ${__message_bus_routing[*]}; do
         # expected routing format:
-        # - path/2/action-message::/channel/to/write/2
+        # - @action-message-alias::/channel/to/write/2
         if [[ "$route" =~ ^"$message"::(.+)$ ]]; then
             channel=${BASH_REMATCH[1]}
             break

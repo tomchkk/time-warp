@@ -5,7 +5,7 @@
 # process to avoid clashing with other loaded loggers.
 ##
 __dependency_loader::debug() {
-    local message="$1"
+    local message="${1:?"A log message is required"}"
     local context="${@:2}"
 
     (
@@ -18,7 +18,7 @@ __dependency_loader::debug() {
 # Overrides the builtin source function to enable dependency loading.
 ##
 source () {
-    __service_source="$1"
+    __service_source="${1:?"A service, alias or filename argument is required"}"
     __service_args=${@:2}
 
     if [[ -f "$__service_source" ]]; then

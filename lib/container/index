@@ -28,8 +28,8 @@ __service_names=() && __service_definitions=()
 # path/location and, the remaining arguments, as its input arguments.
 ##
 container::add() {
-    local name="$1" && shift
-    local definition="$@"
+    local name="${1:?"A service name is required"}"
+    local definition="${@:2}"
 
     __service_names+=("$name")
     __service_definitions+=("$definition")
@@ -39,7 +39,7 @@ container::add() {
 # Gets the name and any existing suffix for a given service alias.
 ##
 __container::parse_alias() {
-    local name="$1"
+    local name="${1:?"A service name is required"}"
     local service_alias
 
     if [[ "$name" =~ ^@(.*)::(.*)$ ]]; then
@@ -58,7 +58,7 @@ __container::parse_alias() {
 # Get the definition of a given parameter or service
 ##
 container::get_definition() {
-    local name="$1"
+    local name="${1:?"A service name is required"}"
     local default="${2:-}"
     local service_alias=$(__container::parse_alias "$name")
 
@@ -84,7 +84,7 @@ container::get_definition() {
 # handles - e.g.: --handle - for each named service defined as a dependency.
 ##
 container::resolve() {
-    local name="$1"
+    local name="${1:?"A service name is required"}"
     local optionHandles=${2:-false}
     local depth=${3:-0}
 
@@ -138,7 +138,7 @@ container::resolve() {
 # an array-like structure - i.e. begins with '--'.
 ##
 container::get_source() {
-    local name="$1"
+    local name="${1:?"A service name is required"}"
     local src=($(container::get_definition "$name"))
 
     echo ${src[0]}

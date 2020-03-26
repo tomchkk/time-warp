@@ -26,7 +26,7 @@ bash_clash_positionals=()
 # a default value if the variable is not found.
 ##
 bash_clash::get() {
-    local name="$1"
+    local name="${1:?"A parameter name to get is required"}"
     local default="$2"
     local value
 
@@ -95,8 +95,7 @@ __bash_clash::parse_arguments() {
 }
 
 if [[ "$1" == "--declare-switches" ]]; then
-    shift && __bash_clash::parse_arguments $@ \
-        && declare ${bash_clash_switches[*]}
+    __bash_clash::parse_arguments ${@:2} && declare ${bash_clash_switches[*]}
 
     return 0
 fi

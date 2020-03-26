@@ -2,8 +2,8 @@
 
 # build an array of config
 __kernel_config=(
-    app_env="$1"
-    debug="$2"
+    app_env="${1:?"APP_ENV is required"}"
+    debug="${2:?"DEBUG must be set"}"
     var_dir="$__var_dir"
     log_dir="$__log_dir"
     org_tmp="$__org_tmp"

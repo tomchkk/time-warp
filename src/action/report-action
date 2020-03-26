@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-__report_action_bash_clash="$1"
-__report_action_view_dir="$2"
+__report_action_bash_clash="${1:?"bash-clash is a required parameter"}"
+__report_action_view_dir="${2:?"view-dir is a required parameter"}"
 
 ##
 # Echos a report view to the $enquirer.

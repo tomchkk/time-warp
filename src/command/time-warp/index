@@ -26,10 +26,10 @@ Commands:
 EOF
 }
 
-__time_warp_command_queue_command="$1"
-__time_warp_command_watch_command="$2"
-
-opt="$3" && shift 3
+__time_warp_command_queue_command="${1:?"A queue command is required"}"
+__time_warp_command_watch_command="${2:?"A watch command is required"}"
+opt="$3"
+args="${@:4}"
 
 case "$opt" in
     exclude)
@@ -38,13 +38,13 @@ case "$opt" in
         #  - on success, pushes item to time-warp/excluded.q
         #  - on fail, pushes item to time-warp/errored.q
 
-        echo "path(s) to exclude:" $@
+        echo "path(s) to exclude:" $args
     ;;
     queue)
-        source $__time_warp_command_queue_command $@
+        source $__time_warp_command_queue_command $args
     ;;
     watch)
-        source $__time_warp_command_watch_command $@
+        source $__time_warp_command_watch_command $args
     ;;
     -l|--list)
         echo "-l --list -v --version -h --help queue watch"

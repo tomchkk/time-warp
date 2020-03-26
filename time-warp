@@ -6,9 +6,13 @@ APP_VERSION="$(cat $__project_dir/version)"
 source "$__project_dir/.env"
 
 APP_NAME="${APP_NAME:-$(basename $0)}"
+APP_ENV="${APP_ENV:-dev}"
+DEBUG="${DEBUG:-true}"
+LOG_LEVEL="${LOG_LEVEL:-DEBUG}"
+
 __var_dir="$__project_dir/var"
 __log_dir="$__var_dir/log"
-__org_tmp="/tmp/${ORG_ID:-org}.$APP_NAME"
+__org_tmp="/tmp/${ORG_ID:-com.org}.$APP_NAME"
 
 __make_config=(
     user_config="$HOME/.config/$APP_NAME"
@@ -25,8 +29,14 @@ source "$__project_dir/src/kernel" $APP_ENV $DEBUG $@
 unset \
     __project_dir \
     APP_VERSION \
+    APP_NAME \
+    APP_ENV \
+    DEBUG \
+    LOG_LEVEL \
+    __var_dir \
+    __log_dir \
     __org_tmp \
-    __make_config \
+    __make_config
 
 # TODO: go through each point of exit and run `declare -p` to check for memory
 # leaks

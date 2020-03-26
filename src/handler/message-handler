@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 
-__message_handler_bash_clash="$1"
-__message_handler_logger="$2" && source $__message_handler_logger
+__message_handler_bash_clash="${1:?"bash-clash is a required parameter"}"
+__message_handler_logger="${2:?"Logger is a required parameter"}" \
+    && source $__message_handler_logger
 
 ##
 # Handles message pushed to a consumer pipe.
 ##
 message_handler::handle_message() {
-    local message="${1:-[EMPTY]}"
+    local message="${1:?"A message type is required"}"
     local args=${@:2}
 
     local action="@$(echo $message | tr '[:upper:]' '[:lower:]')-action"

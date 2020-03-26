@@ -3,13 +3,11 @@
 # opens a fifo pipe at the given path and then executes the given command using
 # arguments pushed to the pipe, or echos the arguments, if no command is given
 
-__consumer_logger="$1" && source $__consumer_logger
-__consumer_fifo="$2"
-__consumer_message_handler="$3" && source $__consumer_message_handler
+__consumer_logger="${1:?"A logger is required"}" && source $__consumer_logger
+__consumer_fifo="${2:?"A fifo pipe path is required"}"
+__consumer_message_handler="${3:?"A message handler is required"}" \
+    && source $__consumer_message_handler
 
-if [[ -z "$__consumer_fifo" ]]; then
-    log_slog::error "A fifo pipe path must be provided" && exit 1
-fi
 
 # make the pipe if it doesn't exist already
 [[ -e "$__consumer_fifo" ]] || mkfifo "$__consumer_fifo"

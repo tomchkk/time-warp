@@ -19,7 +19,7 @@ for key in ${!__producer_modifications[*]}; do
         # created or renamed events
         [[ "$__producer_event" =~ ^created|renamed$ ]]
     then
-        IFS=":"
+        IFS=":" # TODO: do this IFS in a subshell, or handle it better
         for path in $__producer_paths; do
             # $path will be a path stub if $WATCHEXEC_COMMON_PATH is set,
             # otherwise it will be a full path. So, either way, the two can be

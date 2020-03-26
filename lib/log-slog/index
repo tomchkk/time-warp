@@ -1,21 +1,15 @@
 #!/usr/bin/env bash
 
-__log_slog_max_level="$1"
-__log_slog_channel="$2"
-__log_slog_prefix=${3:-""}
-__log_slog_prefix=$([[ -n $3 ]] && echo " $3 ")
+__log_slog_max_level="${1:?"A max level is required"}"
+__log_slog_channel="${2:?"A channel is required"}"
 
-# TODO: separate these into two messages, or find a better way of handling this
-if [[ -z "$__log_slog_max_level" ]] || [[ -z "$__log_slog_channel" ]]; then
-    echo "Error: both 'max level' and 'channel' parameters are required."
-    exit 1
-fi
+__log_slog_prefix=$([[ -n $3 ]] && echo " $3 ")
 
 ##
 # Gets the numerical value for a log level
 ##
 __log_slog::get_level_value() {
-    local level="$1"
+    local level="${1:?"A log level value is required"}"
     local levels=(
         "EMERGENCY" "ALERT" "CRITICAL" "ERROR" "WARNING" "NOTICE" "INFO" "DEBUG"
     )
@@ -32,7 +26,7 @@ __log_slog::get_level_value() {
 # reached.
 ##
 __log_slog::level_reached() {
-    local level="$1"
+    local level="${1:?"A log level value is required"}"
 
     local required="$(__log_slog::get_level_value $level)"
     local max="$(__log_slog::get_level_value $__log_slog_max_level)"
@@ -44,7 +38,7 @@ __log_slog::level_reached() {
 # Attempt to log a message.
 #
 log_slog::log() {
-    local level="$1"
+    local level="${1:?"A log level value is required"}"
     local message="$2"
     local context=${@:3}
 
