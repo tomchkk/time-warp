@@ -21,7 +21,7 @@ __consumer::exit() {
 }
 
 # remove the pipe on exit
-trap __consumer::exit exit
+trap __consumer::exit EXIT
 
 # record the time the process came up
 __consumer_start_time=$(date +"%s")
@@ -29,7 +29,6 @@ __consumer_start_time=$(date +"%s")
 log_slog::info "Queue consumer started"
 
 while true; do
-    # TODO: can we do a while read?
     if read -r __consumer_message < $__consumer_fifo; then
         __consumer_timestamp=$(date +"%s")
 
