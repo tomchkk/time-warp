@@ -33,8 +33,6 @@ while true; do
     if read -r __consumer_message < $__consumer_fifo; then
         __consumer_timestamp=$(date +"%s")
 
-        # TODO: add event dispatcher?
-
         log_slog::info "Message received: $__consumer_message"
 
         __consumer_context=(
