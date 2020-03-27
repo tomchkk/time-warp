@@ -16,7 +16,6 @@ Options:
     -h, --help      Print usage information
     -c, --consume   Open a FIFO pipe to consume items pushed to the queue
     -k, --kill      Kill running queue services
-    -l, --list      List running queue services
     -r, --report    View a report from running services
     -p, --produce   Produce queue items
 
@@ -31,12 +30,13 @@ case "$opt" in
     -c|--consume)
         source $__queue_command_excluding_consumer
     ;;
+    -e|--exclude)
+        source $__queue_command_message_bus
+        message_bus::dispatch_message "EXCLUDE"
+    ;;
     -k|--kill)
         source $__queue_command_message_bus
         message_bus::dispatch_message "KILL"
-    ;;
-    -l|--list)
-        echo "list running queue services..."
     ;;
     -r|--report)
         source $__queue_command_message_bus

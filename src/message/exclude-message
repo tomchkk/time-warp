@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+##
+# Echos an exclude message for the given enquirer.
+##
+message::send_message() {
+    local message="EXCLUDE --enquirer $(tty)"
+
+    echo "$message"
+}

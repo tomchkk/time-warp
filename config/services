@@ -40,7 +40,8 @@ __services::define_parameters() {
     container::add "message-routing" \
         "--" \
             "@kill-message::$excluding_pipe" \
-            "@report-message::$excluding_pipe"
+            "@report-message::$excluding_pipe" \
+            "@exclude-message::$excluding_pipe"
 }
 
 ##
@@ -95,6 +96,9 @@ __services::define_services() {
 
     container::add "report-message" \
         "$__services_base/src/message/report-message"
+
+    container::add "exclude-message" \
+        "$__services_base/src/message/exclude-message"
 
     # handlers
     container::add "message-handler" \
