@@ -17,7 +17,7 @@ message_handler::handle_message() {
     local enquirer=$(bash_clash::get "enquirer")
 
     if [[ ! -w "$enquirer" ]]; then
-        log_slog::error "The enquirer '$enquirer' does not exist."
+        log::error "The enquirer '$enquirer' does not exist."
 
         return 1 # return to continue execution
     fi

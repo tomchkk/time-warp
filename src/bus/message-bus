@@ -5,7 +5,7 @@ __message_bus_logger="${1:?"Logger is a required parameter"}" \
 __message_bus_routing=${@:2}
 
 if [[ -z "$__message_bus_routing" ]]; then
-    log_slog::error "No message routing is defined" && exit 1
+    log::error "No message routing is defined" && exit 1
 fi
 
 ##
@@ -26,16 +26,16 @@ message_bus::dispatch_message() {
     done
 
     if [[ -z "$channel" ]]; then
-        log_slog::error "A message route is not defined for the '$action' message."
+        log::error "A message route is not defined for the '$action' message."
         exit 1
     fi
 
     if [[ ! -e "$channel" ]] || [[ ! -w "$channel" ]]; then
-        log_slog::error "The channel '$channel' does not exist or is not writable."
+        log::error "The channel '$channel' does not exist or is not writable."
         exit 1
     fi
 
     source $message && message::send_message > $channel
 
-    log_slog::info "'$action' message was dispatched."
+    log::info "'$action' message was dispatched."
 }

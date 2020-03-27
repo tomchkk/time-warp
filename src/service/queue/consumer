@@ -17,7 +17,7 @@ __consumer_message_handler="${3:?"A message handler is required"}" \
 ##
 __consumer::exit() {
     rm -f $__consumer_fifo
-    log_slog::info "Queue consumer exited"
+    log::info "Queue consumer exited"
 }
 
 # remove the pipe on exit
@@ -26,13 +26,13 @@ trap __consumer::exit EXIT
 # record the time the process came up
 __consumer_start_time=$(date +"%s")
 
-log_slog::info "Queue consumer started"
+log::info "Queue consumer started"
 
 while true; do
     if read -r __consumer_message < $__consumer_fifo; then
         __consumer_timestamp=$(date +"%s")
 
-        log_slog::info "Message received: $__consumer_message"
+        log::info "Message received: $__consumer_message"
 
         __consumer_context=(
             --pipe="$__consumer_fifo"

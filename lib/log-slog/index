@@ -37,7 +37,7 @@ __log_slog::level_reached() {
 ##
 # Attempt to log a message.
 #
-log_slog::log() {
+log::log() {
     local level="${1:?"A log level value is required"}"
     local message="$2"
     local context=${@:3}
@@ -59,30 +59,30 @@ log_slog::log() {
 }
 
 ##
-# Proxy methods for the main log_slog::log method
+# Proxy methods for the main log::log method
 ##
 
-log_slog::emergency() {
-    log_slog::log "EMERGENCY" "$1" ${@:2}
+log::emergency() {
+    log::log "EMERGENCY" "$1" ${@:2}
 }
-log_slog::alert() {
-    log_slog::log "ALERT" "$1" ${@:2}
+log::alert() {
+    log::log "ALERT" "$1" ${@:2}
 }
-log_slog::critical() {
-    log_slog::log "CRITICAL" "$1" ${@:2}
+log::critical() {
+    log::log "CRITICAL" "$1" ${@:2}
 }
-log_slog::error() {
-    log_slog::log "ERROR" "$1" ${@:2}
+log::error() {
+    log::log "ERROR" "$1" ${@:2}
 }
-log_slog::warning() {
-    log_slog::log "WARNING" "$1" ${@:2}
+log::warning() {
+    log::log "WARNING" "$1" ${@:2}
 }
-log_slog::notice() {
-    log_slog::log "NOTICE" "$1" ${@:2}
+log::notice() {
+    log::log "NOTICE" "$1" ${@:2}
 }
-log_slog::info() {
-    log_slog::log "INFO" "$1" ${@:2}
+log::info() {
+    log::log "INFO" "$1" ${@:2}
 }
-log_slog::debug() {
-    log_slog::log "DEBUG" "$1" ${@:2}
+log::debug() {
+    log::log "DEBUG" "$1" ${@:2}
 }
