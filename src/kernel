@@ -19,7 +19,7 @@ source "$__project_dir/config/services" "$__project_dir" ${__kernel_config[*]}
 services::define
 
 # replace the 'source' builtin with dependency-loader functionality
-source $__project_dir/lib/container/dependency-loader
+source $__project_dir/lib/container/dependency-loader @file-logger
 
 # handle the request
 source @time-warp-command $__kernel_args
