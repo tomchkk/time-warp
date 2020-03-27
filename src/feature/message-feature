@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+__message_feature_bus=${1:?"A message bus is required"}
+__message_feature_logger=${2:?"A logger is required"}
+
+source $__message_feature_bus
+source $__message_feature_logger
+
+##
+# Dispatches an exclude message, via the message bus, with a valid path.
+##
+feature::exclude() {
+    __message_feature_exclude_path=${1:?"A path to exclude is required"}
+
+    if [[ ! -e $__message_feature_exclude_path ]]; then
+        log::error "The exclude path '$__message_feature_exclude_path' does not exist"
+
+        return 1
+    fi
+
+    message_bus::dispatch_message "EXCLUDE" $__message_feature_exclude_path
+}
+
+##
+# Dispatches a kill message via the message bus
+##
+feature::kill() {
+    message_bus::dispatch_message "KILL"
+}
+
+##
+# Dispatches a report message via the message bus
+##
+feature::report() {
+    message_bus::dispatch_message "REPORT"
+}

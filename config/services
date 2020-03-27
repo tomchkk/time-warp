@@ -32,11 +32,11 @@ __services::define_parameters() {
         container::add "$(basename $dir)-dir" "$dir"
     done
 
-    container::add "log-file" "@log-dir::/$(date '+%Y-%m-%d').log"
+    container::add "log-file" $(container::resolve "@log-dir::/$(date '+%Y-%m-%d').log")
 
     container::add "excluding-pipe" $(container::resolve "@org-tmp::/excluding-pipe")
 
-    local excluding_pipe=$(container::resolve "excluding-pipe")
+    local excluding_pipe=$(container::resolve "@excluding-pipe")
     container::add "message-routing" \
         "--" \
             "@kill-message::$excluding_pipe" \
@@ -49,10 +49,12 @@ __services::define_parameters() {
 ##
 __services::define_services() {
     # lib
+    # - aliases for config items that resolve to valid file paths will not be
+    #   sourced and, therefore, not resolve at runtime; they must be resolved here
     container::add "file-logger" \
         "$__services_base/lib/log-slog/index" \
             "@log-level" \
-            "@log-file"
+            $(container::resolve "@log-file")
 
     container::add "stdout-logger" \
         "$__services_base/lib/log-slog/index" \
@@ -66,16 +68,26 @@ __services::define_services() {
     # commands
     container::add "queue-command" \
         "$__services_base/src/command/queue/index" \
-            "@excluding-consumer" \
-            "@message-bus"
-
-    container::add "watch-command" \
-        "$__services_base/src/command/watch/index"
+            "@consume-feature" \
+            "@message-feature"
 
     container::add "time-warp-command" \
         "$__services_base/src/command/time-warp/index" \
             "@queue-command" \
             "@watch-command"
+
+    container::add "watch-command" \
+        "$__services_base/src/command/watch/index"
+
+    # features
+    container::add "consume-feature" \
+        "$__services_base/src/feature/consume-feature" \
+            "@excluding-consumer"
+
+    container::add "message-feature" \
+        "$__services_base/src/feature/message-feature" \
+            "@message-bus" \
+            "@stdout-logger"
 
     # consumers
     container::add "excluding-consumer" \
@@ -83,6 +95,12 @@ __services::define_services() {
             "@stdout-logger" \
             "@excluding-pipe" \
             "@message-handler"
+
+    # producers
+    container::add "excluding-producer" \
+        "$__services_base/src/service/queue/producer" \
+            "@stdout-logger" \
+            "@message-bus"
 
     # buses
     container::add "message-bus" \

@@ -22,28 +22,29 @@ Options:
 EOF
 }
 
-__queue_command_excluding_consumer="${1:?"A consumer is required"}"
-__queue_command_message_bus="${2:?"A message bus is required"}"
+__queue_command_consume_feature="${1:?"A consume feature is required"}"
+__queue_command_message_feature="${2:?"The message feature is required"}"
+
 opt="$3"
+args="${@:4}"
 
 case "$opt" in
     -c|--consume)
-        source $__queue_command_excluding_consumer
+        source $__queue_command_consume_feature && feature::consume
     ;;
     -e|--exclude)
-        source $__queue_command_message_bus
-        message_bus::dispatch_message "EXCLUDE"
+        source $__queue_command_message_feature && feature::exclude $args
     ;;
     -k|--kill)
-        source $__queue_command_message_bus
-        message_bus::dispatch_message "KILL"
+        source $__queue_command_message_feature && feature::kill
     ;;
     -r|--report)
-        source $__queue_command_message_bus
-        message_bus::dispatch_message "REPORT"
+        source $__queue_command_message_feature && feature::report
     ;;
     -p|--produce)
-        echo "produce"
+        # source $__queue_command_produce_feature
+        # feature::produce $args
+        # source $__queue_command_excluding_producer $args
         # - runs `watchexec --resolved-options -- /path/2/producer`
         #   - watches for changes to given paths gets filters from profiles
         #   - ignores changes caused by itself
@@ -59,6 +60,7 @@ case "$opt" in
         #     --no-default-ignore \
         #     --no-shell \
         #     -- "$service/queue/producer"
+        #     -- "source $service/queue/producer && producer::handle_event"
     ;;
     -h|--help|*)
         __queue_command::usage && exit 0
