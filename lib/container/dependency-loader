@@ -13,7 +13,7 @@ __dependency_loader::log() {
 
     (
         builtin source $(container::resolve "$__dependency_loader_logger")
-        log::log "$level" "$message" ${context[*]}
+        log::log "$level" "$message" ${context[*]} &
     )
 }
 
