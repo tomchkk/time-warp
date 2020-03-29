@@ -33,10 +33,6 @@ args="${@:4}"
 
 case "$opt" in
     exclude)
-        # excludes item from backups
-        #  - on success, pushes item to time-warp/excluded.q
-        #  - on fail, pushes item to time-warp/errored.q
-
         echo "path(s) to exclude:" $args
     ;;
     queue)

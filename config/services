@@ -103,6 +103,7 @@ __services::define_services() {
     container::add "watch-feature" \
         "$__services_base/src/feature/watch-feature" \
             "@excluding-consumer" \
+            "@message-bus" \
             "@stdout-logger"
 
     # consumers

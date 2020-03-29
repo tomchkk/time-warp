@@ -47,10 +47,4 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-# resolve options and consume"
-# time-warp queue --consume
-
-# resolve options and produce
-# time-warp queue --produce
-
 source $__watch_command_watch_feature && feature::watch ${__watch_command_paths[*]}

@@ -28,6 +28,7 @@ for key in ${!__producer_modifications[*]}; do
         return 0
     fi
 
+    # TODO: add event types to file profiles
     if [[ "$__producer_event" =~ ^created|renamed$ ]]; then
         # presently, for the purposes of this script, we're only interested in
         # 'created' or 'renamed' events
