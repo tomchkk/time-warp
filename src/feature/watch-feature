@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+__watch_feature_consumer=${1:?"A consumer is required"}
+__watch_feature_logger=${2:?"A logger is required"}
+
+source $__watch_feature_logger
+
+##
+# TODO
+##
+__watch_feature::exit() {
+    # TODO: parameterise or use message bus (better)
+    time-warp queue --kill
+}
+
+##
+#
+##
+feature::watch() {
+    # echo $@ && exit
+    local paths=${@:?"At least one path to watch must be specified"}
+
+    for path in ${paths[*]}; do
+        if [[ ! -d "$path" ]]; then
+            log::error "The directory '$path' does not exist"
+
+            return 1
+        fi
+    done
+
+    trap __watch_feature::exit EXIT
+
+    # TODO:
+    # - inject file profiles to determine filters and ignored lists
+    # - how to handle lack of file profiles?
+    # - resolves options and then calls watchexec
+
+    # source $__queue_command_excluding_producer $args
+    # - runs `watchexec --resolved-options -- /path/2/producer`
+    #   - watches for changes to given paths gets filters from profiles
+    #   - ignores changes caused by itself
+    #   - passes normalised path to `time-warp match $path` to match the path to a
+    #     configured profile
+    #   - on successful match, pushes message (timestamp and path) to time-warp/excluding.q file
+
+    source $__watch_feature_consumer &
+
+    local options=(
+        --verbose
+        --watch /Users/tom/Developer/tomchkk/time-warp/var/sandbox
+        --filter '**/vendor'
+        --ignore '**/vendor/**/vendor/**'
+        --no-vcs-ignore
+        --no-default-ignore
+        # --no-shell
+        --postpone
+        # TODO: parameterise:
+        -- time-warp queue --produce
+    )
+
+    watchexec ${options[*]}
+}

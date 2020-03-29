@@ -13,9 +13,11 @@ fi
 ##
 message_bus::dispatch_message() {
     local action="${1:?"An action type is required"}"
-    local message="@$(echo $action | tr '[:upper:]' '[:lower:]')-message"
+    local args=${@:2}
 
+    local message="@$(echo $action | tr '[:upper:]' '[:lower:]')-message"
     local channel
+
     for route in ${__message_bus_routing[*]}; do
         # expected routing format:
         # - @action-message-alias::/channel/to/write/2
@@ -35,7 +37,7 @@ message_bus::dispatch_message() {
         exit 1
     fi
 
-    source $message && message::send_message > $channel
+    source $message && message::send_message $args > $channel
 
     log::info "'$action' message was dispatched."
 }

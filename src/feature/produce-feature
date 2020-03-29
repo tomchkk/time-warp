@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+__produce_feature_producer=${1:?"A producer is required"}
+__produce_feature_logger=${2:?"A logger is required"}
+
+source $__produce_feature_logger
+
+##
+# Starts producing items into an available consumer queue by starting a watch
+# on one or more given paths.
+##
+feature::produce() {
+    source $__produce_feature_producer
+}

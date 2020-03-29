@@ -4,7 +4,7 @@
 # Echos an exclude message for the given enquirer.
 ##
 message::send_message() {
-    local message="EXCLUDE --enquirer $(tty)"
+    local message="EXCLUDE --enquirer $(tty) --path $1"
 
     echo "$message"
 }

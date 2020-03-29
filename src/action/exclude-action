@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+__exclude_action_logger=${1:?"A logger is required"}
+__exclude_action_bash_clash=${2:?"bash-clash is required"}
+
+source $__exclude_action_logger
+
+##
+# Excludes a path from Time Machine backups
+##
+action::process_action() {
+    source $__exclude_action_bash_clash $@
+
+    local path=$(bash_clash::get "path")
+
+    log::info "Excluding path '$path' from Time Machine backups"
+
+    # TODO: pass in an excluder service and call it (don't be tempted to use
+    # an internal call to time-machine)
+
+    # TODO: try to remove all internal calls to time-machine command
+}

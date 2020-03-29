@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+##
+# Cats the command's usage documentation.
+##
 __watch_command::usage() {
     cat << EOF
 
@@ -18,23 +21,23 @@ Options:
 EOF
 }
 
-# set defaults
-paths=""
+__watch_command_watch_feature=${1:?"The watch feature is required"} && shift
 
 # handle empty args
 [[ -z "$@" ]] && set -- "--help"
 
+# set defaults
+__watch_command_paths=()
+
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         -p|--path)
-            path="$2" && shift
+            __watch_command_path="$2" && shift
 
-            [[ -z "$path" ]] && echo "A path must be set" && exit 1
-
-            if [[ -d "$path" ]]; then
-                paths+=("$path");
+            if [[ -z "$__watch_command_path" ]]; then
+                echo "A path must be set" && exit 1
             else
-                echo "Path '$path' does not exist" && exit 1
+                __watch_command_paths+=("$__watch_command_path");
             fi
         ;;
         -h|--help|*)
@@ -44,10 +47,10 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-echo "paths ${paths[*]}"
-
 # resolve options and consume"
 # time-warp queue --consume
 
 # resolve options and produce
 # time-warp queue --produce
+
+source $__watch_command_watch_feature && feature::watch ${__watch_command_paths[*]}

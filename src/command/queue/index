@@ -13,20 +13,25 @@ Consume or produce $APP_NAME queue items.
 Usage:  $APP_NAME queue [options] <args>
 
 Options:
-    -h, --help      Print usage information
     -c, --consume   Open a FIFO pipe to consume items pushed to the queue
+    -e, --exclude   Send a message to the consuming pipe to exclude a given
+                    path from Time Machine backups
+    -h, --help      Print usage information
     -k, --kill      Kill running queue services
     -r, --report    View a report from running services
-    -p, --produce   Produce queue items
+    -p, --produce   Produce items to a consuming pipe by watching a given
+                    directory (or directories) for changes to files that match
+                    configured file profile filters
 
 EOF
 }
 
-__queue_command_consume_feature="${1:?"A consume feature is required"}"
+__queue_command_consume_feature="${1:?"The consume feature is required"}"
 __queue_command_message_feature="${2:?"The message feature is required"}"
+__queue_command_produce_feature="${3:?"The produce feature is required"}"
 
-opt="$3"
-args="${@:4}"
+opt="$4"
+args="${@:5}"
 
 case "$opt" in
     -c|--consume)
@@ -42,25 +47,7 @@ case "$opt" in
         source $__queue_command_message_feature && feature::report
     ;;
     -p|--produce)
-        # source $__queue_command_produce_feature
-        # feature::produce $args
-        # source $__queue_command_excluding_producer $args
-        # - runs `watchexec --resolved-options -- /path/2/producer`
-        #   - watches for changes to given paths gets filters from profiles
-        #   - ignores changes caused by itself
-        #   - passes normalised path to `time-warp match $path` to match the path to a
-        #     configured profile
-        #   - on successful match, pushes message (timestamp and path) to time-warp/excluding.q file
-
-        # watchexec \
-        #     --watch /Users/tom/ \
-        #     --filter '**/vendor' \
-        #     --ignore '**/vendor/**/vendor/**' \
-        #     --no-vcs-ignore \
-        #     --no-default-ignore \
-        #     --no-shell \
-        #     -- "$service/queue/producer"
-        #     -- "source $service/queue/producer && producer::handle_event"
+        source $__queue_command_produce_feature && feature::produce
     ;;
     -h|--help|*)
         __queue_command::usage && exit 0

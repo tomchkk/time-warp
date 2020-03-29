@@ -32,10 +32,14 @@ __services::define_parameters() {
         container::add "$(basename $dir)-dir" "$dir"
     done
 
-    container::add "log-file" $(container::resolve "@log-dir::/$(date '+%Y-%m-%d').log")
+    # logging channels
+    container::add "stdout-channel" $(tty)
+    container::add "file-channel" $(container::resolve "@log-dir::/$(date '+%Y-%m-%d').log")
 
+    # pipes
     container::add "excluding-pipe" $(container::resolve "@org-tmp::/excluding-pipe")
 
+    # message routing
     local excluding_pipe=$(container::resolve "@excluding-pipe")
     container::add "message-routing" \
         "--" \
@@ -54,12 +58,12 @@ __services::define_services() {
     container::add "file-logger" \
         "$__services_base/lib/log-slog/index" \
             "@log-level" \
-            $(container::resolve "@log-file")
+            $(container::resolve "@file-channel")
 
     container::add "stdout-logger" \
         "$__services_base/lib/log-slog/index" \
             "@log-level" \
-            "$(tty)" \
+            $(container::resolve "@stdout-channel") \
             "->"
 
     container::add "bash-clash" \
@@ -69,7 +73,8 @@ __services::define_services() {
     container::add "queue-command" \
         "$__services_base/src/command/queue/index" \
             "@consume-feature" \
-            "@message-feature"
+            "@message-feature" \
+            "@produce-feature"
 
     container::add "time-warp-command" \
         "$__services_base/src/command/time-warp/index" \
@@ -77,7 +82,8 @@ __services::define_services() {
             "@watch-command"
 
     container::add "watch-command" \
-        "$__services_base/src/command/watch/index"
+        "$__services_base/src/command/watch/index" \
+            "@watch-feature"
 
     # features
     container::add "consume-feature" \
@@ -87,6 +93,16 @@ __services::define_services() {
     container::add "message-feature" \
         "$__services_base/src/feature/message-feature" \
             "@message-bus" \
+            "@stdout-logger"
+
+    container::add "produce-feature" \
+        "$__services_base/src/feature/produce-feature" \
+            "@excluding-producer" \
+            "@stdout-logger"
+
+    container::add "watch-feature" \
+        "$__services_base/src/feature/watch-feature" \
+            "@excluding-consumer" \
             "@stdout-logger"
 
     # consumers
@@ -125,6 +141,11 @@ __services::define_services() {
             "@stdout-logger"
 
     # actions
+    container::add "exclude-action" \
+        "$__services_base/src/action/exclude-action" \
+            "@stdout-logger" \
+            "@bash-clash"
+
     container::add "kill-action" \
         "$__services_base/src/action/kill-action" \
             "@bash-clash" \
