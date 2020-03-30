@@ -30,6 +30,9 @@ feature::watch() {
 
     trap __watch_feature::on_exit EXIT
 
+    # TODO: create and pass in an excluder service and call it (avoid, if possible,
+    # the use of an internal call to time-machine)
+
     # TODO:
     # - inject file profiles to determine filters and ignored lists
     # - how to handle lack of file profiles?

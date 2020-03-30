@@ -14,8 +14,6 @@ Usage:  $APP_NAME queue [options] <args>
 
 Options:
     -c, --consume   Open a FIFO pipe to consume items pushed to the queue
-    -e, --exclude   Send a message to the consuming pipe to exclude a given
-                    path from Time Machine backups
     -h, --help      Print usage information
     -k, --kill      Kill running queue services
     -r, --report    View a report from running services
@@ -36,9 +34,6 @@ args="${@:5}"
 case "$opt" in
     -c|--consume)
         source $__queue_command_consume_feature && feature::consume
-    ;;
-    -e|--exclude)
-        source $__queue_command_message_feature && feature::exclude $args
     ;;
     -k|--kill)
         source $__queue_command_message_feature && feature::kill

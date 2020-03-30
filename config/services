@@ -44,8 +44,8 @@ __services::define_parameters() {
     container::add "message-routing" \
         "--" \
             "@kill-message::$excluding_pipe" \
-            "@report-message::$excluding_pipe" \
-            "@exclude-message::$excluding_pipe"
+            "@publish-message::$excluding_pipe" \
+            "@report-message::$excluding_pipe"
 }
 
 ##
@@ -129,11 +129,12 @@ __services::define_services() {
     container::add "kill-message" \
         "$__services_base/src/message/kill-message"
 
+    container::add "publish-message" \
+        "$__services_base/src/message/publish-message"
+
     container::add "report-message" \
         "$__services_base/src/message/report-message"
 
-    container::add "exclude-message" \
-        "$__services_base/src/message/exclude-message"
 
     # handlers
     container::add "message-handler" \
@@ -142,15 +143,15 @@ __services::define_services() {
             "@stdout-logger"
 
     # actions
-    container::add "exclude-action" \
-        "$__services_base/src/action/exclude-action" \
-            "@stdout-logger" \
-            "@bash-clash"
-
     container::add "kill-action" \
         "$__services_base/src/action/kill-action" \
             "@bash-clash" \
             "@stdout-logger"
+
+    container::add "publish-action" \
+        "$__services_base/src/action/publish-action" \
+            "@stdout-logger" \
+            "@bash-clash"
 
     container::add "report-action" \
         "$__services_base/src/action/report-action" \

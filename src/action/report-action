@@ -15,5 +15,6 @@ action::process_action() {
 
     uptime=$(date -r $(( $uptime - 3600 )) +"%-Hh %-Mm %-Ss")
 
+    # TODO:  look into using `less` here, ala git log
     echo -e "$(source $__report_action_view_dir/report-view)" > $enquirer
 }

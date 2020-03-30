@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+##
+# Echos a publish message for the given enquirer.
+##
+message::send_message() {
+    local message="PUBLISH --enquirer $(tty) $@"
+
+    echo "$message"
+}

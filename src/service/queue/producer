@@ -52,7 +52,7 @@ for key in ${!__producer_modifications[*]}; do
                 if [[ -d "$path" ]] && [[ -f "$path/"../composer.json ]]; then
                     log::debug "Path profile match: '$path'."
 
-                    message_bus::dispatch_message "EXCLUDE" $path
+                    message_bus::dispatch_message "PUBLISH" $path
 
                     # TODO: if the queue is closed, which it could be from elsewhere,
                     # should we abort this running script?

@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+__publish_action_logger=${1:?"A logger is required"}
+__publish_action_bash_clash=${2:?"bash-clash is required"}
+__publish_action_subscribers
+
+source $__publish_action_logger
+
+##
+# Publishes messages received for particular topics
+##
+action::process_action() {
+    source $__publish_action_bash_clash $@
+    local topic=$(bash_clash::get "topic")
+
+    log::info "Publishing message for topic '$topic'"
+
+    # TODO: get all topic subscribers and call their on_publish methods
+}
