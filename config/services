@@ -46,6 +46,12 @@ __services::define_parameters() {
             "@kill-message::$excluding_pipe" \
             "@publish-message::$excluding_pipe" \
             "@report-message::$excluding_pipe"
+
+    # publishable topics
+    container::add "time-machine-exclude-topic" "time-machine-exclude"
+
+    # watchexec producer events
+    container::add "excluding-producer-events" "--" "created" "renamed"
 }
 
 ##
@@ -117,7 +123,9 @@ __services::define_services() {
     container::add "excluding-producer" \
         "$__services_base/src/service/queue/producer" \
             "@stdout-logger" \
-            "@message-bus"
+            "@message-bus" \
+            "@time-machine-exclude-topic" \
+            "@excluding-producer-events"
 
     # buses
     container::add "message-bus" \

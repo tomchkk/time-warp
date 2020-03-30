@@ -1,67 +1,81 @@
 #!/usr/bin/env bash
 
-# TODO: look into making this more generic:
-# - include a list of watchexec events to subscribe to
-# - use message_bus::dispatch_message "PUBLISH" --topic $__producer_topic --path $__producer_path
-
 __producer_logger=${1:?"A logger is required"}
 __producer_bus=${2:?"A message bus is required"}
+__producer_topic=${3:?"A publishable topic is required"}
+__producer_watching=${@:4}
 
 source $__producer_logger
-source $__producer_bus
 
-__producer_events=('created' 'removed' 'renamed' 'written' 'meta')
-__producer_modifications=(
-    'WATCHEXEC_CREATED_PATH'
-    'WATCHEXEC_REMOVED_PATH'
-    'WATCHEXEC_RENAMED_PATH'
-    'WATCHEXEC_WRITTEN_PATH'
-    'WATCHEXEC_META_CHANGED_PATH'
-)
+if [[ -z "$__producer_watching" ]]; then
+    log::error "No events to watch are defined" && exit 1
+fi
 
-for key in ${!__producer_modifications[*]}; do
-    __producer_event="${__producer_events[$key]}"
-    __producer_modification="${__producer_modifications[$key]}"
-    __producer_paths=($(echo "${!__producer_modification}" | sed -E 's/:/ /g'))
+##
+# Determines if the given event is being watched.
+#
+__producer::event_is_watched() {
+    local $event="$1"
 
-    log::debug "watchexec event '$__producer_event' was fired"
-
-    if [[ -z "$__producer_paths" ]]; then
-        log::debug "No watched modifications detected."
-
-        return 0
-    fi
-
-    # TODO: add event types to file profiles
-    if [[ "$__producer_event" =~ ^created|renamed$ ]]; then
-        # presently, for the purposes of this script, we're only interested in
-        # 'created' or 'renamed' events
-
-        for path in ${__producer_paths[*]}; do
-            # $path will be a path stub if $WATCHEXEC_COMMON_PATH is set,
-            # otherwise it will be a full path. So, either way, the two can be
-            # concatenated to get a full path to a changed file
-            path="${WATCHEXEC_COMMON_PATH}${path}"
-
-            # we're only concerned with paths that exist
-            if [[ -e "$path" ]]; then
-                log::debug "Detected modification to '$path'."
-
-                # TODO: here we will try to match $path using something like
-                # if $(time-warp match $path); then push to the queue - i.e.:
-                if [[ -d "$path" ]] && [[ -f "$path/"../composer.json ]]; then
-                    log::debug "Path profile match: '$path'."
-
-                    message_bus::dispatch_message "PUBLISH" $path
-
-                    # TODO: if the queue is closed, which it could be from elsewhere,
-                    # should we abort this running script?
-                fi
-            else
-                log::debug "Ignoring watchexec changed path '$path': doesn't exist."
-            fi
-        done
+    if $(printf '%s\n' ${__producer_watching[*]} | grep -q -E ^$event$); then
+        echo true
     else
-        log::debug "Ignoring '$__producer_event' event: not relevant."
+        echo false
     fi
-done
+}
+
+##
+# Produces publishable topic messages into the given message bus.
+#
+producer::produce() {
+    source $__producer_bus
+
+    local events=('created' 'removed' 'renamed' 'written' 'meta')
+    local modifications=(
+        'WATCHEXEC_CREATED_PATH'
+        'WATCHEXEC_REMOVED_PATH'
+        'WATCHEXEC_RENAMED_PATH'
+        'WATCHEXEC_WRITTEN_PATH'
+        'WATCHEXEC_META_CHANGED_PATH'
+    )
+
+    for key in ${!modifications[*]}; do
+        local event="${events[$key]}"
+        local modification="${modifications[$key]}"
+        local paths=($(echo "${!modification}" | sed -E 's/:/ /g'))
+
+        if [[ -z "$paths" ]]; then
+            log::debug "No watchexec modifications detected."
+
+            return 0
+        fi
+
+        if $(__producer::event_is_watched $event); then
+            log::debug "Watched event '$event' was fired"
+
+            for path in ${paths[*]}; do
+                # $path will be a path stub if $WATCHEXEC_COMMON_PATH is set,
+                # otherwise it will be a full path. So, either way, the two can be
+                # concatenated to get a full path to a changed file
+                path="${WATCHEXEC_COMMON_PATH}${path}"
+
+                # we're only concerned with paths that exist
+                if [[ -e "$path" ]]; then
+                    log::debug "Detected modification to '$path'."
+
+                    # TODO: here we will try to match $path using something like
+                    # if $(time-warp match $path); then push to the queue - i.e.:
+                    if [[ -d "$path" ]] && [[ -f "$path/"../composer.json ]]; then
+                        log::debug "Path profile match: '$path'."
+
+                        message_bus::dispatch_message "PUBLISH" --topic $__producer_topic --path $path
+                    fi
+                else
+                    log::debug "Ignoring watchexec changed path '$path': doesn't exist."
+                fi
+            done
+        else
+            log::debug "Ignoring '$event' event: not watched."
+        fi
+    done
+}

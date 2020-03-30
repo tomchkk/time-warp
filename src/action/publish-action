@@ -11,9 +11,11 @@ source $__publish_action_logger
 ##
 action::process_action() {
     source $__publish_action_bash_clash $@
-    local topic=$(bash_clash::get "topic")
 
-    log::info "Publishing message for topic '$topic'"
+    local topic=$(bash_clash::get "topic")
+    local path=$(bash_clash::get "path")
+
+    log::info "Publishing message for topic '$topic' and path '$path'"
 
     # TODO: get all topic subscribers and call their on_publish methods
 }

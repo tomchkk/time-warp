@@ -10,5 +10,5 @@ source $__produce_feature_logger
 # on one or more given paths.
 ##
 feature::produce() {
-    source $__produce_feature_producer
+    source $__produce_feature_producer && producer::produce
 }
