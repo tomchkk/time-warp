@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# TODO: look into making this more generic:
+# - include a list of watchexec events to subscribe to
+# - use message_bus::dispatch_message "PUBLISH" --topic $__producer_topic --path $__producer_path
+
 __producer_logger=${1:?"A logger is required"}
 __producer_bus=${2:?"A message bus is required"}
 
