@@ -4,6 +4,16 @@ __report_action_bash_clash="${1:?"bash-clash is a required parameter"}"
 __report_action_view_dir="${2:?"view-dir is a required parameter"}"
 
 ##
+# Calculates the consumer throughput in messages per second.
+#
+__report_action::calculate_throughput() {
+    local count=${1:?"A count of messages is required"}
+    local seconds=${2:?"The uptime - in seconds - is required"}
+
+    printf "%.2fmps" $(echo "scale=2; $count / $seconds" | bc)
+}
+
+##
 # Echos a report view to the $enquirer.
 ##
 action::process_action() {
@@ -17,8 +27,12 @@ action::process_action() {
         return 1 # return to continue execution
     fi
 
-    local uptime=$(date -r $(( $(bash_clash::get "uptime") - 3600 )) +"%-Hh %-Mm %-Ss")
     local queue_pid=$(bash_clash::get "queue_pid")
+    local uptime=$(bash_clash::get "uptime")
+    local message_count=$(bash_clash::get "message_count")
+    local throughput=$(__report_action::calculate_throughput $message_count $uptime)
+
+    uptime=$(date -r $(( $uptime - 3600 )) +"%-Hh %-Mm %-Ss")
 
     # TODO:  look into using `less` here, ala git log
     echo -e "$(source $__report_action_view_dir/report-view)" > $enquirer

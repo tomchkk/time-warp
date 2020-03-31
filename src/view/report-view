@@ -4,7 +4,7 @@ cat << VIEW
 
 Queue Report
 
-Queue PID\tQueue Uptime
-$queue_pid\t\t$uptime
+Queue PID\tQueue Uptime\tMessage Count\tThroughput
+$queue_pid\t\t$uptime\t$message_count\t\t$throughput
 
 VIEW

@@ -8,13 +8,13 @@ __consumer_logger="${2:?"A logger is required"}"
 __consumer_message_handler="${3:?"A message handler is required"}"
 
 source $__consumer_logger
-source $__consumer_message_handler
 
 ##
 # Performs actions on exit of the consumer
 ##
 __consumer::exit() {
     rm -f $__consumer_fifo
+
     log::info "Queue consumer exited"
 }
 
@@ -22,34 +22,34 @@ __consumer::exit() {
 # Start the consumer
 ##
 consumer::consume() {
-    # TODO:
-    # - record the number of messages processed (and each type?) "throughput"
-
     # make the pipe if it doesn't exist already
     [[ -e "$__consumer_fifo" ]] || mkfifo "$__consumer_fifo"
 
     # remove the pipe on exit
     trap __consumer::exit EXIT
 
+    source $__consumer_message_handler
+
     # record the time the process came up
     local start_time=$(date +"%s")
+    local message_count=0
+    local message=""
 
     log::info "Queue consumer started"
-
-    local message=""
 
     while true; do
         if read -r message < $__consumer_fifo; then
             local timestamp=$(date +"%s")
-
-            log::info "Message received: $message"
-
+            local uptime=$(($timestamp - $start_time))
             local context=(
                 --pipe="$__consumer_fifo"
-                --queue-pid="$$"
-                --timestamp="$timestamp"
-                --uptime="$(($timestamp - $start_time))"
+                --queue-pid=$$
+                --timestamp=$timestamp
+                --uptime=$uptime
+                --message-count=$((++message_count))
             )
+
+            log::debug "Message received: $message" ${context[*]}
 
             message_handler::handle_message $message "${context[*]}"
         fi
