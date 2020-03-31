@@ -6,5 +6,5 @@ __consume_feature_consumer=${1:?"A consumer is required"}
 # Opens the configured pipe and begins consuming entries to it.
 ##
 feature::consume() {
-    source $__consume_feature_consumer
+    source $__consume_feature_consumer && consumer::consume
 }

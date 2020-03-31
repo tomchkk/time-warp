@@ -64,10 +64,11 @@ __services::define_parameters() {
 # Defines available services.
 ##
 __services::define_services() {
-    # lib
     # Aliases for config items that resolve to valid file paths will not be
     # sourced and, therefore, not resolve at runtime; they must be resolved
     # here.
+
+    # lib
     container::add "file-logger" \
         "$__services_base/lib/log-slog/index" \
             "@log-level" \
@@ -123,8 +124,8 @@ __services::define_services() {
     # consumers
     container::add "excluding-consumer" \
         "$__services_base/src/service/queue/consumer" \
-            "@stdout-logger" \
             "@excluding-pipe" \
+            "@stdout-logger" \
             "@message-handler"
 
     # producers

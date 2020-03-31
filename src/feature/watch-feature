@@ -48,7 +48,7 @@ feature::watch() {
     #     to a configured profile
     #   - on successful match, pushes message (timestamp and path) to time-warp/excluding.q file
 
-    source $__watch_feature_consumer &
+    source $__watch_feature_consumer && consumer::consume &
 
     log::debug "Launching watchexec with pid: $$"
 

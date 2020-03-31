@@ -3,14 +3,12 @@
 # opens a fifo pipe at the given path and then executes the given command using
 # arguments pushed to the pipe, or echos the arguments, if no command is given
 
-__consumer_logger="${1:?"A logger is required"}" && source $__consumer_logger
-__consumer_fifo="${2:?"A fifo pipe path is required"}"
-__consumer_message_handler="${3:?"A message handler is required"}" \
-    && source $__consumer_message_handler
+__consumer_fifo="${1:?"A fifo pipe path is required"}"
+__consumer_logger="${2:?"A logger is required"}"
+__consumer_message_handler="${3:?"A message handler is required"}"
 
-
-# make the pipe if it doesn't exist already
-[[ -e "$__consumer_fifo" ]] || mkfifo "$__consumer_fifo"
+source $__consumer_logger
+source $__consumer_message_handler
 
 ##
 # Performs actions on exit of the consumer
@@ -20,31 +18,40 @@ __consumer::exit() {
     log::info "Queue consumer exited"
 }
 
-# TODO:
-# - wrap this in a consumer::consume function
-# - record the number of messages processed (and each type?) "throughput"
+##
+# Start the consumer
+##
+consumer::consume() {
+    # TODO:
+    # - record the number of messages processed (and each type?) "throughput"
 
-# remove the pipe on exit
-trap __consumer::exit EXIT
+    # make the pipe if it doesn't exist already
+    [[ -e "$__consumer_fifo" ]] || mkfifo "$__consumer_fifo"
 
-# record the time the process came up
-__consumer_start_time=$(date +"%s")
+    # remove the pipe on exit
+    trap __consumer::exit EXIT
 
-log::info "Queue consumer started"
+    # record the time the process came up
+    local start_time=$(date +"%s")
 
-while true; do
-    if read -r __consumer_message < $__consumer_fifo; then
-        __consumer_timestamp=$(date +"%s")
+    log::info "Queue consumer started"
 
-        log::info "Message received: $__consumer_message"
+    local message=""
 
-        __consumer_context=(
-            --pipe="$__consumer_fifo"
-            --queue-pid="$$"
-            --timestamp="$__consumer_timestamp"
-            --uptime="$(($__consumer_timestamp - $__consumer_start_time))"
-        )
+    while true; do
+        if read -r message < $__consumer_fifo; then
+            local timestamp=$(date +"%s")
 
-        message_handler::handle_message $__consumer_message "${__consumer_context[*]}"
-    fi
-done
+            log::info "Message received: $message"
+
+            local context=(
+                --pipe="$__consumer_fifo"
+                --queue-pid="$$"
+                --timestamp="$timestamp"
+                --uptime="$(($timestamp - $start_time))"
+            )
+
+            message_handler::handle_message $message "${context[*]}"
+        fi
+    done
+}
