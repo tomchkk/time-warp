@@ -154,7 +154,6 @@ __services::define_services() {
     # handlers
     container::add "message-handler" \
         "$__services_base/src/handler/message-handler" \
-            "@bash-clash" \
             "@stdout-logger"
 
     # actions

@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 
 ##
-# Echos a report message for the given enquirer.
+# Returns a 'report' message for the enquiring shell.
 ##
 message::send_message() {
-    local message="REPORT --enquirer $(tty)"
-
-    echo "$message"
+    echo "REPORT --enquirer $(tty)"
 }

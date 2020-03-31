@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-__message_handler_bash_clash="${1:?"bash-clash is a required parameter"}"
-__message_handler_logger="${2:?"Logger is a required parameter"}" \
-    && source $__message_handler_logger
+__message_handler_logger="${1:?"Logger is a required parameter"}"
+
+source $__message_handler_logger
 
 ##
 # Handles message pushed to a consumer pipe.
@@ -12,15 +12,6 @@ message_handler::handle_message() {
     local args=${@:2}
 
     local action="@$(echo $message | tr '[:upper:]' '[:lower:]')-action"
-
-    source "$__message_handler_bash_clash" $args
-    local enquirer=$(bash_clash::get "enquirer")
-
-    if [[ ! -w "$enquirer" ]]; then
-        log::error "The enquirer '$enquirer' does not exist."
-
-        return 1 # return to continue execution
-    fi
 
     source $action && action::process_action $args
 }

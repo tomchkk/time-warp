@@ -45,7 +45,6 @@ while true; do
             --uptime="$(($__consumer_timestamp - $__consumer_start_time))"
         )
 
-        message_handler::handle_message $__consumer_message \
-            "${__consumer_context[*]}"
+        message_handler::handle_message $__consumer_message "${__consumer_context[*]}"
     fi
 done

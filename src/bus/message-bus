@@ -39,5 +39,5 @@ message_bus::dispatch_message() {
 
     source $message && message::send_message $args > $channel
 
-    log::info "'$action' message was dispatched."
+    log::info "'$action' message was dispatched." $args
 }

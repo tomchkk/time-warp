@@ -9,11 +9,16 @@ __report_action_view_dir="${2:?"view-dir is a required parameter"}"
 action::process_action() {
     source $__report_action_bash_clash $@
 
-    local uptime=$(bash_clash::get "uptime")
-    local queue_pid=$(bash_clash::get "queue_pid")
     local enquirer=$(bash_clash::get "enquirer")
 
-    uptime=$(date -r $(( $uptime - 3600 )) +"%-Hh %-Mm %-Ss")
+    if [[ ! -w "$enquirer" ]]; then
+        log::error "The enquirer '$enquirer' does not exist."
+
+        return 1 # return to continue execution
+    fi
+
+    local uptime=$(date -r $(( $(bash_clash::get "uptime") - 3600 )) +"%-Hh %-Mm %-Ss")
+    local queue_pid=$(bash_clash::get "queue_pid")
 
     # TODO:  look into using `less` here, ala git log
     echo -e "$(source $__report_action_view_dir/report-view)" > $enquirer

@@ -12,7 +12,6 @@ action::process_action() {
 
     local pipe=$(bash_clash::get "pipe")
     local queue_pid=$(bash_clash::get "queue_pid")
-    local enquirer=$(bash_clash::get "enquirer")
 
     ## put some distance between the kill info message and the command prompt
     echo && log::info "Killing the queue at '$pipe' (pid: $queue_pid)"
