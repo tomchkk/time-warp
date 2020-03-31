@@ -15,13 +15,11 @@ fi
 # Determines if the given event is being watched.
 #
 __producer::event_is_watched() {
-    local $event="$1"
-
-    if $(printf '%s\n' ${__producer_watching[*]} | grep -q -E ^$event$); then
-        echo true
-    else
-        echo false
+    if $(printf '%s\n' ${__producer_watching[*]} | grep -q -E ^$1$); then
+        return 0
     fi
+
+    return 1
 }
 
 ##
@@ -55,8 +53,8 @@ producer::produce() {
 
             for path in ${paths[*]}; do
                 # $path will be a path stub if $WATCHEXEC_COMMON_PATH is set,
-                # otherwise it will be a full path. So, either way, the two can be
-                # concatenated to get a full path to a changed file
+                # otherwise it will be a full path. So, either way, the two can
+                # be concatenated to get a full path to a changed file
                 path="${WATCHEXEC_COMMON_PATH}${path}"
 
                 # we're only concerned with paths that exist
