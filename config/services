@@ -52,6 +52,12 @@ __services::define_parameters() {
 
     # watchexec producer events
     container::add "excluding-producer-events" "--" "created" "renamed"
+
+    # publish action subscribers
+    local tm_exclude_topic=$(container::resolve "@time-machine-exclude-topic")
+    container::add "publish-action-subscribers" \
+        "--" \
+            "@excluding-subscriber::$tm_exclude_topic"
 }
 
 ##
@@ -59,8 +65,9 @@ __services::define_parameters() {
 ##
 __services::define_services() {
     # lib
-    # - aliases for config items that resolve to valid file paths will not be
-    #   sourced and, therefore, not resolve at runtime; they must be resolved here
+    # Aliases for config items that resolve to valid file paths will not be
+    # sourced and, therefore, not resolve at runtime; they must be resolved
+    # here.
     container::add "file-logger" \
         "$__services_base/lib/log-slog/index" \
             "@log-level" \
@@ -159,12 +166,19 @@ __services::define_services() {
     container::add "publish-action" \
         "$__services_base/src/action/publish-action" \
             "@stdout-logger" \
-            "@bash-clash"
+            "@bash-clash" \
+            "@publish-action-subscribers"
 
     container::add "report-action" \
         "$__services_base/src/action/report-action" \
             "@bash-clash" \
             "@view-dir"
+
+    # subscribers
+    container::add "excluding-subscriber" \
+        "$__services_base/src/subscriber/excluding-subscriber" \
+            "@bash-clash" \
+            "@stdout-logger"
 }
 
 ##

@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+__excluding_subscriber_bash_clash=${1:?"bash-clash is required"}
+__excluding_subscriber_logger=${2:?"A logger is required"}
+
+# TODO: create and pass in an excluder service and call it (avoid, if possible,
+# the use of an internal call to time-machine)
+
+##
+# Handles the published topic event.
+##
+subscriber::on_publish() {
+    source $__excluding_subscriber_bash_clash $@
+
+    local path=$(bash_clash::get "path")
+
+    log::debug "Path to exclude from Time Machine backups: $path"
+}

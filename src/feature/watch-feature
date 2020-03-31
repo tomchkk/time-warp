@@ -20,18 +20,19 @@ __watch_feature::on_exit() {
 feature::watch() {
     local paths=${@:?"At least one path to watch must be specified"}
 
+    local watches=()
+
     for path in ${paths[*]}; do
         if [[ ! -d "$path" ]]; then
             log::error "The directory '$path' does not exist"
 
             return 1
         fi
+
+        watches+=("--watch $path ")
     done
 
     trap __watch_feature::on_exit EXIT
-
-    # TODO: create and pass in an excluder service and call it (avoid, if possible,
-    # the use of an internal call to time-machine)
 
     # TODO:
     # - inject file profiles to determine filters and ignored lists
@@ -42,15 +43,17 @@ feature::watch() {
     # - runs `watchexec --resolved-options -- /path/2/producer`
     #   - watches for changes to given paths gets filters from profiles
     #   - ignores changes caused by itself
-    #   - passes normalised path to `time-warp match $path` to match the path to a
-    #     configured profile
+    #   - passes normalised path to `time-warp match $path` to match the path
+    #     to a configured profile
     #   - on successful match, pushes message (timestamp and path) to time-warp/excluding.q file
 
     source $__watch_feature_consumer &
 
     local options=(
+        # TODO: set verbosity based on debug mode:
         --verbose
-        --watch /Users/tom/Developer/tomchkk/time-warp/var/sandbox
+        # --watch /Users/tom/Developer/tomchkk/time-warp/var/sandbox
+        ${watches[*]}
         --filter '**/vendor'
         --ignore '**/vendor/**/vendor/**'
         --no-vcs-ignore

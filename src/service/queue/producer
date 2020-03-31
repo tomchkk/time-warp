@@ -64,9 +64,10 @@ producer::produce() {
                     log::debug "Detected modification to '$path'."
 
                     # TODO: here we will try to match $path using something like
-                    # if $(time-warp match $path); then push to the queue - i.e.:
+                    # source $__producer_profile_matcher
+                    # if $(matcher::match $path); then
                     if [[ -d "$path" ]] && [[ -f "$path/"../composer.json ]]; then
-                        log::debug "Path profile match: '$path'."
+                        log::debug "Path profile matched: '$path'."
 
                         message_bus::dispatch_message "PUBLISH" --topic $__producer_topic --path $path
                     fi

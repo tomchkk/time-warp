@@ -2,7 +2,7 @@
 
 __publish_action_logger=${1:?"A logger is required"}
 __publish_action_bash_clash=${2:?"bash-clash is required"}
-__publish_action_subscribers
+__publish_action_subscribers=${@:3}
 
 source $__publish_action_logger
 
@@ -17,5 +17,14 @@ action::process_action() {
 
     log::info "Publishing message for topic '$topic' and path '$path'"
 
-    # TODO: get all topic subscribers and call their on_publish methods
+    for subscriber_topic in ${__publish_action_subscribers[*]}; do
+        # expected subscriber format:
+        # - @subscriber-alias::topic-name
+        if [[ "$subscriber_topic" =~ ^(.+)::"$topic"$ ]]; then
+            local subscriber=${BASH_REMATCH[1]}
+            log::debug "Found subscriber: '$subscriber'"
+
+            source $subscriber && subscriber::on_publish $@
+        fi
+    done
 }
