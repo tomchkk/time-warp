@@ -49,10 +49,11 @@ feature::watch() {
 
     source $__watch_feature_consumer &
 
+    log::debug "Launching watchexec with pid: $$"
+
     local options=(
         # TODO: set verbosity based on debug mode:
         --verbose
-        # --watch /Users/tom/Developer/tomchkk/time-warp/var/sandbox
         ${watches[*]}
         --filter '**/vendor'
         --ignore '**/vendor/**/vendor/**'
