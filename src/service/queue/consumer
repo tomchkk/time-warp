@@ -22,7 +22,7 @@ __consumer::exit() {
 
 # TODO:
 # - wrap this in a consumer::consume function
-# - record the number of messages processed (and each type?)
+# - record the number of messages processed (and each type?) "throughput"
 
 # remove the pipe on exit
 trap __consumer::exit EXIT

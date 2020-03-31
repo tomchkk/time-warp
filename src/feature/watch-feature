@@ -3,6 +3,7 @@
 __watch_feature_consumer=${1:?"A consumer is required"}
 __watch_feature_bus=${2:?"A message bus is required"}
 __watch_feature_logger=${3:?"A logger is required"}
+__watch_feature_debug=${4:-false}
 
 source $__watch_feature_bus
 source $__watch_feature_logger
@@ -52,8 +53,7 @@ feature::watch() {
     log::debug "Launching watchexec with pid: $$"
 
     local options=(
-        # TODO: set verbosity based on debug mode:
-        --verbose
+        $($__watch_feature_debug && echo "--verbose")
         ${watches[*]}
         --filter '**/vendor'
         --ignore '**/vendor/**/vendor/**'
