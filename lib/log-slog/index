@@ -41,6 +41,7 @@ log::log() {
     local level="${1:?"A log level value is required"}"
     local message="$2"
     local context=${@:3}
+    local contextMsg
 
     if [[ -n "$context" ]]; then
         contextMsg="{ "context:" $(echo $context | sed 's/;*$//g') }"
