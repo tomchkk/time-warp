@@ -9,18 +9,43 @@ source $__watch_feature_bus
 source $__watch_feature_logger
 
 ##
-# Feature exit strategy
+# Parses filters from a profile file
 ##
-__watch_feature::on_exit() {
-    message_bus::dispatch_message "KILL"
+__watch_feature::parse_filters() {
+    local profile="$1"
+
+    echo $(source "$profile" && echo ${filters[*]})
 }
 
 ##
-# Initiates a watch of a given path or paths for modications.
+# Parses watch filters from a given profile file or directory
 ##
-feature::watch() {
-    local paths=${@:?"At least one path to watch must be specified"}
+__watch_feature::parse_filter_options() {
+    local profiles="$1"
+    local filters=()
 
+    if [[ ! -e "$profiles" ]]; then
+        log::error "The profile file or directory '$profiles' does not exist"
+
+        return 1
+    fi
+
+    if [[ -f "$profiles" ]]; then
+        filters=($(__watch_feature::parse_filters "$profiles"))
+    elif [[ -d "$profiles" ]]; then
+        for profile in $(find "$profiles" -mindepth 1 -maxdepth 1 -type f); do
+            filters+=($(__watch_feature::parse_filters "$profile"))
+        done
+    fi
+
+    echo ${filters[*]}
+}
+
+##
+# Parses watch options from a given array of paths
+#
+__watch_feature::parse_watch_options() {
+    local paths=${@:?"At least one path is required"}
     local watches=()
 
     for path in ${paths[*]}; do
@@ -33,34 +58,43 @@ feature::watch() {
         watches+=("--watch $path ")
     done
 
+    echo ${watches[*]}
+}
+
+##
+# Feature exit strategy
+##
+__watch_feature::on_exit() {
+    message_bus::dispatch_message "KILL"
+}
+
+##
+# Initiates a watch of a given path or paths for modications.
+##
+feature::watch() {
+    local profiles="${1:?"A profile file or directory is required"}"
+    local root_paths="${@:2}"
+
+    local filters=$(__watch_feature::parse_filter_options "$profiles")
+    local watches=$(__watch_feature::parse_watch_options "$root_paths")
+
+    if [[ -z $filters ]] || [[ -z $watches ]]; then
+        exit 1
+    fi
+
     trap __watch_feature::on_exit EXIT
-
-    # TODO:
-    # - inject file profiles to determine filters and ignored lists
-    # - how to handle lack of file profiles?
-    # - resolves options and then calls watchexec
-
-    # source $__queue_command_excluding_producer $args
-    # - runs `watchexec --resolved-options -- /path/2/producer`
-    #   - watches for changes to given paths gets filters from profiles
-    #   - ignores changes caused by itself
-    #   - passes normalised path to `time-warp match $path` to match the path
-    #     to a configured profile
-    #   - on successful match, pushes message (timestamp and path) to time-warp/excluding.q file
 
     source $__watch_feature_consumer && consumer::consume &
 
     log::debug "Launching watchexec with pid: $$"
 
     local options=(
-        $($__watch_feature_debug && echo "--verbose")
         ${watches[*]}
-        --filter '**/vendor'
-        --ignore '**/vendor/**/vendor/**'
+        ${filters[*]}
+        $($__watch_feature_debug && echo "--verbose")
         --no-vcs-ignore
         --no-default-ignore
-        --postpone
-        -- time-warp queue --produce
+        --postpone -- time-warp queue --produce
     )
 
     watchexec ${options[*]}

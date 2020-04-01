@@ -19,9 +19,9 @@ Options:
     -v, --version   Print the version number
 
 Commands:
-    queue       Consume or produce queue items.
-    watch       Recursively watch a path, or paths, for changes to files matching
-                configured file profile filters.
+    queue       Manage $APP_NAME's queue functionality
+    watch       Watch for changes to files matching configured profiles, and
+                optionally take action on identified items
 
 EOF
 }

@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+__watch_command_watch_feature=${1:?"The watch feature is required"}
+__watch_command_default_profiles=${2:?"A default profiles dir is required"}
+__watch_command_default_root=${3:?"A default root watch path is required"}
+
+__watch_command_args=${@:4}
+
 ##
 # Cats the command's usage documentation.
 ##
@@ -8,43 +14,52 @@ __watch_command::usage() {
 
 $APP_NAME ($APP_VERSION) - Watch
 
-Recursively watch a path, or paths, for changes to files matching configured
-file profile filters.
+Watch for changes to files matching configured profiles, and optionally take
+action on identified items.
 
 Usage:  $APP_NAME watch [options] <args>
 
 Options:
     -h, --help      Print usage information
-    -p, --path      Watch a path for relevant changes.  This may be specified
-                    multiple times to monitor multiple paths.
+    -p, --profiles  A file profile or a directory containing multiple profiles
+                    used to identify target file items
+    -r, --root      The root directory path from which to watch for changes. This
+                    option may be specified multiple times to set up multiple watches
 
 EOF
 }
 
-__watch_command_watch_feature=${1:?"The watch feature is required"} && shift
+##
+# Handles in incoming watch commands.
+##
+__watch_command::handle() {
+    # handle empty args
+    [[ -z "$@" ]] && set -- "--help"
 
-# handle empty args
-[[ -z "$@" ]] && set -- "--help"
+    local profiles="$__watch_command_default_profiles"
+    local root_paths=()
 
-# set defaults
-__watch_command_paths=()
+    while [[ "$#" -gt 0 ]]; do
+        case $1 in
+            -p|--profiles)
+                profiles="$2" && shift
+            ;;
+            -r|--root)
+                root_paths+=($2) && shift
+            ;;
+            -h|--help|*)
+                __watch_command::usage && exit 0
+            ;;
+        esac
 
-while [[ "$#" -gt 0 ]]; do
-    case $1 in
-        -p|--path)
-            __watch_command_path="$2" && shift
+        shift
+    done
 
-            if [[ -z "$__watch_command_path" ]]; then
-                echo "A path must be set" && exit 1
-            else
-                __watch_command_paths+=("$__watch_command_path");
-            fi
-        ;;
-        -h|--help|*)
-            __watch_command::usage && exit 0
-        ;;
-    esac
-    shift
-done
+    if [[ -z $root_paths ]]; then
+        root_paths="$__watch_command_default_root"
+    fi
 
-source $__watch_command_watch_feature && feature::watch ${__watch_command_paths[*]}
+    source $__watch_command_watch_feature && feature::watch "$profiles" "${root_paths[*]}"
+}
+
+__watch_command::handle $__watch_command_args

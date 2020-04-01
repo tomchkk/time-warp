@@ -68,6 +68,8 @@ producer::produce() {
                         log::debug "Path profile matched: '$path'."
 
                         message_bus::dispatch_message "PUBLISH" --topic $__producer_topic --path $path
+                    else
+                        log::debug "Path '$path' does not match any profile."
                     fi
                 else
                     log::debug "Ignoring watchexec changed path '$path': doesn't exist."

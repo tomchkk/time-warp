@@ -4,6 +4,8 @@
 __kernel_config=(
     app_env="${1:?"APP_ENV is required"}"
     debug="${2:?"DEBUG must be set"}"
+    user_config="$__user_config"
+    profiles_dir="$__profiles_dir"
     var_dir="$__var_dir"
     log_dir="$__log_dir"
     org_tmp="$__org_tmp"

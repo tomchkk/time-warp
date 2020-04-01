@@ -28,7 +28,7 @@ __services::define_parameters() {
     container::add "src-dir" "$__services_base/src"
 
     # add all src dirs as container parameters
-    for dir in $(find $__services_base/src -mindepth 1 -maxdepth 1 -type d); do
+    for dir in $(find "$__services_base/src" -mindepth 1 -maxdepth 1 -type d); do
         container::add "$(basename $dir)-dir" "$dir"
     done
 
@@ -97,7 +97,9 @@ __services::define_services() {
 
     container::add "watch-command" \
         "$__services_base/src/command/watch/index" \
-            "@watch-feature"
+            "@watch-feature" \
+            $(container::resolve "@profiles-dir") \
+            $HOME
 
     # features
     container::add "consume-feature" \

@@ -8,18 +8,18 @@ __queue_command::usage() {
 
 $APP_NAME ($APP_VERSION) - Queue
 
-Consume or produce $APP_NAME queue items.
+Manage $APP_NAME's queue functionality.
 
 Usage:  $APP_NAME queue [options] <args>
 
 Options:
-    -c, --consume   Open a FIFO pipe to consume items pushed to the queue
+    -c, --consume   Open a FIFO pipe to consume pushed items
     -h, --help      Print usage information
-    -k, --kill      Kill running queue services
-    -r, --report    View a report from running services
-    -p, --produce   Produce items to a consuming pipe by watching a given
-                    directory (or directories) for changes to files that match
-                    configured file profile filters
+    -k, --kill      Kill the running consumer
+    -r, --report    View a report from the running consumer
+    -p, --produce   Launch $APP_NAME's producing script, used in conjunction
+                    with a filesystem watcher, to produce items into $APP_NAME's
+                    consumer FIFO pipe
 
 EOF
 }
