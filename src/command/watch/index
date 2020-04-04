@@ -42,6 +42,9 @@ __watch_command::handle() {
     while [[ "$#" -gt 0 ]]; do
         case $1 in
             -p|--profiles)
+                # TODO: allow handling of profile paths with spaces:
+                # - gather all argument values until the next option handle
+                #   is encountered
                 profiles="$2" && shift
             ;;
             -r|--root)
@@ -59,7 +62,8 @@ __watch_command::handle() {
         root_paths="$__watch_command_default_root"
     fi
 
-    source $__watch_command_watch_feature && feature::watch "$profiles" "${root_paths[*]}"
+    source $__watch_command_watch_feature
+    feature::watch "$profiles" "${root_paths[*]}"
 }
 
 __watch_command::handle $__watch_command_args

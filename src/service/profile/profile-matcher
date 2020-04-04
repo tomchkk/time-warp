@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+
+__profile_matcher_profile_manager=${1:?"A profile manager is required"}
+__profile_matcher_filter_tester=${2:?"A filter tester is required"}
+__profile_matcher_predicate_tester=${3:?"A predicate tester is required"}
+__profile_matcher_logger=${4:?"A logger is required"}
+
+__profile_matcher_profiles=${5:?"A profile file or directory is required"}
+
+source $__profile_matcher_profile_manager "$__profile_matcher_profiles"
+source "$__profile_matcher_filter_tester"
+source "$__profile_matcher_predicate_tester"
+
+##
+# Determines if all filters parsed from the given profile match the given path.
+#
+__profile_matcher::path_matches_filters () {
+    local profile=$1
+    local path=$2
+    local flag=false
+    local filter
+
+    for item in $(profile_mananger::get_filters $profile); do
+        case "$item" in
+            -f*|--filter*)
+                if ! $(filter_tester::test_filter "$item" "$path"); then
+                    log::debug "Path '$path' does not match filter '$item'"
+                    return 1
+                fi
+
+                log::debug "Path '$path' matches filter '$item'"
+                flag=true
+            ;;
+            *)
+                log::debug "Filter '$item' is not supported"
+                continue
+            ;;
+        esac
+    done
+
+    $flag && return 0 || return 1
+}
+
+##
+# Determines if all predicates parsed from the given profile match the given path.
+##
+__profile_matcher::path_matches_predicates() {
+    local profile=$1
+    local path=$2
+    local flag=false
+
+    for item in $(profile_mananger::get_predicates $profile); do
+        case "$item" in
+            -d*|--directory*)
+                if ! $(predicate_tester::test_directory "$item" "$path"); then
+                    log::debug "Failed directory test: '$item'"
+                    return 1
+                fi
+
+                log::debug "Passed directory test: '$item'"
+                flag=true
+            ;;
+            -f*|--file*)
+                if ! $(predicate_tester::test_file "$item" "$path"); then
+                    log::debug "Failed file test: '$item'"
+                    return 1
+                fi
+
+                log::debug "Passed file test: '$item'"
+                flag=true
+            ;;
+            *)
+                log::debug "Predicate '$item' is not supported"
+                continue
+            ;;
+        esac
+    done
+
+    $flag && return 0 || return 1
+}
+
+##
+# Matches a given path against a set of predicates
+##
+matcher::match() {
+    local path=$1
+    local flag=false
+
+    source $__profile_matcher_logger
+
+    for profile in $(profile_manager::get_profiles); do
+        if ! $(__profile_matcher::path_matches_filters $profile $path); then
+            continue # try to match the next profile
+        fi
+
+        # The path matches the profile. If it also matches all of the profile's
+        # predicates, then we have our match
+        if $(__profile_matcher::path_matches_predicates $profile $path); then
+            return 0
+        fi
+    done
+
+    return 1
+}

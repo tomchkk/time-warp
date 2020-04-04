@@ -118,6 +118,7 @@ __services::define_services() {
 
     container::add "watch-feature" \
         "$__services_base/src/feature/watch-feature" \
+            "@profile-manager" \
             "@excluding-consumer" \
             "@message-bus" \
             "@stdout-logger" \
@@ -130,12 +131,35 @@ __services::define_services() {
             "@stdout-logger" \
             "@message-handler"
 
+    # file profilers
+    container::add "profile-parser" \
+        "$__services_base/src/service/profile/profile-parser"
+
+    container::add "profile-manager" \
+        "$__services_base/src/service/profile/profile-manager" \
+            "@profile-parser" \
+            "@stdout-logger"
+
+    container::add "watchexec-tester" \
+        "$__services_base/src/service/profile/tester/watchexec-tester"
+
+    container::add "predicate-tester" \
+        "$__services_base/src/service/profile/tester/predicate-tester"
+
+    container::add "profile-matcher" \
+        "$__services_base/src/service/profile/profile-matcher" \
+            "@profile-manager" \
+            "@watchexec-tester" \
+            "@predicate-tester" \
+            "@stdout-logger"
+
     # producers
     container::add "excluding-producer" \
         "$__services_base/src/service/queue/producer" \
             "@stdout-logger" \
             "@message-bus" \
             "@time-machine-exclude-topic" \
+            "@profile-matcher" \
             "@excluding-producer-events"
 
     # buses

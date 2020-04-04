@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+# Tests watchexec filters; based on watchexec's filter options and can be
+# extended accordingly.
+#
+# Valid filters should include the equal sign - e.g.:
+#  --filter="[glob]"
+#  -f="[glob]"
+
+##
+# Determines whether the given path matches the given watchexec filter glob.
+##
+filter_tester::test_filter() {
+    local filter=$(echo $1 | sed -E 's/^-(f|-filter)=//')
+    local path="$2"
+
+    [[ $path == $filter ]] && return 0 || return 1
+}

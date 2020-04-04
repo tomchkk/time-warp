@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+
+__profile_manager_parser=${1:?"A profile parser is required"}
+__profile_manager_logger=${2:?"A logger is required"}
+
+__profile_manager_profiles=${3:?"A profile file or directory is required"}
+
+source $__profile_manager_logger
+
+if [[ ! -e "$__profile_manager_profiles" ]]; then
+    log::error "The profile file or directory '$__profile_manager_profiles' does not exist"
+
+    exit 1
+fi
+
+##
+# Gets a profile file path, or an array of file path inodes, both of which can
+# then be passed to profile_manager getter methods to handle the actual profile
+# files as required.
+##
+profile_manager::get_profiles() {
+    local path="$__profile_manager_profiles"
+    local profiles=()
+
+    if [[ -f "$path" ]]; then
+        profiles="$path"
+    elif [[ -d "$path" ]]; then
+        while read file; do
+            profiles+=($file)
+        done < <(ls -i -d $path/* | awk '{print $1}') # reads inodes of $path
+    fi
+
+    echo ${profiles[*]}
+}
+
+##
+# Converts an inode to a file path, if profile is not a file and
+# __profile_manager_profiles is a directory
+##
+__profile_manager::convert_profile_inode_to_path() {
+    local profile="$1"
+
+    if [[ ! -f "$profile" ]] && [[ -d "$__profile_manager_profiles" ]]; then
+        # convert an inode to a file path
+        profile=$(find "$__profile_manager_profiles" -xdev -inum $profile)
+    fi
+
+    echo "$profile"
+}
+
+##
+# Gets filters from the given profile file.
+##
+profile_mananger::get_filters() {
+    local profile="$(__profile_manager::convert_profile_inode_to_path $1)"
+
+    source $__profile_manager_parser
+
+    echo $(profile_parser::parse_filters "$profile")
+}
+
+##
+# Gets predicates from the given profile file.
+##
+profile_mananger::get_predicates() {
+    local profile="$(__profile_manager::convert_profile_inode_to_path $1)"
+
+    source $__profile_manager_parser
+
+    echo $(profile_parser::parse_predicates "$profile")
+}

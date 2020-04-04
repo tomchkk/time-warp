@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+# Tests file profile predicates; based on the bash 'test' builtin command and
+# can be extended accordingly.
+#
+# Valid predicates should include the equal sign and can be negated with a
+# preceding ! - e.g.:
+#  -d, --directory="[relative/path]" - the directory should exist
+#  -d, --directory!="[relative/path]" - the directory should not exist
+
+##
+# Determines whether the given path matches given directory predicate.
+##
+predicate_tester::test_directory() {
+    local predicate="$1"
+    local path="$2"
+
+    [[ "$predicate" =~ ^-(d|-directory)(!?)=(.+) ]]
+
+    local negate=$([[ -n "${BASH_REMATCH[2]}" ]] && echo true || echo false)
+    local value=${BASH_REMATCH[3]}
+
+    if [[ -d "${path}/${value}" ]]; then
+        $negate && return 1 || return 0
+    else
+        $negate && return 0 || return 1
+    fi
+}
+
+##
+# Determines whether the given path matches given file predicate.
+##
+predicate_tester::test_file() {
+    local predicate="$1"
+    local path="$2"
+
+    [[ "$predicate" =~ ^-(f|-file)(!?)=(.+) ]]
+
+    local negate=$([[ -n "${BASH_REMATCH[2]}" ]] && echo true || echo false)
+    local value=${BASH_REMATCH[3]}
+
+    if [[ -f "${path}/${value}" ]]; then
+        $negate && return 1 || return 0
+    else
+        $negate && return 0 || return 1
+    fi
+}

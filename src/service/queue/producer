@@ -3,7 +3,8 @@
 __producer_logger=${1:?"A logger is required"}
 __producer_bus=${2:?"A message bus is required"}
 __producer_topic=${3:?"A publishable topic is required"}
-__producer_watching=${@:4}
+__producer_profile_matcher=${4:?"A profile matcher is required"}
+__producer_watching=${@:5}
 
 source $__producer_logger
 
@@ -26,7 +27,7 @@ __producer::event_is_watched() {
 # Produces publishable topic messages into the given message bus.
 #
 producer::produce() {
-    source $__producer_bus
+    local path_profiles=${1:?"A path profile is required"}
 
     local events=('created' 'removed' 'renamed' 'written' 'meta')
     local modifications=(
@@ -51,28 +52,25 @@ producer::produce() {
         if $(__producer::event_is_watched $event); then
             log::debug "Watched event '$event' was fired"
 
+            # now that shit is getting real, let's charge our weapons!
+            source $__producer_profile_matcher "$path_profiles"
+            source $__producer_bus
+
+            local path
             for path in ${paths[*]}; do
                 # $path will be a path stub if $WATCHEXEC_COMMON_PATH is set,
                 # otherwise it will be a full path. So, either way, the two can
                 # be concatenated to get a full path to a changed file
                 path="${WATCHEXEC_COMMON_PATH}${path}"
 
-                # we're only concerned with paths that exist
-                if [[ -e "$path" ]]; then
-                    log::debug "Detected modification to '$path'."
+                log::debug "Detected modification to '$path'."
 
-                    # TODO: here we will try to match $path using something like
-                    # source $__producer_profile_matcher
-                    # if $(matcher::match $path); then
-                    if [[ -d "$path" ]] && [[ -f "$path/"../composer.json ]]; then
-                        log::debug "Path profile matched: '$path'."
+                if $(matcher::match $path); then
+                    log::debug "Matcher matched path '$path'"
 
-                        message_bus::dispatch_message "PUBLISH" --topic $__producer_topic --path $path
-                    else
-                        log::debug "Path '$path' does not match any profile."
-                    fi
+                    message_bus::dispatch_message "PUBLISH" --topic $__producer_topic --path $path
                 else
-                    log::debug "Ignoring watchexec changed path '$path': doesn't exist."
+                    log::debug "Matcher did not match path '$path'"
                 fi
             done
         else

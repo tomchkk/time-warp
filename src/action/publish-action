@@ -25,6 +25,7 @@ action::process_action() {
             log::debug "Found subscriber: '$subscriber'"
 
             source $subscriber && subscriber::on_publish $@
+            # TODO: add if subscriber can continue!
         fi
     done
 }

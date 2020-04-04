@@ -1,44 +1,55 @@
 #!/usr/bin/env bash
 
-__watch_feature_consumer=${1:?"A consumer is required"}
-__watch_feature_bus=${2:?"A message bus is required"}
-__watch_feature_logger=${3:?"A logger is required"}
-__watch_feature_debug=${4:-false}
+__watch_feature_profile_manager=${1:?"A profile manager is required"}
+__watch_feature_consumer=${2:?"A consumer is required"}
+__watch_feature_bus=${3:?"A message bus is required"}
+__watch_feature_logger=${4:?"A logger is required"}
+__watch_feature_debug=${5:-false}
 
-source $__watch_feature_bus
 source $__watch_feature_logger
 
 ##
 # Parses filters from a profile file
 ##
-__watch_feature::parse_filters() {
-    local profile="$1"
+# __watch_feature::parse_filters() {
+#     local profile="$1"
 
-    echo $(source "$profile" && echo ${filters[*]})
-}
+#     echo $(source "$profile" && echo ${filters[*]})
+# }
 
 ##
 # Parses watch filters from a given profile file or directory
 ##
 __watch_feature::parse_filter_options() {
     local profiles="$1"
+
+    source $__watch_feature_profile_manager "$profiles"
+
     local filters=()
 
-    if [[ ! -e "$profiles" ]]; then
-        log::error "The profile file or directory '$profiles' does not exist"
-
-        return 1
-    fi
-
-    if [[ -f "$profiles" ]]; then
-        filters=($(__watch_feature::parse_filters "$profiles"))
-    elif [[ -d "$profiles" ]]; then
-        for profile in $(find "$profiles" -mindepth 1 -maxdepth 1 -type f); do
-            filters+=($(__watch_feature::parse_filters "$profile"))
+    for profile in $(profile_manager::get_profiles); do
+        for item in $(profile_mananger::get_filters $profile); do
+            filters+=("$item")
         done
-    fi
+    done
 
     echo ${filters[*]}
+
+    # if [[ ! -e "$profiles" ]]; then
+    #     log::error "The profile file or directory '$profiles' does not exist"
+
+    #     return 1
+    # fi
+
+    # if [[ -f "$profiles" ]]; then
+    #     filters=($(__watch_feature::parse_filters "$profiles"))
+    # elif [[ -d "$profiles" ]]; then
+    #     for profile in $(find "$profiles" -mindepth 1 -maxdepth 1 -type f); do
+    #         filters+=($(__watch_feature::parse_filters "$profile"))
+    #     done
+    # fi
+
+    # echo ${filters[*]}
 }
 
 ##
@@ -65,6 +76,7 @@ __watch_feature::parse_watch_options() {
 # Feature exit strategy
 ##
 __watch_feature::on_exit() {
+    source $__watch_feature_bus
     message_bus::dispatch_message "KILL"
 }
 
@@ -94,7 +106,8 @@ feature::watch() {
         $($__watch_feature_debug && echo "--verbose")
         --no-vcs-ignore
         --no-default-ignore
-        --postpone -- time-warp queue --produce
+        --postpone
+        -- time-warp queue --produce $profiles
     )
 
     watchexec ${options[*]}

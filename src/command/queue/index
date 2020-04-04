@@ -42,7 +42,7 @@ case "$opt" in
         source $__queue_command_message_feature && feature::report
     ;;
     -p|--produce)
-        source $__queue_command_produce_feature && feature::produce
+        source $__queue_command_produce_feature && feature::produce $args
     ;;
     -h|--help|*)
         __queue_command::usage && exit 0
