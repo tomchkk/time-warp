@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+__notifying_subscriber_bash_clash=${1:?"bash-clash is required"}
+__notifying_subscriber_logger=${2:?"A logger is required"}
+__notifying_subscriber_sound=${3:-"Submarine"}
+
+# TODO: figure out how to either set the title and subtitle in services
+# or how to use a view to get these values dynamically and allow this subscriber
+# to be generic
+
+##
+# Handles the published topic event.
+##
+subscriber::on_publish() {
+    source $__notifying_subscriber_bash_clash $@
+
+    local title="Time Warp Notification"
+    local subtitle="Path excluded from Time Machine backups:"
+    local text="$(bash_clash::get "path")"
+
+    local notification='display notification "'"$text"'" with title "'"$title"'" subtitle "'"$subtitle"'"sound name "'"$__notifying_subscriber_sound"'"'
+
+    log::debug "Notifying user! '$notification'"
+
+    osascript -e "$notification"
+}

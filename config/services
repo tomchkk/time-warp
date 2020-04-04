@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# TODO: try to move services to package folders for better organisation
+
 __services_base="${1:?"A services base directory is required"}"
 __services_config="${@:2}"
 
@@ -57,7 +59,8 @@ __services::define_parameters() {
     local tm_exclude_topic=$(container::resolve "@time-machine-exclude-topic")
     container::add "publish-action-subscribers" \
         "--" \
-            "@excluding-subscriber::$tm_exclude_topic"
+            "@excluding-subscriber::$tm_exclude_topic" \
+            "@excluding-notification-subscriber::$tm_exclude_topic"
 }
 
 ##
@@ -204,6 +207,11 @@ __services::define_services() {
     # subscribers
     container::add "excluding-subscriber" \
         "$__services_base/src/subscriber/excluding-subscriber" \
+            "@bash-clash" \
+            "@stdout-logger"
+
+    container::add "excluding-notification-subscriber" \
+        "$__services_base/src/subscriber/notifying-subscriber" \
             "@bash-clash" \
             "@stdout-logger"
 }
