@@ -18,7 +18,7 @@ subscriber::on_publish() {
     local subtitle="Path excluded from Time Machine backups:"
     local text="$(bash_clash::get "path")"
 
-    local notification='display notification "'"$text"'" with title "'"$title"'" subtitle "'"$subtitle"'"sound name "'"$__notifying_subscriber_sound"'"'
+    local notification='display notification "'"$text"'" with title "'"$title"'" subtitle "'"$subtitle"'" sound name "'"$__notifying_subscriber_sound"'"'
 
     log::debug "Notifying user! '$notification'"
 
