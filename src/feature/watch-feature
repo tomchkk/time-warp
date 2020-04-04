@@ -9,15 +9,6 @@ __watch_feature_debug=${5:-false}
 source $__watch_feature_logger
 
 ##
-# Parses filters from a profile file
-##
-# __watch_feature::parse_filters() {
-#     local profile="$1"
-
-#     echo $(source "$profile" && echo ${filters[*]})
-# }
-
-##
 # Parses watch filters from a given profile file or directory
 ##
 __watch_feature::parse_filter_options() {
@@ -34,22 +25,6 @@ __watch_feature::parse_filter_options() {
     done
 
     echo ${filters[*]}
-
-    # if [[ ! -e "$profiles" ]]; then
-    #     log::error "The profile file or directory '$profiles' does not exist"
-
-    #     return 1
-    # fi
-
-    # if [[ -f "$profiles" ]]; then
-    #     filters=($(__watch_feature::parse_filters "$profiles"))
-    # elif [[ -d "$profiles" ]]; then
-    #     for profile in $(find "$profiles" -mindepth 1 -maxdepth 1 -type f); do
-    #         filters+=($(__watch_feature::parse_filters "$profile"))
-    #     done
-    # fi
-
-    # echo ${filters[*]}
 }
 
 ##
