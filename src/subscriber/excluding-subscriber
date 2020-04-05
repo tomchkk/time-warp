@@ -15,4 +15,6 @@ subscriber::on_publish() {
     local path=$(bash_clash::get "path")
 
     log::debug "Path to exclude from Time Machine backups: $path"
+
+    return 0
 }

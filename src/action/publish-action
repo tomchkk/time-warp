@@ -24,7 +24,7 @@ action::process_action() {
             local subscriber=${BASH_REMATCH[1]}
             log::debug "Found subscriber: '$subscriber'"
 
-            if ! $(source $subscriber && subscriber::on_publish $@); then
+            if ! $(source $subscriber && subscriber::on_publish "$@"); then
                 log::info "'$subscriber' signaled to stop propagation of 'publish' action."
 
                 return 0

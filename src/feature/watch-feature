@@ -78,7 +78,7 @@ feature::watch() {
     local options=(
         ${watches[*]}
         ${filters[*]}
-        $($__watch_feature_debug && echo "--verbose")
+        # $($__watch_feature_debug && echo "--verbose")
         --no-vcs-ignore
         --no-default-ignore
         --postpone

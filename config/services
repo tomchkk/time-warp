@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 # TODO: try to move services to package folders for better organisation
+# TODO: add a time-warp debug --dump-services
 
 __services_base="${1:?"A services base directory is required"}"
 __services_config="${@:2}"
@@ -212,8 +213,13 @@ __services::define_services() {
 
     container::add "excluding-notification-subscriber" \
         "$__services_base/src/subscriber/notifying-subscriber" \
-            "@bash-clash" \
-            "@stdout-logger"
+            "@stdout-logger" \
+            "@excluding-notification"
+
+    # notifications
+    container::add "excluding-notification" \
+        "$__services_base/src/notification/excluding-notification" \
+            "@bash-clash"
 }
 
 ##
