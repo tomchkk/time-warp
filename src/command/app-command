@@ -3,7 +3,7 @@
 ##
 # Cats the command's usage documentation.
 ##
-__time_warp_command::usage() {
+__app_command::usage() {
     cat << EOF
 
 $APP_NAME ($APP_VERSION)
@@ -26,8 +26,9 @@ Commands:
 EOF
 }
 
-__time_warp_command_queue_command="${1:?"A queue command is required"}"
-__time_warp_command_watch_command="${2:?"A watch command is required"}"
+__app_command_queue_command="${1:?"A queue command is required"}"
+__app_command_watch_command="${2:?"A watch command is required"}"
+
 opt="$3"
 args="${@:4}"
 
@@ -36,10 +37,10 @@ case "$opt" in
         echo "path(s) to exclude:" $args
     ;;
     queue)
-        source $__time_warp_command_queue_command $args
+        source $__app_command_queue_command $args
     ;;
     watch)
-        source $__time_warp_command_watch_command $args
+        source $__app_command_watch_command $args
     ;;
     -l|--list)
         echo "-l --list -v --version -h --help queue watch"
@@ -48,6 +49,6 @@ case "$opt" in
         echo "$APP_VERSION"
     ;;
     -h|--help|*)
-        __time_warp_command::usage && exit 0
+        __app_command::usage && exit 0
     ;;
 esac

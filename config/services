@@ -88,19 +88,19 @@ __services::define_services() {
         "$__services_base/lib/bash-clash/index"
 
     # commands
+    container::add "app-command" \
+        "$__services_base/src/command/app-command" \
+            "@queue-command" \
+            "@watch-command"
+
     container::add "queue-command" \
-        "$__services_base/src/command/queue/index" \
+        "$__services_base/src/command/queue-command" \
             "@consume-feature" \
             "@message-feature" \
             "@produce-feature"
 
-    container::add "time-warp-command" \
-        "$__services_base/src/command/time-warp/index" \
-            "@queue-command" \
-            "@watch-command"
-
     container::add "watch-command" \
-        "$__services_base/src/command/watch/index" \
+        "$__services_base/src/command/watch-command" \
             "@watch-feature" \
             $(container::resolve "@profiles-dir") \
             $HOME
