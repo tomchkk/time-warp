@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+__services_command_args=${@:1}
+
+##
+# Cats the command's usage documentation.
+##
+__services_command::usage() {
+    cat << EOF
+
+$APP_NAME ($APP_VERSION) - Services
+
+Manage $APP_NAME's services.
+
+Usage:  $APP_NAME services [options] <args>
+
+Options:
+    -d, --debug     Dump $APP_NAME's container
+    -h, --help      Print usage information
+
+EOF
+}
+
+##
+# Handles incoming services commands.
+##
+__services_command::handle() {
+    local opt=${1}
+    local args=${@:2}
+
+    case "$opt" in
+        -d|--debug)
+            echo "dumping container services"
+        ;;
+        -h|--help|*)
+            __services_command::usage && exit 0
+        ;;
+    esac
+}
+
+__services_command::handle $__services_command_args

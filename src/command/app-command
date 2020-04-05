@@ -20,6 +20,7 @@ Options:
 
 Commands:
     queue       Manage $APP_NAME's queue functionality
+    services    Manage $APP_NAME's services
     watch       Watch for changes to files matching configured profiles, and
                 optionally take action on identified items
 
@@ -27,10 +28,11 @@ EOF
 }
 
 __app_command_queue_command="${1:?"A queue command is required"}"
-__app_command_watch_command="${2:?"A watch command is required"}"
+__app_command_services_command="${2:?"A services command is required"}"
+__app_command_watch_command="${3:?"A watch command is required"}"
 
-opt="$3"
-args="${@:4}"
+opt="$4"
+args="${@:5}"
 
 case "$opt" in
     exclude)
@@ -38,6 +40,9 @@ case "$opt" in
     ;;
     queue)
         source $__app_command_queue_command $args
+    ;;
+    services)
+        source $__app_command_services_command $args
     ;;
     watch)
         source $__app_command_watch_command $args

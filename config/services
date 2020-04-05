@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 # TODO: try to move services to package folders for better organisation
-# TODO: add a time-warp debug --dump-services
 
 __services_base="${1:?"A services base directory is required"}"
 __services_config="${@:2}"
@@ -91,6 +90,7 @@ __services::define_services() {
     container::add "app-command" \
         "$__services_base/src/command/app-command" \
             "@queue-command" \
+            "@services-command" \
             "@watch-command"
 
     container::add "queue-command" \
@@ -98,6 +98,9 @@ __services::define_services() {
             "@consume-feature" \
             "@message-feature" \
             "@produce-feature"
+
+    container::add "services-command" \
+        "$__services_base/src/command/services-command"
 
     container::add "watch-command" \
         "$__services_base/src/command/watch-command" \
