@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-__services_command_args=${@:1}
+__services_command_services_feature=${1:?"A services feature is required"}
+
+__services_command_args=${@:2}
 
 ##
 # Cats the command's usage documentation.
@@ -15,7 +17,8 @@ Manage $APP_NAME's services.
 Usage:  $APP_NAME services [options] <args>
 
 Options:
-    -d, --debug     Dump $APP_NAME's container
+    -d, --dump      Dump all, or a space-separated list of $APP_NAME's defined
+                    container services
     -h, --help      Print usage information
 
 EOF
@@ -29,8 +32,8 @@ __services_command::handle() {
     local args=${@:2}
 
     case "$opt" in
-        -d|--debug)
-            echo "dumping container services"
+        -d|--dump)
+            source $__services_command_services_feature && feature::dump $args
         ;;
         -h|--help|*)
             __services_command::usage && exit 0

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+##
+# Dumps all, or a sub-section of the container's defined services.
+##
+feature::dump() {
+    container::dump $@
+}

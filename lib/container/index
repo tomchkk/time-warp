@@ -143,3 +143,30 @@ container::get_source() {
 
     echo ${src[0]}
 }
+
+##
+# Dumps all or a given sub-section of the container.
+##
+container::dump() {
+    local filter=$@
+
+    if [[ -z "${filter[*]}" ]]; then
+        filter=(${__service_names[*]})
+    fi
+
+    local name
+    for name in ${filter[*]}; do
+        local definition=($(container::get_definition "$name" "[null]"))
+
+        if [[ $definition == "[null]" ]]; then
+            echo " - $name ([definition not found])"
+
+            continue
+        fi
+
+        echo " - $name (${definition[0]})"
+        for argument in ${definition[*]:1}; do
+            echo "   - $argument"
+        done
+    done
+}

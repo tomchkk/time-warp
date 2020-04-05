@@ -100,7 +100,8 @@ __services::define_services() {
             "@produce-feature"
 
     container::add "services-command" \
-        "$__services_base/src/command/services-command"
+        "$__services_base/src/command/services-command" \
+            "@services-feature"
 
     container::add "watch-command" \
         "$__services_base/src/command/watch-command" \
@@ -122,6 +123,9 @@ __services::define_services() {
         "$__services_base/src/feature/produce-feature" \
             "@excluding-producer" \
             "@stdout-logger"
+
+    container::add "services-feature" \
+        "$__services_base/src/feature/services-feature"
 
     container::add "watch-feature" \
         "$__services_base/src/feature/watch-feature" \
