@@ -34,7 +34,6 @@ action::process_action() {
 
     uptime=$(date -r $(( $uptime - 3600 )) +"%-Hh %-Mm %-Ss")
 
-    # TODO: this may be improved upon!
     echo -e "\n" > $enquirer
     echo -e "$(source $__report_action_view_dir/report-view)" | column -t -s="," > $enquirer
 }
