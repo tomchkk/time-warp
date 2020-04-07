@@ -69,7 +69,7 @@ feature::watch() {
         exit 1
     fi
 
-    trap __watch_feature::on_exit EXIT
+    trap __watch_feature::on_exit SIGINT
 
     source $__watch_feature_consumer && consumer::consume &
 
