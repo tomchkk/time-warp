@@ -56,12 +56,20 @@ __watch_feature::on_exit() {
 }
 
 ##
-# Initiates a watch of a given path or paths for modications.
+# Initiates a watch of a given path or paths for modifications.
 ##
 feature::watch() {
     local profiles="${1:?"A profile file or directory is required"}"
     local root_paths="${@:2}"
 
+    # TODO: move parse_filter_options and parse_watch_options to a new script
+    # 'watchexec-option-resolver' with methods:
+    #  - 'option_resolver::resolve_filters'
+    #  - 'option_resolver::resolve_watches'
+    #
+    # Pass in @profile-manager as an argument and do this work there! But also
+    # handle filter validation, to filter for allowed filters. Possibly also
+    # handle all of watchexec's option resolving (below)
     local filters=$(__watch_feature::parse_filter_options "$profiles")
     local watches=$(__watch_feature::parse_watch_options "$root_paths")
 
@@ -84,6 +92,8 @@ feature::watch() {
         --postpone
         -- time-warp queue --produce $profiles
     )
+
+    log::debug "Watch options: ${options[*]}"
 
     watchexec ${options[*]}
 }
