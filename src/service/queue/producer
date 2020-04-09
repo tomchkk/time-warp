@@ -44,7 +44,7 @@ producer::produce() {
         local paths=($(echo "${!modification}" | sed -E 's/:/ /g'))
 
         if [[ -z "$paths" ]]; then
-            log::debug "No watchexec modifications detected."
+            log::debug "Producer was called, but no watchexec modifications were detected."
 
             return 0
         fi
