@@ -129,7 +129,7 @@ __services::define_services() {
 
     container::add "watch-feature" \
         "$__services_base/src/feature/watch-feature" \
-            "@profile-manager" \
+            "@watchexec-options-resolver" \
             "@excluding-consumer" \
             "@message-bus" \
             "@stdout-logger" \
@@ -163,6 +163,15 @@ __services::define_services() {
             "@watchexec-tester" \
             "@predicate-tester" \
             "@stdout-logger"
+
+    container::add "watchexec-options-resolver" \
+        "$__services_base/src/service/profile/resolver/watchexec-options-resolver" \
+            "@profile-manager" \
+            "@watchexec-filter-validator" \
+            "@stdout-logger"
+
+    container::add "watchexec-filter-validator" \
+        "$__services_base/src/service/profile/resolver/watchexec-filter-validator"
 
     # producers
     container::add "excluding-producer" \

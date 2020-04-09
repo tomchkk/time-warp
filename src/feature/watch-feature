@@ -1,51 +1,12 @@
 #!/usr/bin/env bash
 
-__watch_feature_profile_manager=${1:?"A profile manager is required"}
+__watch_feature_options_resolver=${1:?"An options resolver is required"}
 __watch_feature_consumer=${2:?"A consumer is required"}
 __watch_feature_bus=${3:?"A message bus is required"}
 __watch_feature_logger=${4:?"A logger is required"}
 __watch_feature_debug=${5:-false}
 
 source $__watch_feature_logger
-
-##
-# Parses watch filters from a given profile file or directory
-##
-__watch_feature::parse_filter_options() {
-    local profiles="$1"
-
-    source $__watch_feature_profile_manager "$profiles"
-
-    local filters=()
-
-    for profile in $(profile_manager::get_profiles); do
-        for item in $(profile_mananger::get_filters $profile); do
-            filters+=("$item")
-        done
-    done
-
-    echo ${filters[*]}
-}
-
-##
-# Parses watch options from a given array of paths
-#
-__watch_feature::parse_watch_options() {
-    local paths=${@:?"At least one path is required"}
-    local watches=()
-
-    for path in ${paths[*]}; do
-        if [[ ! -d "$path" ]]; then
-            log::error "The directory '$path' does not exist"
-
-            return 1
-        fi
-
-        watches+=("--watch $path ")
-    done
-
-    echo ${watches[*]}
-}
 
 ##
 # Feature exit strategy
@@ -62,16 +23,10 @@ feature::watch() {
     local profiles="${1:?"A profile file or directory is required"}"
     local root_paths="${@:2}"
 
-    # TODO: move parse_filter_options and parse_watch_options to a new script
-    # 'watchexec-option-resolver' with methods:
-    #  - 'option_resolver::resolve_filters'
-    #  - 'option_resolver::resolve_watches'
-    #
-    # Pass in @profile-manager as an argument and do this work there! But also
-    # handle filter validation, to filter for allowed filters. Possibly also
-    # handle all of watchexec's option resolving (below)
-    local filters=$(__watch_feature::parse_filter_options "$profiles")
-    local watches=$(__watch_feature::parse_watch_options "$root_paths")
+    source $__watch_feature_options_resolver
+
+    local filters=$(options_resolver::resolve_filters "$profiles")
+    local watches=$(options_resolver::resolve_watches "$root_paths")
 
     if [[ -z $filters ]] || [[ -z $watches ]]; then
         exit 1
@@ -81,19 +36,16 @@ feature::watch() {
 
     source $__watch_feature_consumer && consumer::consume &
 
-    log::debug "Launching watchexec with pid: $$"
-
-    local options=(
+    local resolved=(
         ${watches[*]}
         ${filters[*]}
         # $($__watch_feature_debug && echo "--verbose")
-        --no-vcs-ignore
-        --no-default-ignore
         --postpone
         -- time-warp queue --produce $profiles
     )
 
-    log::debug "Watch options: ${options[*]}"
+    log::debug "Resolved watchexec options: ${resolved[*]}"
+    log::debug "Launching watchexec with pid: $$"
 
-    watchexec ${options[*]}
+    watchexec ${resolved[*]}
 }

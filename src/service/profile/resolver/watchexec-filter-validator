@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+##
+# Determines if the given filter is valid and applicable.
+##
+filter_validator::is_valid() {
+    local filter="$1"
+
+    case "$filter" in
+        -e*|--exts*) return 0 ;;
+        -f*|--filter*) return 0 ;;
+        -i*|--ignore*) return 0 ;;
+        --no-vcs-ignore) return 0 ;;
+        --no-default-ignore) return 0 ;;
+        *) return 1 ;;
+    esac
+}

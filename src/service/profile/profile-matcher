@@ -32,7 +32,7 @@ __profile_matcher::path_matches_filters () {
                 flag=true
             ;;
             *)
-                log::debug "Filter '$item' is not supported"
+                log::debug "Filter '$item' is not relevant for path matching"
                 continue
             ;;
         esac

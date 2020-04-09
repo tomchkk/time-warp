@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+__watchexec_options_resolver_profile_manager=${1:?"A profile manager is required"}
+__watchexec_options_resolver_filter_validator=${2:?"A filter validator is required"}
+__watchexec_options_resolver_logger=${3:?"A logger is required"}
+
+source $__watchexec_options_resolver_logger
+
+##
+# Parses watchexec watch options from a given array of paths.
+##
+options_resolver::resolve_watches() {
+    local paths=${@:?"At least one path is required"}
+    local watches=()
+
+    for path in ${paths[*]}; do
+        if [[ ! -d "$path" ]]; then
+            log::error "The directory '$path' does not exist"
+
+            return 1
+        fi
+
+        watches+=("--watch $path ")
+    done
+
+    echo ${watches[*]}
+}
+
+##
+# Parses watchexec filters from a given profile file or directory.
+##
+options_resolver::resolve_filters() {
+    local profiles="$1"
+
+    source $__watchexec_options_resolver_profile_manager "$profiles"
+    source $__watchexec_options_resolver_filter_validator
+
+    local filters=()
+
+    for profile in $(profile_manager::get_profiles); do
+        for item in $(profile_mananger::get_filters $profile); do
+            if $(filter_validator::is_valid "$item"); then
+                filters+=("$item")
+            else
+                log::debug "'$item' is not an applicable profile filter"
+            fi
+        done
+    done
+
+    echo ${filters[*]}
+}
