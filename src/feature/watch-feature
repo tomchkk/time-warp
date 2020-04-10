@@ -32,6 +32,14 @@ feature::watch() {
         exit 1
     fi
 
+    # TODO: before first run:
+    # - load a list of cached already excluded paths
+    #   - if the cache doesn't exist, create it
+    # - load a cached list of ignored paths, if it exists
+    # - scan the watched paths for matching profiles
+    #   - if matching paths aren't already excluded and aren't ignored, mark them
+    #   as excluded
+
     trap __watch_feature::on_exit SIGINT
 
     source $__watch_feature_consumer && consumer::consume &
@@ -39,6 +47,10 @@ feature::watch() {
     local resolved=(
         ${watches[*]}
         ${filters[*]}
+
+        # TODO: figure out how/when/if to have verbose watchexec output
+        # - possibly only during some kind of 'set-up/test' run, to check
+        # profiles are working correctly
         # $($__watch_feature_debug && echo "--verbose")
         --postpone
         -- time-warp queue --produce $profiles
