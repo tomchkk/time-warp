@@ -1,4 +1,4 @@
-all: clean version
+all: clean
 
 # install: bin
 # 	@cp ./src/* ./bin
@@ -13,11 +13,14 @@ clean:
 version:
 	@git describe --always --first-parent HEAD > ./version
 
-
-build: user_config files log_dir org_tmp
+profiles: user_config
+	@cp -iR ${resource_dir}/profiles ${user_config}/
 
 user_config:
 	@mkdir -p ${user_config}
+
+
+run: files log_dir org_tmp
 
 var_dir:
 	@mkdir -p ${var_dir}
