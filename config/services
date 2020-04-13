@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-# TODO: try to move services to package folders for better organisation
-
 __services_base="${1:?"A services base directory is required"}"
 __services_config="${@:2}"
 
@@ -48,6 +46,9 @@ __services::define_parameters() {
             "@kill-message::$excluding_pipe" \
             "@publish-message::$excluding_pipe" \
             "@report-message::$excluding_pipe"
+
+    # TODO: look into replacing $container::resolve "@service-name" calls with
+    # resolvable {{@service-name}}
 
     # publishable topics
     container::add "time-machine-exclude-topic" "time-machine-exclude"
