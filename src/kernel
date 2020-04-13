@@ -14,14 +14,14 @@ __kernel_config=(
 __kernel_args=${@:3}
 
 # import container functionality
-source "$__project_dir/lib/container/index"
+source "$__submodules_dir/tomchkk/bash-container/index"
 
 # boot app config, parameters and services
 source "$__project_dir/config/services" "$__project_dir" ${__kernel_config[*]}
 services::define
 
 # extend the 'source' builtin with dependency-loader functionality
-source $__project_dir/lib/container/dependency-loader @file-logger
+source $bash_container_loader @file-logger
 
 # handle the request
 source @app-command $__kernel_args
