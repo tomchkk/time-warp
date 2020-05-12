@@ -20,7 +20,7 @@ user_config:
 	@mkdir -p ${user_config}
 
 
-run: files log_dir org_tmp
+run: files cache_dir log_dir org_tmp
 
 var_dir:
 	@mkdir -p ${var_dir}
@@ -28,6 +28,9 @@ var_dir:
 files: var_dir
 	@touch ${var_dir}/errored
 	@touch ${var_dir}/excluded
+
+cache_dir: var_dir
+	@mkdir -p ${cache_dir}
 
 log_dir: var_dir
 	@mkdir -p ${log_dir}

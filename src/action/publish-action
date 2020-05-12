@@ -17,7 +17,7 @@ action::process_action() {
 
     log::info "Publishing message for topic '$topic' and path '$path'"
 
-    for subscriber_topic in ${__publish_action_subscribers[*]}; do
+    for subscriber_topic in ${__publish_action_subscribers[@]}; do
         # expected subscriber format: @subscriber-alias::topic-name
 
         if [[ "$subscriber_topic" =~ ^(.+)::"$topic"$ ]]; then

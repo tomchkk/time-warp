@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+# import submodule directories
+source "$__submodules_dir/autoload"
+
+# import container functionality
+for file in container loader; do
+    source "$tomchkk_private_projects_bash_container/src/$file" \
+        "$tomchkk_private_projects_bash_clash/src/index"
+done
+
+__services_loader="$__project_dir/config/services"
+__services_cache="$__cache_dir/$(md5 -q "$__services_loader")"
+
+if [[ -f "$__services_cache" ]]; then
+    # services cache is valid, we'll just load that
+    source "$__services_cache"
+else
+    # services cache is invalid, we'll load it with the given config
+    source "$__services_loader" $@
+
+    # cache the loaded container services
+    declare -p \
+        __container_names \
+        __container_types \
+        __container_values \
+            > "$__services_cache"
+fi
+
+# load uncacheable logging channels
+container::add_scalar "stdout-channel" $(tty)
+container::add_scalar "file-channel" "@{log-dir}/$(date '+%Y-%m-%d').log"
+
+# extend the 'source' builtin with bash-container loader functionality
+source() { loader::source $@; }
+
+unset __services_loader __services_cache

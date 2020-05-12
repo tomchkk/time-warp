@@ -30,7 +30,7 @@ profile_manager::get_profiles() {
         done < <(ls -i -d $path/* | awk '{print $1}') # reads inodes of $path
     fi
 
-    echo ${profiles[*]}
+    echo ${profiles[@]}
 }
 
 ##

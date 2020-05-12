@@ -45,8 +45,8 @@ feature::watch() {
     source $__watch_feature_consumer && consumer::consume &
 
     local resolved=(
-        ${watches[*]}
-        ${filters[*]}
+        ${watches[@]}
+        ${filters[@]}
 
         # TODO: figure out how/when/if to have verbose watchexec output
         # - possibly only during some kind of 'set-up/test' run, to check
@@ -56,8 +56,8 @@ feature::watch() {
         -- time-warp queue --produce $profiles
     )
 
-    log::debug "Resolved watchexec options: ${resolved[*]}"
+    log::debug "Resolved watchexec options: ${resolved[@]}"
     log::debug "Launching watchexec with pid: $$"
 
-    watchexec ${resolved[*]}
+    watchexec ${resolved[@]}
 }

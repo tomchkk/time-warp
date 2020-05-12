@@ -16,7 +16,7 @@ fi
 # Determines if the given event is being watched.
 #
 __producer::event_is_watched() {
-    if $(printf '%s\n' ${__producer_watching[*]} | grep -q -E ^$1$); then
+    if $(printf '%s\n' ${__producer_watching[@]} | grep -q -E ^$1$); then
         return 0
     fi
 
@@ -57,7 +57,7 @@ producer::produce() {
             source $__producer_bus
 
             local path
-            for path in ${paths[*]}; do
+            for path in ${paths[@]}; do
                 # $path will be a path stub if $WATCHEXEC_COMMON_PATH is set,
                 # otherwise it will be a full path. So, either way, the two can
                 # be concatenated to get a full path to a changed file

@@ -1,21 +1,19 @@
 #!/usr/bin/env bash
 
-__excluding_notification_bash_clash=${1:?"bash-clash is required"}
-__excluding_notification_title=${2:-"Time Warp"}
-__excluding_notification_sound=${3:-"Submarine"}
-
-# TODO: how to set the title in services, considering it would be a string with
-# spaces
+__excluding_notification_bash_clash="${1:?"bash-clash is required"}"
+__excluding_notification_title="$2"
+__excluding_notification_subtitle="$3"
+__excluding_notification_sound="$4"
 
 ##
 # Sends a notification that path has been excluded from Time Machine backups.
 ##
 notification::notify() {
-    source __excluding_notification_bash_clash $@
+    source $__excluding_notification_bash_clash $@
 
     # terminal-notifier is a bit verbose and doesn't return bash exit codes,
-    # which can prevent parent processes from working properly, so we'll
-    # redirect any noise:
+    # which can prevent parent processes from working properly, so we'll just
+    # redirect any 'noise' that it creates:
     __excluding_notification::do_notify &> /dev/null
 }
 
@@ -25,9 +23,9 @@ notification::notify() {
 __excluding_notification::do_notify() {
     terminal-notifier \
         -group "$APP_NAME" \
-        -title "$__excluding_notification_title" \
-        -subtitle "Path excluded from Time Machine backups:" \
+        -title "${__excluding_notification_title:-"Title"}" \
+        -subtitle "${__excluding_notification_subtitle:-"Subtitle"}" \
         -message $(bash_clash::get "path") \
-        -sound "$__excluding_notification_sound" \
+        -sound "${__excluding_notification_sound:-"Submarine"}" \
         -ignoreDnD
 }

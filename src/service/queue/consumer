@@ -50,9 +50,9 @@ consumer::consume() {
                 --message-count=$((++message_count))
             )
 
-            log::debug "Message received: $message" ${context[*]}
+            log::debug "Message received: $message" ${context[@]}
 
-            message_handler::handle_message $message "${context[*]}"
+            message_handler::handle_message $message "${context[@]}"
         fi
     done
 }

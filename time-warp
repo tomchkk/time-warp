@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-__project_dir=$(dirname $(perl -e "use Cwd 'abs_path'; print abs_path(@ARGV[0])" -- "$0"))
+__project_dir="$(cd $(dirname $(readlink "$0" || echo "$0")); pwd)"
+
 APP_VERSION="$(cat $__project_dir/version)"
 
 source "$__project_dir/.env"
@@ -10,11 +11,11 @@ APP_ENV="${APP_ENV:-dev}"
 DEBUG="${DEBUG:-true}"
 LOG_LEVEL="${LOG_LEVEL:-DEBUG}"
 
-__user_config="$HOME/.config/$APP_NAME"
-__profiles_dir="$__user_config/profiles"
 __submodules_dir="$__project_dir/submodules"
 __var_dir="$__project_dir/var"
+__cache_dir="$__var_dir/cache"
 __log_dir="$__var_dir/log"
+__profiles_dir="$HOME/.config/$APP_NAME/profiles"
 __org_tmp="/tmp/${ORG_ID:-com.org}.$APP_NAME"
 
 __make_run=(
@@ -22,28 +23,14 @@ __make_run=(
     --warn-undefined-variables
     run
     var_dir="$__var_dir"
+    cache_dir="$__cache_dir"
     log_dir="$__log_dir"
     org_tmp="$__org_tmp"
 )
 
 # build all the files that will be needed for the project to work
-make ${__make_run[*]}
+make ${__make_run[@]}
 
 source "$__project_dir/src/kernel" $APP_ENV $DEBUG $@
 
-unset \
-    __project_dir \
-    APP_VERSION \
-    APP_NAME \
-    APP_ENV \
-    DEBUG \
-    LOG_LEVEL \
-    __user_config \
-    __profiles_dir \
-    __var_dir \
-    __log_dir \
-    __org_tmp \
-    __make_run
-
-# TODO: go through each point of exit and run `declare -p` to check for memory
-# leaks
+# TODO: check variable collisions in each script using `declare -p`

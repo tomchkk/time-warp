@@ -13,7 +13,7 @@ options_resolver::resolve_watches() {
     local paths=${@:?"At least one path is required"}
     local watches=()
 
-    for path in ${paths[*]}; do
+    for path in ${paths[@]}; do
         if [[ ! -d "$path" ]]; then
             log::error "The directory '$path' does not exist"
 
@@ -23,7 +23,7 @@ options_resolver::resolve_watches() {
         watches+=("--watch $path ")
     done
 
-    echo ${watches[*]}
+    echo ${watches[@]}
 }
 
 ##
@@ -47,5 +47,5 @@ options_resolver::resolve_filters() {
         done
     done
 
-    echo ${filters[*]}
+    echo ${filters[@]}
 }

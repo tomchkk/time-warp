@@ -39,13 +39,13 @@ case "$opt" in
         echo "path(s) to exclude:" $args
     ;;
     queue)
-        source $__app_command_queue_command $args
+        source "$__app_command_queue_command" $args
     ;;
     services)
-        source $__app_command_services_command $args
+        source "$__app_command_services_command" $args
     ;;
     watch)
-        source $__app_command_watch_command $args
+        source "$__app_command_watch_command" $args
     ;;
     -l|--list)
         echo "-l --list -v --version -h --help queue watch"

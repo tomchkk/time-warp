@@ -2,26 +2,22 @@
 
 # build an array of config
 __kernel_config=(
-    app_env="${1:?"APP_ENV is required"}"
+    app-env="${1:?"APP_ENV is required"}"
     debug="${2:?"DEBUG must be set"}"
-    user_config="$__user_config"
-    profiles_dir="$__profiles_dir"
-    var_dir="$__var_dir"
-    log_dir="$__log_dir"
-    org_tmp="$__org_tmp"
-    log_level="${LOG_LEVEL:-"DEBUG"}"
+    log-level="${LOG_LEVEL:-"DEBUG"}"
+    project-dir="$__project_dir"
+    submodules-dir="$__submodules_dir"
+    var-dir="$__var_dir"
+    cache-dir="$__cache_dir"
+    log-dir="$__log_dir"
+    profiles-dir="$__profiles_dir"
+    org-tmp="$__org_tmp"
 )
+
 __kernel_args=${@:3}
 
-# import container functionality
-source "$__submodules_dir/tomchkk/bash-container/index"
-
 # boot app config, parameters and services
-source "$__project_dir/config/services" "$__project_dir" ${__kernel_config[*]}
-services::define
-
-# extend the 'source' builtin with dependency-loader functionality
-source $bash_container_loader @file-logger
+source "$__project_dir/config/bootstrap" ${__kernel_config[@]}
 
 # handle the request
 source @app-command $__kernel_args

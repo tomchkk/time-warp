@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-__services_base="${1:?"A services base directory is required"}"
-__services_config="${@:2}"
+__services_config="$@"
 
 ##
 # Defines available config.
@@ -10,12 +9,12 @@ __services::define_config() {
     local key
     local value
 
-    for item in ${__services_config[*]}; do
+    for item in ${__services_config[@]}; do
         [[ "$item" =~ ^(.*)=(.*)$ ]]
-        key="$(echo ${BASH_REMATCH[1]} | sed "s/_/-/g")"
+        key="${BASH_REMATCH[1]}"
         value="${BASH_REMATCH[2]}"
 
-        container::add "$key" "$value"
+        container::add_scalar "$key" "$value"
     done
 }
 
@@ -23,230 +22,204 @@ __services::define_config() {
 # Defines available parameters.
 ##
 __services::define_parameters() {
-    container::add "config-dir" "$__services_base/config"
-    container::add "lib-dir" "$__services_base/lib"
-    container::add "src-dir" "$__services_base/src"
-
-    # add all src dirs as container parameters
-    for dir in $(find "$__services_base/src" -mindepth 1 -maxdepth 1 -type d); do
-        container::add "$(basename $dir)-dir" "$dir"
-    done
-
-    # logging channels
-    container::add "stdout-channel" $(tty)
-    container::add "file-channel" $(container::resolve "@log-dir::/$(date '+%Y-%m-%d').log")
+    # dirs
+    container::add_scalar "view-dir" "@{project-dir}/src/view"
 
     # pipes
-    container::add "excluding-pipe" $(container::resolve "@org-tmp::/excluding-pipe")
+    container::add_scalar "excluding-pipe" "@{org-tmp}/excluding-pipe"
 
     # message routing
-    local excluding_pipe=$(container::resolve "@excluding-pipe")
-    container::add "message-routing" \
-        "--" \
-            "@kill-message::$excluding_pipe" \
-            "@publish-message::$excluding_pipe" \
-            "@report-message::$excluding_pipe"
-
-    # TODO: look into replacing $container::resolve "@service-name" calls with
-    # resolvable {{@service-name}}
+    container::add_array "message-routing" \
+        -- "\@kill-message::@excluding-pipe" \
+        -- "\@publish-message::@excluding-pipe" \
+        -- "\@report-message::@excluding-pipe"
 
     # publishable topics
-    container::add "time-machine-exclude-topic" "time-machine-exclude"
+    container::add_scalar "time-machine-exclude-topic" "time-machine-exclude"
 
     # watchexec producer events
-    container::add "excluding-producer-events" "--" "created" "renamed"
+    container::add_array "excluding-producer-events" -- "created" -- "renamed"
 
     # publish action subscribers
-    local tm_exclude_topic=$(container::resolve "@time-machine-exclude-topic")
-    container::add "publish-action-subscribers" \
-        "--" \
-            "@excluding-subscriber::$tm_exclude_topic" \
-            "@excluding-notification-subscriber::$tm_exclude_topic"
+    container::add_array "publish-action-subscribers" \
+        -- "\@excluding-subscriber::@time-machine-exclude-topic" \
+        -- "\@excluding-notification-subscriber::@time-machine-exclude-topic"
 }
 
 ##
 # Defines available services.
 ##
 __services::define_services() {
-    # Aliases for config items that resolve to valid file paths will not be
-    # sourced and, therefore, not resolve at runtime; they must be resolved
-    # here.
+    # submodule services
+    container::add_service "bash-clash" \
+        "$tomchkk_private_projects_bash_clash/src/index"
 
-    # lib
-    container::add "file-logger" \
-        "$__services_base/lib/log-slog/index" \
-            "@log-level" \
-            $(container::resolve "@file-channel")
+    container::add_service "file-logger" \
+        "$tomchkk_private_projects_bash_logger/src/index" \
+            -- "@log-level" \
+            -- "@file-channel"
 
-    container::add "stdout-logger" \
-        "$__services_base/lib/log-slog/index" \
-            "@log-level" \
-            $(container::resolve "@stdout-channel") \
-            "->"
-
-    container::add "bash-clash" \
-        "$__services_base/lib/bash-clash/index"
+    container::add_service "stdout-logger" \
+        "$tomchkk_private_projects_bash_logger/src/index" \
+            -- "@log-level" \
+            -- "@stdout-channel" \
+            -- " =>" # TODO: figure-out why '->' is not valid
 
     # commands
-    container::add "app-command" \
-        "$__services_base/src/command/app-command" \
-            "@queue-command" \
-            "@services-command" \
-            "@watch-command"
+    container::add_service "app-command" \
+        "@{project-dir}/src/command/app-command" \
+            -- "@queue-command" \
+            -- "@services-command" \
+            -- "@watch-command"
 
-    container::add "queue-command" \
-        "$__services_base/src/command/queue-command" \
-            "@consume-feature" \
-            "@message-feature" \
-            "@produce-feature"
+    container::add_service "queue-command" \
+        "@{project-dir}/src/command/queue-command" \
+            -- "@consume-feature" \
+            -- "@message-feature" \
+            -- "@produce-feature"
 
-    container::add "services-command" \
-        "$__services_base/src/command/services-command" \
-            "@services-feature"
+    container::add_service "services-command" \
+        "@{project-dir}/src/command/services-command" \
+            -- "@services-feature"
 
-    container::add "watch-command" \
-        "$__services_base/src/command/watch-command" \
-            "@watch-feature" \
-            $(container::resolve "@profiles-dir") \
-            $HOME
+    container::add_service "watch-command" \
+        "@{project-dir}/src/command/watch-command" \
+            -- "@watch-feature" \
+            -- "@profiles-dir" \
+            -- "$HOME"
 
     # features
-    container::add "consume-feature" \
-        "$__services_base/src/feature/consume-feature" \
-            "@excluding-consumer"
+    container::add_service "consume-feature" \
+        "@{project-dir}/src/feature/consume-feature" \
+            -- "@excluding-consumer"
 
-    container::add "message-feature" \
-        "$__services_base/src/feature/message-feature" \
-            "@message-bus" \
-            "@stdout-logger"
+    container::add_service "message-feature" \
+        "@{project-dir}/src/feature/message-feature" \
+            -- "@message-bus"
 
-    container::add "produce-feature" \
-        "$__services_base/src/feature/produce-feature" \
-            "@excluding-producer" \
-            "@stdout-logger"
+    container::add_service "produce-feature" \
+        "@{project-dir}/src/feature/produce-feature" \
+            -- "@excluding-producer" \
+            -- "@stdout-logger"
 
-    container::add "services-feature" \
-        "$__services_base/src/feature/services-feature"
+    container::add_service "services-feature" \
+        "@{project-dir}/src/feature/services-feature"
 
-    container::add "watch-feature" \
-        "$__services_base/src/feature/watch-feature" \
-            "@watchexec-options-resolver" \
-            "@excluding-consumer" \
-            "@message-bus" \
-            "@stdout-logger" \
-            $(container::resolve "@debug")
+    container::add_service "watch-feature" \
+        "@{project-dir}/src/feature/watch-feature" \
+            -- "@watchexec-options-resolver" \
+            -- "@excluding-consumer" \
+            -- "@message-bus" \
+            -- "@stdout-logger" \
+            -- "@debug"
 
     # consumers
-    container::add "excluding-consumer" \
-        "$__services_base/src/service/queue/consumer" \
-            "@excluding-pipe" \
-            "@stdout-logger" \
-            "@message-handler"
+    container::add_service "excluding-consumer" \
+        "@{project-dir}/src/service/queue/consumer" \
+           --  "@excluding-pipe" \
+           --  "@stdout-logger" \
+           --  "@message-handler"
 
     # file profilers
-    container::add "profile-parser" \
-        "$__services_base/src/service/profile/profile-parser"
+    container::add_service "profile-parser" \
+        "@{project-dir}/src/service/profile/profile-parser"
 
-    container::add "profile-manager" \
-        "$__services_base/src/service/profile/profile-manager" \
-            "@profile-parser" \
-            "@stdout-logger"
+    container::add_service "profile-manager" \
+        "@{project-dir}/src/service/profile/profile-manager" \
+            -- "@profile-parser" \
+            -- "@stdout-logger"
 
-    container::add "watchexec-tester" \
-        "$__services_base/src/service/profile/tester/watchexec-tester"
+    container::add_service "watchexec-tester" \
+        "@{project-dir}/src/service/profile/tester/watchexec-tester"
 
-    container::add "predicate-tester" \
-        "$__services_base/src/service/profile/tester/predicate-tester"
+    container::add_service "predicate-tester" \
+        "@{project-dir}/src/service/profile/tester/predicate-tester"
 
-    container::add "profile-matcher" \
-        "$__services_base/src/service/profile/profile-matcher" \
-            "@profile-manager" \
-            "@watchexec-tester" \
-            "@predicate-tester" \
-            "@stdout-logger"
+    container::add_service "profile-matcher" \
+        "@{project-dir}/src/service/profile/profile-matcher" \
+            -- "@profile-manager" \
+            -- "@watchexec-tester" \
+            -- "@predicate-tester" \
+            -- "@stdout-logger"
 
-    container::add "watchexec-options-resolver" \
-        "$__services_base/src/service/profile/resolver/watchexec-options-resolver" \
-            "@profile-manager" \
-            "@watchexec-filter-validator" \
-            "@stdout-logger"
+    container::add_service "watchexec-options-resolver" \
+        "@{project-dir}/src/service/profile/resolver/watchexec-options-resolver" \
+            -- "@profile-manager" \
+            -- "@watchexec-filter-validator" \
+            -- "@stdout-logger"
 
-    container::add "watchexec-filter-validator" \
-        "$__services_base/src/service/profile/resolver/watchexec-filter-validator"
+    container::add_service "watchexec-filter-validator" \
+        "@{project-dir}/src/service/profile/resolver/watchexec-filter-validator"
 
     # producers
-    container::add "excluding-producer" \
-        "$__services_base/src/service/queue/producer" \
-            "@stdout-logger" \
-            "@message-bus" \
-            "@time-machine-exclude-topic" \
-            "@profile-matcher" \
-            "@excluding-producer-events"
+    container::add_service "excluding-producer" \
+        "@{project-dir}/src/service/queue/producer" \
+            -- "@stdout-logger" \
+            -- "@message-bus" \
+            -- "@time-machine-exclude-topic" \
+            -- "@profile-matcher" \
+            -- "@excluding-producer-events"
 
     # buses
-    container::add "message-bus" \
-        "$__services_base/src/bus/message-bus" \
-            "@stdout-logger" \
-            "@message-routing"
+    container::add_service "message-bus" \
+        "@{project-dir}/src/bus/message-bus" \
+            -- "@stdout-logger" \
+            -- "@message-routing"
 
     # messages
-    container::add "kill-message" \
-        "$__services_base/src/message/kill-message"
+    container::add_service "kill-message" \
+        "@{project-dir}/src/message/kill-message"
 
-    container::add "publish-message" \
-        "$__services_base/src/message/publish-message"
+    container::add_service "publish-message" \
+        "@{project-dir}/src/message/publish-message"
 
-    container::add "report-message" \
-        "$__services_base/src/message/report-message"
+    container::add_service "report-message" \
+        "@{project-dir}/src/message/report-message"
 
 
     # handlers
-    container::add "message-handler" \
-        "$__services_base/src/handler/message-handler" \
-            "@stdout-logger"
+    container::add_service "message-handler" \
+        "@{project-dir}/src/handler/message-handler" \
+            -- "@stdout-logger"
 
     # actions
-    container::add "kill-action" \
-        "$__services_base/src/action/kill-action" \
-            "@bash-clash" \
-            "@stdout-logger"
+    container::add_service "kill-action" \
+        "@{project-dir}/src/action/kill-action" \
+            -- "@bash-clash" \
+            -- "@stdout-logger"
 
-    container::add "publish-action" \
-        "$__services_base/src/action/publish-action" \
-            "@stdout-logger" \
-            "@bash-clash" \
-            "@publish-action-subscribers"
+    container::add_service "publish-action" \
+        "@{project-dir}/src/action/publish-action" \
+            -- "@stdout-logger" \
+            -- "@bash-clash" \
+            -- "@publish-action-subscribers"
 
-    container::add "report-action" \
-        "$__services_base/src/action/report-action" \
-            "@bash-clash" \
-            "@view-dir"
+    container::add_service "report-action" \
+        "@{project-dir}/src/action/report-action" \
+            -- "@bash-clash" \
+            -- "@view-dir"
 
     # subscribers
-    container::add "excluding-subscriber" \
-        "$__services_base/src/subscriber/excluding-subscriber" \
-            "@bash-clash" \
-            "@stdout-logger"
+    container::add_service "excluding-subscriber" \
+        "@{project-dir}/src/subscriber/excluding-subscriber" \
+            -- "@bash-clash" \
+            -- "@stdout-logger"
 
-    container::add "excluding-notification-subscriber" \
-        "$__services_base/src/subscriber/notifying-subscriber" \
-            "@stdout-logger" \
-            "@excluding-notification"
+    container::add_service "excluding-notification-subscriber" \
+        "@{project-dir}/src/subscriber/notifying-subscriber" \
+            -- "@stdout-logger" \
+            -- "@excluding-notification"
 
     # notifications
-    container::add "excluding-notification" \
-        "$__services_base/src/notification/excluding-notification" \
-            "@bash-clash"
+    container::add_service "excluding-notification" \
+        "@{project-dir}/src/notification/excluding-notification" \
+            -- "@bash-clash" \
+            -- "Time Warp" \
+            -- "Path excluded from Time Machine backups:"
 }
 
-##
-# Defines all configured services.
-##
-services::define() {
-    __services::define_config
-    __services::define_parameters
-    __services::define_services
+__services::define_config
+__services::define_parameters
+__services::define_services
 
-    unset __services_base
-    unset __services_config
-}
+unset __services_config

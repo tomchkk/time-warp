@@ -30,7 +30,7 @@ EOF
 }
 
 ##
-# Handles in incoming watch commands.
+# Handles incoming watch commands.
 ##
 __watch_command::handle() {
     # handle empty args
@@ -63,7 +63,7 @@ __watch_command::handle() {
     fi
 
     source $__watch_command_watch_feature
-    feature::watch "$profiles" "${root_paths[*]}"
+    feature::watch "$profiles" ${root_paths[@]}
 }
 
 __watch_command::handle $__watch_command_args
