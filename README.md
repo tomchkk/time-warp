@@ -5,13 +5,13 @@ Ever wish Time Machine for MacOS didn't back-up all of your composer or npm depe
 
 ## Intro
 
-Time Warp monitors your filesystem for defined dependency directories and excludes them from Time Machine backups.
+Time Warp monitors your filesystem for dependency directories and excluding them from Time Machine backups.
 
 ## What
 
-At its heart Time Warp is a cli that can be used to set up a watch on chosen filesystem paths for changes to defined target files or directories, marking those identified as excluded from Time Machine backups.
+At its heart Time Warp is a cli that can be used to set up a watch on chosen filesystem paths for changes to defined target files or directories, excluding from Time Machine backups those that are identified.
 
-Targets are defined by configurable (and extendable) profiles, and the profiles are then used both to filter paths for the watch process and to positively identify changed paths as targets for exclusion.
+Targets are defined by configurable (and extendable) profiles, and the profiles are then used both to filter paths for the watch process and to positively identify new matching paths as targets for exclusion.
 
 ## File Profiles
 
@@ -50,13 +50,13 @@ Both the short- and long-form options are allowed and **the equal sign joinng an
 
 ### Predicates
 
-Predicates are used to test that a candidate matched by the watcher – as defined by the profile filters – definitively matches this profile. Predicates are tested sequentially, in the order in which they are defined, and they must all evaluate as `true` to identify a candidate path as a confirmed target.
+Predicates are used to test that a candidate matched by the watcher – as defined by the profile filters – definitively matches this profile. Predicates are tested sequentially, in the order in which they are defined, and they must all evaluate as `true` in order to identify a candidate path as a confirmed target.
 
-Predicate values are essentially relative path values, tested for existence or non-existence. Allowed predicates are:
+Predicate values are essentially relative path values, tested for existence or non-existence. Allowed predicate tests are currently any combination of:
 
-  - `-d, --directory=[path]`
-  - `-f, --file=[path]`
+  - `-d, --directory=[path/2/dir/that/should/exist]`
+  - `-f, --file=[path/2/file/that/should/exist]`
 
-A predicate can be negated with an exclamation mark, as follows:
+A predicate can also be negated with an exclamation mark, as follows:
 
   - `--file!=[file/that/should/not/exist]`
