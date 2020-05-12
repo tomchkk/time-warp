@@ -1,4 +1,4 @@
-all: clean
+all: clean version
 
 # install: bin
 # 	@cp ./src/* ./bin
