@@ -41,6 +41,8 @@ producer::produce() {
     for key in ${!modifications[*]}; do
         local event="${events[$key]}"
         local modification="${modifications[$key]}"
+        # TODO: fix this (with tests)
+        # - it will certainly fail when one of the paths contains a space...
         local paths=($(echo "${!modification}" | sed -E 's/:/ /g'))
 
         if [[ -z "$paths" ]]; then
