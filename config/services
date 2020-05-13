@@ -42,8 +42,12 @@ __services::define_parameters() {
 
     # publish action subscribers
     container::add_array "publish-action-subscribers" \
-        -- "\@excluding-subscriber::@time-machine-exclude-topic" \
+        -- "\@excluding-action-subscriber::@time-machine-exclude-topic" \
         -- "\@excluding-notification-subscriber::@time-machine-exclude-topic"
+
+    container::add_array "excluding-notifications" \
+        -- "@terminal-notification" \
+        -- "@slack-notification"
 }
 
 ##
@@ -182,7 +186,7 @@ __services::define_services() {
         "@{project-dir}/src/handler/message-handler" \
             -- "@stdout-logger"
 
-    # actions
+    # message actions
     container::add_service "kill-action" \
         "@{project-dir}/src/action/kill-action" \
             -- "@bash-clash" \
@@ -200,22 +204,30 @@ __services::define_services() {
             -- "@view-dir"
 
     # subscribers
-    container::add_service "excluding-subscriber" \
+    container::add_service "excluding-action-subscriber" \
         "@{project-dir}/src/subscriber/excluding-subscriber" \
             -- "@bash-clash" \
-            -- "@stdout-logger"
+            -- "@excluder-service"
 
     container::add_service "excluding-notification-subscriber" \
         "@{project-dir}/src/subscriber/notifying-subscriber" \
             -- "@stdout-logger" \
-            -- "@excluding-notification"
+            -- "@excluding-notifications"
+
+    # subscriber actions
+    container::add_service "excluder-service" \
+        "@{project-dir}/src/service/excluder/excluder-service" \
+            -- "@stdout-logger"
 
     # notifications
-    container::add_service "excluding-notification" \
-        "@{project-dir}/src/notification/excluding-notification" \
+    container::add_service "terminal-notification" \
+        "@{project-dir}/src/notification/excluding/terminal-notification" \
             -- "@bash-clash" \
             -- "Time Warp" \
             -- "Path excluded from Time Machine backups:"
+
+    container::add_service "slack-notification" \
+        "@{project-dir}/src/notification/excluding/slack-notification"
 }
 
 __services::define_config

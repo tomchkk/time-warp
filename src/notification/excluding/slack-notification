@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+##
+# Sends a notification that path has been excluded from Time Machine backups.
+##
+notification::notify() {
+    echo "TODO: slack notification" >&2
+}

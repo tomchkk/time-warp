@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 __notifying_subscriber_logger=${1:?"A logger is required"}
-__notifying_subscriber_notification=${2:?"A notification is required"}
+__notifying_subscriber_notifications=${@:2}
 
 source $__notifying_subscriber_logger
 
@@ -9,11 +9,11 @@ source $__notifying_subscriber_logger
 # Handles the published topic event.
 ##
 subscriber::on_publish() {
-    log::debug "Notifying user!"
+    log::info "Publishing notifications"
 
-    source $__notifying_subscriber_notification
+    for notification in ${__notifying_subscriber_notifications[@]}; do
+        source "$notification" && notification::notify $@ &
+    done
 
-    notification::notify $@ &
-
-    return 0
+    return $?
 }
