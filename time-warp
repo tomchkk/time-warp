@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-__project_dir="$(cd $(dirname $(readlink "$0" || echo "$0")); pwd)"
+__script=$(readlink "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}")
+__project_dir="$(cd $(dirname "$__script"); pwd)"
 
 APP_VERSION="$(cat $__project_dir/version)"
 

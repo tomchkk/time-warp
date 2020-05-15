@@ -15,5 +15,6 @@ subscriber::on_publish() {
         source "$notification" && notification::notify $@ &
     done
 
-    return $?
+    # failure to send notifications should not stop action propagation
+    return 0
 }

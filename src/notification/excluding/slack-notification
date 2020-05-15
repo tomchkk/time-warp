@@ -1,8 +1,36 @@
 #!/usr/bin/env bash
 
+__slack_notification_bash_clash="${1:?"bash-clash is required"}"
+__slack_notification_logger="${2:?"A logger is required"}"
+__slack_notification_client="${3:?"A slack client is required"}"
+__slack_notification_webhook="${4:?"A webhook is required"}"
+
+source "$__slack_notification_logger"
+source "$__slack_notification_client"
+
 ##
-# Sends a notification that path has been excluded from Time Machine backups.
+# Sends a Slack notification advising that the given path has been excluded
+# from Time Machine backups.
 ##
 notification::notify() {
-    echo "TODO: slack notification" >&2
+    local path="$(__slack_notification::get_path "$@")"
+    local message=$(cat << JSON
+{ "text": "Path excluded from Time Machine backups: \`$path\`" }
+JSON
+)
+
+    slack_client::post_json "$__slack_notification_webhook" "$message"
+
+    if [[ $? -gt 0 ]]; then
+        log::error "Slack notification failed to send"
+    fi
+}
+
+##
+# Gets the --path argument value from the given arguments.
+##
+__slack_notification::get_path() {
+    source $__slack_notification_bash_clash $@
+
+    bash_clash::get "path"
 }

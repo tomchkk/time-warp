@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+##
+# Posts json data to the given url.
+##
+slack_client::post_json() {
+    local url="${1:?"A url is required"}"
+    local message="$2"
+
+    local curl_args=(
+        -s
+        -X POST
+        -H 'Content-type: application/json'
+        --data "$message"
+        --url "$url"
+    )
+
+    if [[ $(curl "${curl_args[@]}") == "ok" ]]; then
+        return 0
+    fi
+
+    return 1
+}

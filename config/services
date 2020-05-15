@@ -227,7 +227,15 @@ __services::define_services() {
             -- "Path excluded from Time Machine backups:"
 
     container::add_service "slack-notification" \
-        "@{project-dir}/src/notification/excluding/slack-notification"
+        "@{project-dir}/src/notification/excluding/slack-notification" \
+            -- "@bash-clash" \
+            -- "@stdout-logger" \
+            -- "@slack-client" \
+            -- "$SLACK_WEBHOOK"
+
+    # clients
+    container::add_service "slack-client" \
+        "@{project-dir}/src/service/slack/slack-client"
 }
 
 __services::define_config
