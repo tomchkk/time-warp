@@ -8,6 +8,7 @@ __consumer_logger="${2:?"A logger is required"}"
 __consumer_message_handler="${3:?"A message handler is required"}"
 
 source $__consumer_logger
+source $__consumer_message_handler
 
 ##
 # Performs actions on exit of the consumer
@@ -19,18 +20,19 @@ __consumer::exit() {
 }
 
 ##
-# Start the consumer
+# Start the fifo consumer.
 ##
 consumer::consume() {
-    # make the pipe if it doesn't exist already
-    [[ -e "$__consumer_fifo" ]] || mkfifo "$__consumer_fifo"
+    if [[ -p "$__consumer_fifo" ]]; then
+        log::info "The fifo '$__consumer_fifo' is already being consumed"
 
-    # remove the pipe on exit
+        return 1
+    fi
+
+    mkfifo "$__consumer_fifo"
+
     trap __consumer::exit EXIT
 
-    source $__consumer_message_handler
-
-    # record the time the process came up
     local start_time=$(date +"%s")
     local message_count=0
     local message=""
