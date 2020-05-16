@@ -70,7 +70,12 @@ producer::produce() {
                 if $(matcher::match $path); then
                     log::debug "Matcher matched path '$path'"
 
-                    message_bus::dispatch_message "PUBLISH" --topic $__producer_topic --path $path
+                    local message=(
+                        "PUBLISH"
+                        --topic "$__producer_topic"
+                        --path "$path"
+                    )
+                    message_bus::dispatch_message ${message[@]}
                 else
                     log::debug "Matcher did not match path '$path'"
                 fi
