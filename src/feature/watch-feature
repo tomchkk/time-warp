@@ -53,7 +53,9 @@ feature::watch() {
         # profiles are working correctly
         # $($__watch_feature_debug && echo "--verbose")
         --postpone
-        -- time-warp queue --produce $profiles
+        # the producer call _must_ be an external call to the application to
+        # enable all required config and services
+        -- $APP_NAME queue --produce $profiles
     )
 
     log::debug "Resolved watchexec options: ${resolved[@]}"
