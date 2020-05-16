@@ -45,7 +45,7 @@ case "$opt" in
         source "$__app_command_services_command" $args
     ;;
     watch)
-        source "$__app_command_watch_command" $args
+        source "$__app_command_watch_command" && watch_command::handle $args
     ;;
     -l|--list)
         echo "-l --list -v --version -h --help queue watch"
