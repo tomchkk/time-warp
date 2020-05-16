@@ -6,6 +6,7 @@ __watch_feature_bus=${3:?"A message bus is required"}
 __watch_feature_logger=${4:?"A logger is required"}
 __watch_feature_debug=${5:-false}
 
+source $__watch_feature_options_resolver
 source $__watch_feature_logger
 
 ##
@@ -20,12 +21,10 @@ __watch_feature::on_exit() {
 # Initiates a watch of a given path or paths for modifications.
 ##
 feature::watch() {
-    local profiles="${1:?"A profile file or directory is required"}"
+    local profile="${1:?"A profile file or directory is required"}"
     local root_paths="${@:2}"
 
-    source $__watch_feature_options_resolver
-
-    local filters=$(options_resolver::resolve_filters "$profiles")
+    local filters=$(options_resolver::resolve_filters "$profile")
     local watches=$(options_resolver::resolve_watches "$root_paths")
 
     if [[ -z $filters ]] || [[ -z $watches ]]; then
@@ -55,7 +54,7 @@ feature::watch() {
         --postpone
         # the producer call _must_ be an external call to the application to
         # enable all required config and services
-        -- $APP_NAME queue --produce $profiles
+        -- "$APP_NAME" queue --produce "$profile"
     )
 
     log::debug "Resolved watchexec options: ${resolved[@]}"
