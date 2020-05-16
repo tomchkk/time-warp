@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-__watch_command_watch_feature=${1:?"The watch feature is required"}
-__watch_command_default_profiles=${2:?"A default profiles dir is required"}
-__watch_command_default_root=${3:?"A default root watch path is required"}
+__watch_command_watch_feature="${1:?"The watch feature is required"}"
+__watch_command_default_profile="${2:?"A default profile dir is required"}"
+__watch_command_default_dir="${3:?"A default root dir is required"}"
 
-__watch_command_args=${@:4}
+source "$__watch_command_watch_feature"
 
 ##
 # Cats the command's usage documentation.
@@ -21,10 +21,10 @@ Usage:  $APP_NAME watch [options] <args>
 
 Options:
     -h, --help      Print usage information
-    -p, --profiles  A file profile or a directory containing multiple profiles
-                    used to identify target file items
-    -r, --root      The root directory path from which to watch for changes. This
+    -d, --dir       The root directory path from which to watch for changes. This
                     option may be specified multiple times to set up multiple watches
+    -p, --profile   A file profile or a directory containing multiple profiles
+                    used to identify target file items
 
 EOF
 }
@@ -32,25 +32,33 @@ EOF
 ##
 # Handles incoming watch commands.
 ##
-__watch_command::handle() {
-    # handle empty args
-    [[ -z "$@" ]] && set -- "--help"
-
-    local profiles="$__watch_command_default_profiles"
-    local root_paths=()
+watch_command::handle() {
+    local profile="$__watch_command_default_profile"
+    local dirs=()
 
     while [[ "$#" -gt 0 ]]; do
         case $1 in
-            -p|--profiles)
-                # TODO: allow handling of profile paths with spaces:
-                # - gather all argument values until the next option handle
-                #   is encountered
-                profiles="$2" && shift
+            -d|--dir)
+                if [[ -d "$2" ]]; then
+                    dirs+=("$2") && shift
+                else
+                    echo "'$2' is not a valid directory to watch" >&2
+
+                    exit 1
+                fi
             ;;
-            -r|--root)
-                root_paths+=($2) && shift
+            -p|--profile)
+                if [[ -d "$2" ]]; then
+                    profile="$(cd "$2"; pwd)" && shift
+                elif [[ -f "$2" ]]; then
+                    profile="$(cd $(dirname "$2"); pwd)/$(basename "$2")" && shift
+                else
+                    echo "'$2' is not a valid profile" >&2
+
+                    exit 1
+                fi
             ;;
-            -h|--help|*)
+            -h|--help|-*)
                 __watch_command::usage && exit 0
             ;;
         esac
@@ -58,12 +66,9 @@ __watch_command::handle() {
         shift
     done
 
-    if [[ -z $root_paths ]]; then
-        root_paths="$__watch_command_default_root"
+    if [[ -z $dirs ]]; then
+        dirs=("$__watch_command_default_dir")
     fi
 
-    source $__watch_command_watch_feature
-    feature::watch "$profiles" ${root_paths[@]}
+    feature::watch "$profile" ${dirs[@]}
 }
-
-__watch_command::handle $__watch_command_args

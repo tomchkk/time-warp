@@ -22,10 +22,10 @@ __watch_feature::on_exit() {
 ##
 feature::watch() {
     local profile="${1:?"A profile file or directory is required"}"
-    local root_paths="${@:2}"
+    local dirs="${@:2}"
 
     local filters=$(options_resolver::resolve_filters "$profile")
-    local watches=$(options_resolver::resolve_watches "$root_paths")
+    local watches=$(options_resolver::resolve_watches "$dirs")
 
     if [[ -z $filters ]] || [[ -z $watches ]]; then
         exit 1
