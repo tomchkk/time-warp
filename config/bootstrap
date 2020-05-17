@@ -27,7 +27,7 @@ else
             > "$__services_cache"
 fi
 
-# load uncacheable logging channels
+# load uncacheable service config
 container::add_scalar "stdout-channel" $(tty)
 container::add_scalar "file-channel" "@{log-dir}/$(date '+%Y-%m-%d').log"
 
