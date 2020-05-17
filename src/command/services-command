@@ -18,10 +18,9 @@ Manage $APP_NAME's services.
 Usage:  $APP_NAME services [options] <args>
 
 Options:
-    -f, --flush Flush the application cache
-    -d, --dump  Dump all, or a space-separated list of $APP_NAME's defined
-                container services
-    -h, --help  Print usage information
+    -f, --flush         Flush the application cache
+    -d, --definitions   List named or all application service definitions
+    -h, --help          Print usage information
 
 EOF
 }
@@ -34,11 +33,11 @@ __services_command::handle() {
     local args=${@:2}
 
     case "$opt" in
-        -c|--cache-clear)
-            feature::cache_clear
+        -f|--flush)
+            feature::flush_cache
         ;;
-        -d|--dump)
-            feature::dump $args
+        -d|--definitions)
+            feature::list_definitions $args
         ;;
         # TODO: -r\--resolve
         -h|--help|*)

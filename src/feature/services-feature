@@ -6,9 +6,9 @@ __services_feature_cache_dir="${2:?"The cache dir is required"}"
 source "$__services_feature_logger"
 
 ##
-# Clear's the app's service cache dir.
+# Flush the app's service cache dir.
 ##
-feature::cache_clear() {
+feature::flush_cache() {
     if [[ ! -d "$__services_feature_cache_dir" ]]; then
         log::error "'$__services_feature_cache_dir' is not a valid directory"
 
@@ -21,8 +21,8 @@ feature::cache_clear() {
 }
 
 ##
-# Dumps all, or a sub-section of the container's defined services.
+# List named or all application service definitions
 ##
-feature::dump() {
+feature::list_definitions() {
     container::dump $@
 }
