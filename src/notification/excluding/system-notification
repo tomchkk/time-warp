@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
 __excluding_notification_bash_clash="${1:?"bash-clash is required"}"
-__excluding_notification_title="$2"
+__excluding_notification_title="${2}"
 __excluding_notification_subtitle="$3"
 __excluding_notification_sound="$4"
+__excluding_notification_ignore_dnd="$5"
 
 ##
 # Sends a notification that path has been excluded from Time Machine backups.
@@ -27,5 +28,5 @@ __excluding_notification::do_notify() {
         -subtitle "${__excluding_notification_subtitle:-"Subtitle"}" \
         -message $(bash_clash::get "path") \
         -sound "${__excluding_notification_sound:-"Submarine"}" \
-        -ignoreDnD
+        "$($__excluding_notification_ignore_dnd && echo "-ignoreDnD")"
 }

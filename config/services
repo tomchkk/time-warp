@@ -227,7 +227,9 @@ __services::define_services() {
         "@{project-dir}/src/notification/excluding/system-notification" \
             -- "@bash-clash" \
             -- "Time Warp" \
-            -- "Path excluded from Time Machine backups:"
+            -- "Path excluded from Time Machine backups:" \
+            -- "Submarine" \
+            -- false
 
     container::add_service "slack-notification" \
         "@{project-dir}/src/notification/excluding/slack-notification" \
