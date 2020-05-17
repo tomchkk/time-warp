@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 
 __produce_feature_producer=${1:?"A producer is required"}
-__produce_feature_logger=${2:?"A logger is required"}
-
-source $__produce_feature_logger
 
 ##
 # Starts producing items into an available consumer queue by starting a watch
@@ -12,5 +9,5 @@ source $__produce_feature_logger
 feature::produce() {
     local profiles="${1:?"A profile file or directory is required"}"
 
-    source $__produce_feature_producer && producer::produce $profiles
+    source "$__produce_feature_producer" && producer::produce "$profiles"
 }

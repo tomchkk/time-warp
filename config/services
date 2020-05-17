@@ -106,8 +106,7 @@ __services::define_services() {
 
     container::add_service "produce-feature" \
         "@{project-dir}/src/feature/produce-feature" \
-            -- "@excluding-producer" \
-            -- "@stdout-logger"
+            -- "@excluding-producer"
 
     container::add_service "services-feature" \
         "@{project-dir}/src/feature/services-feature"
