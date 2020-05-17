@@ -19,10 +19,18 @@ notification::notify() {
 JSON
 )
 
+    if [[ "$__slack_notification_webhook" == false ]]; then
+        log::info "A Slack webhook is not defined"
+
+        return 1
+    fi
+
     slack_client::post_json "$__slack_notification_webhook" "$message"
 
     if [[ $? -gt 0 ]]; then
         log::error "Slack notification failed to send"
+
+        return 1
     fi
 }
 
