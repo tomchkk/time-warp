@@ -45,9 +45,12 @@ __services::define_parameters() {
         -- "\@excluding-action-subscriber::@time-machine-exclude-topic" \
         -- "\@excluding-notification-subscriber::@time-machine-exclude-topic"
 
+    # notification config
     container::add_array "excluding-notifications" \
-        -- "@terminal-notification" \
-        -- "@slack-notification"
+        "${SUBSCRIBED_NOTIFICATIONS[@]//@/-- @}"
+
+    container::add_scalar "slack-webhook" "${SLACK_WEBHOOK:-false}"
+
 }
 
 ##
@@ -220,8 +223,8 @@ __services::define_services() {
             -- "@stdout-logger"
 
     # notifications
-    container::add_service "terminal-notification" \
-        "@{project-dir}/src/notification/excluding/terminal-notification" \
+    container::add_service "system-notification" \
+        "@{project-dir}/src/notification/excluding/system-notification" \
             -- "@bash-clash" \
             -- "Time Warp" \
             -- "Path excluded from Time Machine backups:"
@@ -231,7 +234,7 @@ __services::define_services() {
             -- "@bash-clash" \
             -- "@stdout-logger" \
             -- "@slack-client" \
-            -- "$SLACK_WEBHOOK"
+            -- "@slack-webhook"
 
     # clients
     container::add_service "slack-client" \
