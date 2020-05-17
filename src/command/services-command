@@ -39,7 +39,6 @@ __services_command::handle() {
         -d|--definitions)
             feature::list_definitions $args
         ;;
-        # TODO: -r\--resolve
         -h|--help|*)
             __services_command::usage && exit 0
         ;;
