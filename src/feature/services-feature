@@ -1,5 +1,25 @@
 #!/usr/bin/env bash
 
+__services_feature_logger="${1:?"A logger is required"}"
+__services_feature_cache_dir="${2:?"The cache dir is required"}"
+
+source "$__services_feature_logger"
+
+##
+# Clear's the app's service cache dir.
+##
+feature::cache_clear() {
+    if [[ ! -d "$__services_feature_cache_dir" ]]; then
+        log::error "'$__services_feature_cache_dir' is not a valid directory"
+
+        return 1
+    fi
+
+    rm "${__services_feature_cache_dir}"/*
+
+    return $?
+}
+
 ##
 # Dumps all, or a sub-section of the container's defined services.
 ##
