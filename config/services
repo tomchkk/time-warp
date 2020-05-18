@@ -70,7 +70,7 @@ __services::define_services() {
         "$tomchkk_private_projects_bash_logger/src/index" \
             -- "@log-level" \
             -- "@stdout-channel" \
-            -- " =>" # TODO: figure-out why '->' is not valid
+            -- "->"
 
     # commands
     container::add_service "app-command" \
