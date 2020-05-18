@@ -4,7 +4,7 @@ __watch_feature_options_resolver=${1:?"An options resolver is required"}
 __watch_feature_consumer=${2:?"A consumer is required"}
 __watch_feature_bus=${3:?"A message bus is required"}
 __watch_feature_logger=${4:?"A logger is required"}
-__watch_feature_debug=${5:-false}
+__watch_feature_watchexec_debug=${5:-false}
 
 source $__watch_feature_options_resolver
 source $__watch_feature_logger
@@ -46,11 +46,7 @@ feature::watch() {
     local resolved=(
         ${watches[@]}
         ${filters[@]}
-
-        # TODO: figure out how/when/if to have verbose watchexec output
-        # - possibly only during some kind of 'set-up/test' run, to check
-        # profiles are working correctly
-        # $($__watch_feature_debug && echo "--verbose")
+        $($__watch_feature_watchexec_debug && echo "--verbose")
         --postpone
         # the producer call _must_ be an external call to the application to
         # enable all required config and services

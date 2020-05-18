@@ -119,7 +119,7 @@ __services::define_services() {
             -- "@excluding-consumer" \
             -- "@message-bus" \
             -- "@stdout-logger" \
-            -- "@debug"
+            -- "$WATCHEXEC_DEBUG"
 
     # consumers
     container::add_service "excluding-consumer" \
