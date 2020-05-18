@@ -10,7 +10,6 @@
 	branch = master
 	super = submodules/tomchkk-private/projects/bash-container
 	super = self
-	super = submodules/tomchkk-private/projects/bash-test
 [submodule "tomchkk-private/projects/bash-logger"]
 	path = submodules/tomchkk-private/projects/bash-logger
 	url = git@gitlab.com:tomchkk-private/projects/bash-logger.git
@@ -22,4 +21,3 @@
 	branch = master
 	super = self
 	dev = true
-	dependency = submodules/tomchkk-private/projects/bash-clash
