@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+##
+# Writes the given extended attribute value to the target paths.
+##
+x_attribute_editor::write() {
+    local x_key="${1:?"An x-attribute key is required"}"
+    local x_val="${2:?"An value is required"}"
+    local paths="${@:3}"
+
+    if ! $(__x_attribute_editor::validate_paths ${paths[@]}); then
+        return 1
+    fi
+
+    xattr -w "$x_key" "$x_val" ${paths[@]}
+
+    return $?
+}
+
+##
+# Checks the given paths for validity - i.e. that the argument is given and
+# that the path(s) exist.
+##
+__x_attribute_editor::validate_paths() {
+    local paths="$@"
+
+    if [[ -z "${paths[@]}" ]]; then
+        echo "At least one target path is required" >&2
+
+        return 1
+    fi
+
+    for path in ${paths[@]}; do
+        if [[ ! -e "$path" ]]; then
+            echo "Target path '$path' does not exist" >&2
+
+            return 1
+        fi
+    done
+}

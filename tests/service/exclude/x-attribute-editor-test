@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+source "$(dirname "${BASH_SOURCE[0]}")/../../bootstrap"
+
+x_attribute_editor="$__project_dir/src/service/exclude/x-attribute-editor"
+
+__X_KEY="com.tomchkk.x_attribute_editor:com_tomchkk_test"
+__X_VAL="com.tomchkk.testd"
+
+x_attribute_editor_test::before_each() {
+    source "$x_attribute_editor"
+}
+
+x_attribute_editor_test::test_write() {
+    local actual expected
+    local dir=$(time_warp_test::mktmp_dir)
+    local not_path="no/path"
+    local paths=("$dir" "$not_path")
+
+    # a path is required
+    actual=$(x_attribute_editor::write "$__X_KEY" "$__X_VAL" 2>&1)
+    expected="At least one target path is required"
+    bash_assert::assert_equals "$expected" "$actual"
+
+    # a path must exist
+    actual=$(x_attribute_editor::write "$__X_KEY" "$__X_VAL" "$not_path" 2>&1)
+    expected="Target path '$not_path' does not exist"
+    bash_assert::assert_equals "$expected" "$actual"
+
+    # all paths must exist
+    actual=$(x_attribute_editor::write "$__X_KEY" "$__X_VAL" ${paths[@]} 2>&1)
+    expected="Target path '$not_path' does not exist"
+    bash_assert::assert_equals "$expected" "$actual"
+
+    x_attribute_editor::write "$__X_KEY" "$__X_VAL" "$dir"
+    bash_assert::assert_equals "0" "$?"
+    bash_assert::assert_equals "$__X_KEY: $__X_VAL" "$(xattr -l "$dir")"
+}
