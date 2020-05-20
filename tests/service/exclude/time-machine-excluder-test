@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+source "$(dirname "${BASH_SOURCE[0]}")/../../bootstrap"
+
+x_attribute_editor="$__project_dir/src/service/exclude/x-attribute-editor"
+time_machine_excluder="$__project_dir/src/service/exclude/time-machine-excluder"
+
+time_machine_excluder_test::before_each() {
+    source "$time_machine_excluder" "$x_attribute_editor"
+}
+
+time_machine_excluder_test::test_exclude() {
+    local actual expected
+    local dir0=$(time_warp_test::mktmp_dir)
+    local dir1=$(time_warp_test::mktmp_dir)
+    local paths=("$dir0" "$dir1")
+
+    # an error code is returned for a non-existent path
+    time_machine_excluder::exclude "non-existent/path" 2>/dev/null
+    bash_assert::assert_equals "1" "$?"
+
+    # a success code is returned and xattrs are updated for a valid paths
+    time_machine_excluder::exclude ${paths[@]}
+    bash_assert::assert_equals "0" "$?"
+    bash_assert::assert_equals \
+        "com.apple.metadata:com_apple_backup_excludeItem: com.apple.backupd" \
+        "$(xattr -l "$dir0")"
+    bash_assert::assert_equals \
+        "com.apple.metadata:com_apple_backup_excludeItem: com.apple.backupd" \
+        "$(xattr -l "$dir1")"
+}
