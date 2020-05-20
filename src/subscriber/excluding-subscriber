@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 __excluding_subscriber_bash_clash="${1:?"bash-clash is required"}"
-__excluding_subscriber_service="${2:?"The excluder service is required"}"
+__excluding_subscriber_service="${2:?"The exclude service is required"}"
 
 source "$__excluding_subscriber_service"
 
@@ -11,7 +11,7 @@ source "$__excluding_subscriber_service"
 subscriber::on_publish() {
     source $__excluding_subscriber_bash_clash $@
 
-    excluder_service::exclude_path "$(bash_clash::get "path")"
+    exclude_service::exclude_path "$(bash_clash::get "path")"
 
     return $?
 }

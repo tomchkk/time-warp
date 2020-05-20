@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+__exclude_service_logger="${1:?"A logger is required"}"
+__exclude_service_excluder="${2:?"An Time Machine excluder is required"}"
+
+source "$__exclude_service_logger"
+source "$__exclude_service_excluder"
+
+##
+# Excludes the given path from Time Machine backups.
+##
+exclude_service::exclude_path() {
+    local path="${1:?"A path to exclude is required"}"
+
+    log::info "Excluding path '$path' from Time Machine backups"
+
+    time_machine_excluder::exclude "$path"
+
+    return $?
+}

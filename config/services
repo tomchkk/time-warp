@@ -211,17 +211,25 @@ __services::define_services() {
     container::add_service "excluding-action-subscriber" \
         "@{project-dir}/src/subscriber/excluding-subscriber" \
             -- "@bash-clash" \
-            -- "@excluder-service"
+            -- "@exclude-service"
 
     container::add_service "excluding-notification-subscriber" \
         "@{project-dir}/src/subscriber/notifying-subscriber" \
             -- "@stdout-logger" \
             -- "@excluding-notifications"
 
-    # subscriber actions
-    container::add_service "excluder-service" \
-        "@{project-dir}/src/service/excluder/excluder-service" \
-            -- "@stdout-logger"
+    # exclude services
+    container::add_service "exclude-service" \
+        "@{project-dir}/src/service/exclude/exclude-service" \
+            -- "@stdout-logger" \
+            -- "@time-machine-excluder"
+
+    container::add_service "time-machine-excluder" \
+        "@{project-dir}/src/service/exclude/time-machine-excluder" \
+            -- "@x-attribute-editor"
+
+    container::add_service "x-attribute-editor" \
+        "@{project-dir}/src/service/exclude/x-attribute-editor"
 
     # notifications
     container::add_service "system-notification" \
