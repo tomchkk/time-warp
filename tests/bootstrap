@@ -4,3 +4,25 @@ __script="$(readlink "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}")"
 
 __test_dir="$(cd "$(dirname "$__script")"; pwd)"
 __project_dir="$(dirname "$__test_dir")"
+
+source "$__project_dir/.env.test"
+
+__org_tmp="$TMPDIR${ORG_ID}.${APP_NAME}.${APP_ENV}"
+
+__make_test=(
+    --file="$__project_dir/Makefile"
+    --warn-undefined-variables
+    "test"
+    org_tmp="$__org_tmp"
+)
+make ${__make_test[@]}
+
+##
+# Makes a temp directory within the app test temp directory, returning the name
+# of the temp file.
+##
+time_warp_test::mktmp_dir() {
+    local dir=$(mktemp -d)
+
+    echo $(mv -v "$dir" "$__org_tmp" | sed -E 's/.* -> (.*)/\1/')
+}

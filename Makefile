@@ -19,6 +19,7 @@ profiles: user_config
 user_config:
 	@mkdir -p ${user_config}
 
+test: org_tmp
 
 run: files cache_dir log_dir org_tmp
 
