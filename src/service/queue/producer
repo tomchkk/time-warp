@@ -66,6 +66,7 @@ producer::produce() {
                     "PUBLISH"
                     --producer-pid "$$"
                     --topic "$__producer_topic"
+                    --event "$event"
                     --path "$path"
                 )
                 message_bus::dispatch_message ${message[@]} &
