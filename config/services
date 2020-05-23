@@ -38,7 +38,10 @@ __services::define_parameters() {
     container::add_scalar "time-machine-exclude-topic" "time-machine-exclude"
 
     # watchexec producer events
-    container::add_array "excluding-producer-events" -- "created" -- "renamed"
+    container::add_array "excluding-producer-events" \
+        -- "create" \
+        -- "rename" \
+        -- "meta"
 
     # publish action subscribers
     container::add_array "publish-action-subscribers" \

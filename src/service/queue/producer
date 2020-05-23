@@ -18,7 +18,7 @@ fi
 producer::produce() {
     local path_profiles=${1:?"A path profile is required"}
 
-    local events=('created' 'removed' 'renamed' 'written' 'meta')
+    local events=('create' 'remove' 'rename' 'write' 'meta')
     local modifications=(
         'WATCHEXEC_CREATED_PATH'
         'WATCHEXEC_REMOVED_PATH'
