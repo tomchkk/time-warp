@@ -20,6 +20,7 @@ else
     source "$__services_loader" $@
 
     # cache the loaded container services
+    # TODO: consider moving this to a (new) container::dump method
     declare -p \
         __container_names \
         __container_types \
