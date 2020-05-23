@@ -60,8 +60,6 @@ producer::produce() {
             if $(matcher::match $path); then
                 log::info "Matcher matched path '$path'"
 
-                TIME_WARP_PATH_STACK+=("$path")
-
                 local message=(
                     "PUBLISH"
                     --producer-pid "$$"
