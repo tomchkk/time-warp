@@ -5,6 +5,10 @@ __script="$(readlink "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}")"
 __test_dir="$(cd "$(dirname "$__script")"; pwd)"
 __project_dir="$(dirname "$__test_dir")"
 
+source "$__test_dir/../submodules/autoload"
+
+__bash_clash="$tomchkk_private_projects_bash_clash/src/index"
+
 source "$__project_dir/.env.test"
 
 __org_tmp="$TMPDIR${ORG_ID}.${APP_NAME}.${APP_ENV}"
@@ -18,8 +22,8 @@ __make_test=(
 make ${__make_test[@]}
 
 ##
-# Makes a temp directory within the app test temp directory, returning the name
-# of the temp file.
+# Makes a temp directory within the app test temp directory, returning the path
+# to the created.
 ##
 time_warp_test::mktmp_dir() {
     local dir=$(mktemp -d)
