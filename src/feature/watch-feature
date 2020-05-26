@@ -4,7 +4,8 @@ __watch_feature_options_resolver=${1:?"An options resolver is required"}
 __watch_feature_consumer=${2:?"A consumer is required"}
 __watch_feature_bus=${3:?"A message bus is required"}
 __watch_feature_logger=${4:?"A logger is required"}
-__watch_feature_watchexec_debug=${5:-false}
+__watch_feature_fifo=${5:?"The fifo pipe path is required"}
+__watch_feature_watchexec_debug=${6:-false}
 
 source $__watch_feature_options_resolver
 source $__watch_feature_logger
@@ -23,6 +24,12 @@ __watch_feature::on_exit() {
 feature::watch() {
     local profile="${1:?"A profile file or directory is required"}"
     local dirs="${@:2}"
+
+    if [[ -p "$__watch_feature_fifo" ]]; then
+        echo "Unable to start watch: consumer is already running"
+
+        return 1
+    fi
 
     local filters=$(options_resolver::resolve_filters "$profile")
     local watches=$(options_resolver::resolve_watches "$dirs")

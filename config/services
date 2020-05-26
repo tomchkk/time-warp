@@ -130,6 +130,7 @@ __services::define_services() {
             -- "@excluding-consumer" \
             -- "@message-bus" \
             -- "@stdout-logger" \
+            -- "@excluding-pipe" \
             -- "$WATCHEXEC_DEBUG"
 
     # consumers
