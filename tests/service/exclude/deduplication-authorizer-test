@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+source "$(dirname "${BASH_SOURCE[0]}")/../../bootstrap"
+
+deduplication_authorizer_test::before_each() {
+    local authorizer_args=(
+        "$__test_dir/stubs/bash-logger"
+        "$__bash_clash"
+        "$__test_dir/service/exclude/stubs/message-cache"
+    )
+
+    source "$__project_dir/src/service/exclude/deduplication-authorizer" \
+        "${authorizer_args[@]}"
+}
+
+deduplication_authorizer_test::test_is_authorized() {
+    local actual expected
+    local message message_args
+
+    # does not authorize an event that is not handled
+    message="$(__deduplication_authorizer_test::get_message "non-event")"
+    actual="$(authorizer::is_authorized "${message[@]}"; echo $?)"
+    bash_assert::assert_equals 1 "$actual"
+
+    # handles but does not authorize a 'meta' event
+    message="$(__deduplication_authorizer_test::get_message "meta")"
+    actual="$(authorizer::is_authorized "${message[@]}"; echo $?)"
+    bash_assert::assert_equals 1 "$actual"
+
+    # handles and authorizes a 'create' event for a uncached message
+    message=$(__deduplication_authorizer_test::get_message "create")
+    bash_test::mock "message_cache::contains" "" 1
+    actual="$(authorizer::is_authorized "${message[@]}"; echo $?)"
+    bash_assert::assert_equals 0 "$actual"
+
+    # handles but does not authorize a 'create' event for a cached message
+    message=$(__deduplication_authorizer_test::get_message "create")
+    bash_test::mock "message_cache::contains" "" 0
+    actual="$(authorizer::is_authorized "${message[@]}"; echo $?)"
+    bash_assert::assert_equals 1 "$actual"
+}
+
+__deduplication_authorizer_test::get_message() {
+    local message=(
+        --topic "test-topic"
+        --event "${1:-"test-event"}"
+        --path "${2:-"path/2/dir"}"
+        --timestamp="${3:-$(date +"%s")}"
+    )
+
+    echo ${message[@]}
+}

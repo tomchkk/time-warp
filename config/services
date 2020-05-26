@@ -45,8 +45,16 @@ __services::define_parameters() {
 
     # publish action subscribers
     container::add_array "publish-action-subscribers" \
+        -- "\@authorizing-events-subscriber::@time-machine-exclude-topic" \
         -- "\@excluding-action-subscriber::@time-machine-exclude-topic" \
         -- "\@excluding-notification-subscriber::@time-machine-exclude-topic"
+
+    # authorizer config
+    container::add_array "excluding-authorizers" \
+        -- "@deduplication-authorizer"
+        # TODO - add authorizers:
+        # - path-exception-authorizer
+        # - path-already-excluded-authorizer
 
     # notification config
     container::add_array "excluding-notifications" \
@@ -211,6 +219,11 @@ __services::define_services() {
             -- "@view-dir"
 
     # subscribers
+    container::add_service "authorizing-events-subscriber" \
+        "@{project-dir}/src/subscriber/authorizing-subscriber" \
+            -- "@stdout-logger" \
+            -- "@excluding-authorizers"
+
     container::add_service "excluding-action-subscriber" \
         "@{project-dir}/src/subscriber/excluding-subscriber" \
             -- "@bash-clash" \
@@ -222,10 +235,21 @@ __services::define_services() {
             -- "@excluding-notifications"
 
     # exclude services
+    container::add_service "deduplication-authorizer" \
+        "@{project-dir}/src/service/exclude/deduplication-authorizer" \
+            -- "@stdout-logger" \
+            -- "@bash-clash" \
+            -- "@message-cache"
+
     container::add_service "exclude-service" \
         "@{project-dir}/src/service/exclude/exclude-service" \
             -- "@stdout-logger" \
             -- "@time-machine-excluder"
+
+    container::add_service "message-cache" \
+        "@{project-dir}/src/service/exclude/message-cache" \
+            -- "@{cache-dir}/messages" \
+            -- "$MESSAGE_CACHE_STL"
 
     container::add_service "time-machine-excluder" \
         "@{project-dir}/src/service/exclude/time-machine-excluder" \

@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+__authorizing_subscriber_logger="${1:?"A logger is required"}"
+__authorizing_subscriber_authorizers="${@:2}"
+
+source "$__authorizing_subscriber_logger"
+
+##
+# Handles the published topic event.
+##
+subscriber::on_publish() {
+    log::info "Checking for event authorization"
+
+    for authorizer in ${__authorizing_subscriber_authorizers[@]}; do
+        if ! $(source "$authorizer" && authorizer::is_authorized $@); then
+            log::debug "Authorization denied by '$authorizer' authorizer"
+
+            # stop propagation of unauthorized events
+            return 1
+        fi
+
+        log::debug "Authorization granted by '$authorizer' authorizer"
+    done
+
+    return 0
+}

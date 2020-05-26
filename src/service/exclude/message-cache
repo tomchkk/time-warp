@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+__message_cache_dir="${1:?"A message cache dir is required"}"
+__message_cache_stl="${2:?"A 'seconds to live' value is required"}"
+
+if [[ ! -d "$__message_cache_dir" ]]; then
+    mkdir -p "$__message_cache_dir"
+fi
+
+##
+# Adds an item to the message cache.
+##
+message_cache::add() {
+    local item="${1:?"A cache item is required"}"
+
+    if $(message_cache::contains "$item"); then
+        return 1
+    fi
+
+    touch "$__message_cache_dir/$item"
+
+    return 0
+}
+
+##
+# Removes an item from the message cache.
+##
+message_cache::remove() {
+    local item="${1:?"A cache item is required"}"
+
+    if ! $(message_cache::contains "$item"); then
+        return 1
+    fi
+
+    rm "$__message_cache_dir/$item"
+
+    return 0
+}
+
+##
+# Determines if the message cache contains a given item.
+##
+message_cache::contains() {
+    local item="${1:?"A cache item is required"}"
+
+    if [[ -z "$(ls -A $__message_cache_dir)" ]]; then
+        # an empty cache can't contain anything
+        return 1
+    fi
+
+    __message_cache::invalidate
+
+    if [[ ! -e "$__message_cache_dir/$item" ]]; then
+        # the item is not in the cache
+        return 1
+    fi
+
+    return 0
+}
+
+##
+# Removes items from the cache with a creation date older than the configured
+# invalidation period.
+##
+__message_cache::invalidate() {
+    local created period
+
+    local item; for item in $(ls "$__message_cache_dir"); do
+        created=$(stat -f "%Sm" -t "%s" "$__message_cache_dir/$item")
+        period=$(($created + $__message_cache_stl))
+
+        if [[ "$period" < $(date +%s) ]]; then
+            rm "$__message_cache_dir/$item"
+        fi
+    done
+}

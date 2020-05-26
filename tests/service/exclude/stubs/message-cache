@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+message_cache::add() {
+    :
+}
+
+message_cache::remove() {
+    :
+}
+
+message_cache::contains() {
+    :
+}

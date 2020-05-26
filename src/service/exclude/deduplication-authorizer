@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+__deduplication_authorizer_logger="${1:?"A logger is required"}"
+__deduplication_authorizer_bash_clash="${2:?"bash-clash is required"}"
+__deduplication_authorizer_message_cache="${3:?"A message cache is required"}"
+
+source "$__deduplication_authorizer_logger"
+source "$__deduplication_authorizer_message_cache"
+
+##
+# Determines if the given message is authorized for further processing.
+##
+authorizer::is_authorized() {
+    if ! $(__deduplication_authorizer::authorize "$@"); then
+        return 1
+    fi
+
+    return 0
+}
+
+##
+# Attempts to authorize the given message by ruling-out duplicates and unhandled
+# events.
+##
+__deduplication_authorizer::authorize() {
+    source "$__deduplication_authorizer_bash_clash" $@
+
+    log::info "Checking event processing status"
+
+    local event=$(bash_clash::get "event")
+    local message_hash=$(
+        echo $(bash_clash::get "topic") $(bash_clash::get "path") | md5
+    )
+
+    case "$event" in
+        create|rename)
+            if $(message_cache::contains "$message_hash"); then
+                log::debug "Status: processing on-going."
+
+                return 1 # not authorized
+            fi
+
+            log::debug "Status: initiating processing with the '$event' event"
+            message_cache::add "$message_hash"
+
+            return 0 # authorized
+        ;;
+        meta)
+            log::debug "Status: halting processing with the '$event' event"
+            message_cache::remove "$message_hash"
+
+            return 1 # not authorized
+        ;;
+        *)
+            log::error "Error: the '$event' event is not supported"
+
+            return 1 # not authorized
+        ;;
+    esac
+}
