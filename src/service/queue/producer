@@ -67,7 +67,10 @@ producer::produce() {
                     --event "$event"
                     --path "$path"
                 )
-                message_bus::dispatch_message ${message[@]} &
+
+                # this statement must be synchronous, calling it asynchronously
+                # causes messages to be missed
+                message_bus::dispatch_message ${message[@]}
             else
                 log::info "Matcher did not match path '$path'"
             fi
