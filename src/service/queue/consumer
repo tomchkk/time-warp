@@ -37,7 +37,7 @@ consumer::consume() {
     local message_count=0
     local message=""
 
-    log::info "Queue consumer started"
+    log::debug "Queue consumer started"
 
     while true; do
         if read -r message < $__consumer_fifo; then
