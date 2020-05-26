@@ -9,8 +9,13 @@ for file in container loader; do
         "$tomchkk_private_projects_bash_clash/src/index"
 done
 
+__services_cache_dir="$__cache_dir/container"
+if [[ ! -d "$__services_cache_dir" ]]; then
+    mkdir -p "$__services_cache_dir"
+fi
+
 __services_loader="$__project_dir/config/services"
-__services_cache="$__cache_dir/$(md5 -q "$__services_loader")"
+__services_cache="$__services_cache_dir/$(md5 -q "$__services_loader")"
 
 if [[ -f "$__services_cache" ]]; then
     # services cache is valid, we'll just load that
@@ -29,10 +34,11 @@ else
 fi
 
 # load uncacheable service config
+container::add_scalar "container-cache-dir" "$__services_cache_dir"
 container::add_scalar "stdout-channel" $(tty)
 container::add_scalar "file-channel" "@{log-dir}/$(date '+%Y-%m-%d').log"
 
 # extend the 'source' builtin with bash-container loader functionality
 source() { loader::source $@; }
 
-unset __services_loader __services_cache
+unset __services_cache_dir __services_loader __services_cache
