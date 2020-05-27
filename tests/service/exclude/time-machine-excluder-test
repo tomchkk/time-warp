@@ -17,15 +17,15 @@ time_machine_excluder_test::test_exclude() {
 
     # an error code is returned for a non-existent path
     time_machine_excluder::exclude "non-existent/path" 2>/dev/null
-    bash_assert::assert_equals "1" "$?"
+    bash_test::assert_equals "1" "$?"
 
     # a success code is returned and xattrs are updated for a valid paths
     time_machine_excluder::exclude ${paths[@]}
-    bash_assert::assert_equals "0" "$?"
-    bash_assert::assert_equals \
+    bash_test::assert_equals "0" "$?"
+    bash_test::assert_equals \
         "com.apple.metadata:com_apple_backup_excludeItem: com.apple.backupd" \
         "$(xattr -l "$dir0")"
-    bash_assert::assert_equals \
+    bash_test::assert_equals \
         "com.apple.metadata:com_apple_backup_excludeItem: com.apple.backupd" \
         "$(xattr -l "$dir1")"
 }

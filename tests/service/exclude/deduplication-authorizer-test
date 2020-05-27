@@ -20,24 +20,24 @@ deduplication_authorizer_test::test_is_authorized() {
     # does not authorize an event that is not handled
     message="$(__deduplication_authorizer_test::get_message "non-event")"
     actual="$(authorizer::is_authorized "${message[@]}"; echo $?)"
-    bash_assert::assert_equals 1 "$actual"
+    bash_test::assert_equals 1 "$actual"
 
     # handles but does not authorize a 'meta' event
     message="$(__deduplication_authorizer_test::get_message "meta")"
     actual="$(authorizer::is_authorized "${message[@]}"; echo $?)"
-    bash_assert::assert_equals 1 "$actual"
+    bash_test::assert_equals 1 "$actual"
 
     # handles and authorizes a 'create' event for a uncached message
     message=$(__deduplication_authorizer_test::get_message "create")
     bash_test::mock "message_cache::contains" "" 1
     actual="$(authorizer::is_authorized "${message[@]}"; echo $?)"
-    bash_assert::assert_equals 0 "$actual"
+    bash_test::assert_equals 0 "$actual"
 
     # handles but does not authorize a 'create' event for a cached message
     message=$(__deduplication_authorizer_test::get_message "create")
     bash_test::mock "message_cache::contains" "" 0
     actual="$(authorizer::is_authorized "${message[@]}"; echo $?)"
-    bash_assert::assert_equals 1 "$actual"
+    bash_test::assert_equals 1 "$actual"
 }
 
 __deduplication_authorizer_test::get_message() {

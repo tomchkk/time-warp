@@ -17,24 +17,24 @@ message_cache_test::test_contains() {
 
     # an empty cache can't contain anything
     actual="$(message_cache::contains "item-1"; echo $?)"
-    bash_assert::assert_equals 1 "$actual"
+    bash_test::assert_equals 1 "$actual"
 
     # the cache does contain an existing item
     touch "$message_cache_dir/item-1"
     actual="$(message_cache::contains "item-1"; echo $?)"
-    bash_assert::assert_equals 0 "$actual"
+    bash_test::assert_equals 0 "$actual"
 
     # the cache does not contain an non-existing item when not empty
     actual="$(message_cache::contains "item-2"; echo $?)"
-    bash_assert::assert_equals 1 "$actual"
+    bash_test::assert_equals 1 "$actual"
 
     # invalid items are removed from the cache as a consequence of calling this
     # method
     touch -t $(date -v-1d +%Y%m%d%H%M) "$message_cache_dir/item-2"
     actual="$(message_cache::contains "item-1"; echo $?)"
-    bash_assert::assert_equals 0 "$actual"
+    bash_test::assert_equals 0 "$actual"
     actual="$(message_cache::contains "item-2"; echo $?)"
-    bash_assert::assert_equals 1 "$actual"
+    bash_test::assert_equals 1 "$actual"
 }
 
 message_cache_test::test_add() {
@@ -42,13 +42,13 @@ message_cache_test::test_add() {
 
     # an item is added to the cache
     actual=$(message_cache::add "item-1"; echo $?)
-    bash_assert::assert_equals 0 "$actual"
+    bash_test::assert_equals 0 "$actual"
     actual=$([[ -f "$message_cache_dir/item-1" ]] && echo 0)
-    bash_assert::assert_equals 0 "$actual"
+    bash_test::assert_equals 0 "$actual"
 
     # an existing item is not re-added to the cache
     actual=$(message_cache::add "item-1"; echo $?)
-    bash_assert::assert_equals 1 "$actual"
+    bash_test::assert_equals 1 "$actual"
 }
 
 message_cache_test::test_remove() {
@@ -56,10 +56,10 @@ message_cache_test::test_remove() {
 
     # an non-existing item is not removed from the cache
     actual=$(message_cache::remove "item-1"; echo $?)
-    bash_assert::assert_equals 1 "$actual"
+    bash_test::assert_equals 1 "$actual"
 
     # an existing item is removed from the cache
     touch "$message_cache_dir/item-1"
     actual=$(message_cache::remove "item-1"; echo $?)
-    bash_assert::assert_equals 0 "$actual"
+    bash_test::assert_equals 0 "$actual"
 }
