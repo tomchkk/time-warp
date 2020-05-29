@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+
+source "$(dirname "${BASH_SOURCE[0]}")/../../bootstrap"
+
+producer_test::before_each() {
+    local logger="$__test_dir/stubs/bash-logger"
+    local bash_clash="$__bash_clash"
+    local bus="/dev/null"
+    local topic="test-topic"
+    local matcher="/dev/null"
+    local watching=("create" "rename" "meta")
+
+    local producer_args=(
+        "$logger"
+        "$bash_clash"
+        "$bus"
+        "$topic"
+        "$matcher"
+        "$watching"
+    )
+    source "$__project_dir/src/service/queue/producer" ${producer_args[@]}
+}
+
+producer_test::after_each() {
+    __producer_test::unset_modifications
+}
+
+producer_test::test_produce() {
+    local actual expected message
+    local profiles="/dev/null"
+
+    # method exits cleanly if no modifications are detected
+    actual=$(producer::produce "$profiles"; echo $?)
+    bash_test::assert_equals 0 "$actual"
+
+    # unwatched modification is ignored
+    WATCHEXEC_WRITTEN_PATH="path/2/file"
+    actual=$(producer::produce "$profiles"; echo $?)
+    bash_test::assert_equals 0 "$actual"
+    __producer_test::unset_modifications
+
+    # watched modification for unmatched path does nothing
+    WATCHEXEC_CREATED_PATH="path/2/file"
+    bash_test::mock "matcher::match" "" 1
+    actual=$(producer::produce "$profiles"; echo $?)
+    bash_test::assert_equals 0 "$actual"
+    __producer_test::unset_modifications
+
+    # watched modification for matched path dispatches a message
+    WATCHEXEC_CREATED_PATH="path/2/file"
+    bash_test::mock "matcher::match" "" 0
+    bash_test::mock "message_bus::dispatch_message" '$@' 0
+    message=$(producer::produce "$profiles")
+    actual="$?"
+    bash_test::assert_contains "$message" "--path path/2/file"
+    bash_test::assert_equals 0 "$actual"
+    __producer_test::unset_modifications
+
+    # watched modifications for two matched paths dispatches two messages
+    WATCHEXEC_CREATED_PATH="file-1:file-2"
+    WATCHEXEC_COMMON_PATH="path/2/"
+    bash_test::mock "matcher::match" "" 0
+    bash_test::mock "message_bus::dispatch_message" '$@' 0
+    message=$(producer::produce "$profiles")
+    actual="$?"
+    bash_test::assert_equals 0 "$actual"
+    bash_test::assert_contains "$message" "--path path/2/file-1"
+    bash_test::assert_contains "$message" "--path path/2/file-2"
+    __producer_test::unset_modifications
+
+    # watched modifications for a matched path with spaces functions correctly
+    WATCHEXEC_CREATED_PATH="path/2/file 1"
+    bash_test::mock "matcher::match" "" 0
+    bash_test::mock "message_bus::dispatch_message" '$@' 0
+    message=$(producer::produce "$profiles")
+    actual="$?"
+    bash_test::assert_equals 0 "$actual"
+    bash_test::assert_contains "$message" "--path path/2/file 1"
+    __producer_test::unset_modifications
+
+    # watched modifications for matched paths with spaces functions correctly
+    WATCHEXEC_CREATED_PATH="file 1:file 2"
+    WATCHEXEC_COMMON_PATH="path/2/"
+    bash_test::mock "matcher::match" "" 0
+    bash_test::mock "message_bus::dispatch_message" '$@' 0
+    message=$(producer::produce "$profiles")
+    actual="$?"
+    bash_test::assert_equals 0 "$actual"
+    bash_test::assert_contains "$message" "--path path/2/file 1"
+    bash_test::assert_contains "$message" "--path path/2/file 2"
+    __producer_test::unset_modifications
+}
+
+__producer_test::unset_modifications() {
+    local modification_variables=(
+        WATCHEXEC_CREATED_PATH
+        WATCHEXEC_REMOVED_PATH
+        WATCHEXEC_RENAMED_PATH
+        WATCHEXEC_WRITTEN_PATH
+        WATCHEXEC_META_CHANGED_PATH
+        WATCHEXEC_COMMON_PATH
+    )
+
+    unset ${modification_variables[@]}
+}

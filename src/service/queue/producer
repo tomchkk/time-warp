@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
 __producer_logger=${1:?"A logger is required"}
-__producer_bus=${2:?"A message bus is required"}
-__producer_topic=${3:?"A publishable topic is required"}
-__producer_profile_matcher=${4:?"A profile matcher is required"}
-__producer_watching=${@:5}
+__producer_bash_clash=${2:?"bash-clash is required"}
+__producer_bus=${3:?"A message bus is required"}
+__producer_topic=${4:?"A publishable topic is required"}
+__producer_profile_matcher=${5:?"A profile matcher is required"}
+__producer_watching=${@:6}
 
 source $__producer_logger
 
@@ -19,7 +20,7 @@ producer::produce() {
     local path_profiles=${1:?"A path profile is required"}
 
     local events=('create' 'remove' 'rename' 'write' 'meta')
-    local modifications=(
+    local changes=(
         'WATCHEXEC_CREATED_PATH'
         'WATCHEXEC_REMOVED_PATH'
         'WATCHEXEC_RENAMED_PATH'
@@ -27,17 +28,14 @@ producer::produce() {
         'WATCHEXEC_META_CHANGED_PATH'
     )
 
-    for key in ${!modifications[*]}; do
-        local event="${events[$key]}"
-        local modification="${modifications[$key]}"
-        # TODO: fix this (with tests)
-        # - it will probably fail when one of the paths contains a space...
-        local paths=($(echo "${!modification}" | sed -E 's/:/ /g'))
-
-        if [[ -z "${paths[@]}" ]]; then
-            # no notable event occurred: no paths were given
+    for key in ${!changes[@]}; do
+        if [[ -z ${!changes[$key]} ]]; then
+            # no detectable change occurred: no changec path was given
             continue
-        elif ! $(__producer::event_is_watched $event); then
+        fi
+
+        local event="${events[$key]}"
+        if ! $(__producer::event_is_watched $event); then
             log::debug "Ignoring '$event' event: not watched"
 
             continue
@@ -46,10 +44,13 @@ producer::produce() {
         log::debug "Watched event '$event' was fired"
 
         # now that shit is getting real, let's charge our weapons!
-        source $__producer_profile_matcher "$path_profiles"
-        source $__producer_bus
+        source "$__producer_profile_matcher" "$path_profiles"
+        source "$__producer_bus"
+        source "$__producer_bash_clash" "$(
+            __producer::parameterize_paths "${!changes[$key]}"
+        )"
 
-        local path; for path in ${paths[@]}; do
+        local path; for path in "${bash_clash_positionals[@]}"; do
             # $path will be a path stub if $WATCHEXEC_COMMON_PATH is set,
             # otherwise it will be a full path. So, either way, the two can
             # be concatenated to get a full path to a changed file
@@ -87,4 +88,13 @@ __producer::event_is_watched() {
     fi
 
     return 1
+}
+
+##
+# Modifies the given paths string to a format interpretable by bash-clash -
+# i.e.:
+# - path/2/file:path/2/other-file -> path/2/file -- path/2/other-file
+##
+__producer::parameterize_paths() {
+    echo "$@" | sed -E 's/:/ -- /g'
 }

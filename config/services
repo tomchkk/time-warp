@@ -175,6 +175,7 @@ __services::define_services() {
     container::add_service "excluding-producer" \
         "@{project-dir}/src/service/queue/producer" \
             -- "@stdout-logger" \
+            -- "@bash-clash" \
             -- "@message-bus" \
             -- "@time-machine-exclude-topic" \
             -- "@profile-matcher" \
