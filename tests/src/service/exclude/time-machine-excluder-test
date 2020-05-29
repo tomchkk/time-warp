@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-source "$(dirname "${BASH_SOURCE[0]}")/../../bootstrap"
+__script_dir="$(dirname "${BASH_SOURCE[0]}")"
+source "$__script_dir/../../../bootstrap"
 
 x_attribute_editor="$__project_dir/src/service/exclude/x-attribute-editor"
 time_machine_excluder="$__project_dir/src/service/exclude/time-machine-excluder"

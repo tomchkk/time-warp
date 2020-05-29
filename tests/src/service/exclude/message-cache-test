@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-source "$(dirname "${BASH_SOURCE[0]}")/../../bootstrap"
+__script_dir="$(dirname "${BASH_SOURCE[0]}")"
+source "$__script_dir/../../../bootstrap"
 
 message_cache="$__project_dir/src/service/exclude/message-cache"
 message_cache_dir=""

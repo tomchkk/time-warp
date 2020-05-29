@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-source "$(dirname "${BASH_SOURCE[0]}")/../../bootstrap"
+__script_dir="$(dirname "${BASH_SOURCE[0]}")"
+source "$__script_dir/../../../bootstrap"
 
 producer_test::before_each() {
     local logger="$__test_dir/stubs/bash-logger"

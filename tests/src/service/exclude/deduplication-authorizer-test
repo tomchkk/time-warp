@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
-source "$(dirname "${BASH_SOURCE[0]}")/../../bootstrap"
+__script_dir="$(dirname "${BASH_SOURCE[0]}")"
+source "$__script_dir/../../../bootstrap"
 
 deduplication_authorizer_test::before_each() {
     local authorizer_args=(
         "$__test_dir/stubs/bash-logger"
         "$__bash_clash"
-        "$__test_dir/service/exclude/stubs/message-cache"
+        "$__script_dir/stubs/message-cache"
     )
 
     source "$__project_dir/src/service/exclude/deduplication-authorizer" \
