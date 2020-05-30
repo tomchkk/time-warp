@@ -50,8 +50,7 @@ feature::watch() {
 
     source $__watch_feature_consumer && consumer::consume &
 
-    log::info "Launching queue consumer with pid: $!"
-    log::info "Launching queue producer with pid: $$"
+    log::info "Launching $APP_NAME watch (consumer pid $! | producer pid $$)"
 
     local resolved=(
         ${watches[@]}
