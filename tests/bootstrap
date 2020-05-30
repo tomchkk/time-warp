@@ -26,7 +26,14 @@ make ${__make_test[@]}
 # to the created.
 ##
 time_warp_test::mktmp_dir() {
-    local dir=$(mktemp -d)
+    local name="$1"
 
-    echo $(mv -v "$dir" "$__org_tmp" | sed -E 's/.* -> (.*)/\1/')
+    local dir=$(mv -v "$(mktemp -d)" "$__org_tmp" | sed -E 's/.* -> (.*)/\1/')
+
+    if [[ -n "$name" ]]; then
+        mkdir -p "$dir/$name"
+        dir="$dir/$name"
+    fi
+
+    echo "$dir"
 }
