@@ -4,20 +4,13 @@ __script_dir="$(dirname "${BASH_SOURCE[0]}")"
 source "$__script_dir/../../../bootstrap"
 
 producer_test::before_each() {
-    local logger="$__test_dir/stubs/bash-logger"
-    local bash_clash="$__bash_clash"
-    local bus="/dev/null"
-    local topic="test-topic"
-    local matcher="/dev/null"
-    local watching=("create" "rename" "meta")
-
     local producer_args=(
-        "$logger"
-        "$bash_clash"
-        "$bus"
-        "$topic"
-        "$matcher"
-        "$watching"
+        "$__test_dir/stubs/bash-logger"
+        "$__bash_clash"
+        "/dev/null" # message-bus
+        "test-topic"
+        "/dev/null" # matcher
+        "create" "rename" "meta"
     )
     source "$__project_dir/src/service/queue/producer" ${producer_args[@]}
 }
