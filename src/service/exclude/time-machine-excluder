@@ -11,9 +11,9 @@ __X_VAL="com.apple.backupd"
 # Excludes the given paths from macOS Time Machine backups.
 ##
 time_machine_excluder::exclude() {
-    local paths="$@"
+    local path="$1"
 
-    x_attribute_editor::write "$__X_KEY" "$__X_VAL" "$paths"
+    x_attribute_editor::write "$__X_KEY" "$__X_VAL" "$path"
 
     return $?
 }

@@ -9,9 +9,11 @@ source $__message_handler_logger
 ##
 message_handler::handle_message() {
     local message="${1:?"A message type is required"}"
-    local args=${@:2}
+    local args="${@:2}"
 
     local action="@$(echo $message | tr '[:upper:]' '[:lower:]')-action"
 
-    source $action && action::process_action $args
+    log::debug "Handling '$action'" ${args[@]}
+
+    source $action && action::process_action ${args[@]}
 }

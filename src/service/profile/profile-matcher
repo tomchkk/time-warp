@@ -7,20 +7,46 @@ __profile_matcher_logger=${4:?"A logger is required"}
 
 __profile_matcher_profiles=${5:?"A profile file or directory is required"}
 
-source $__profile_matcher_profile_manager "$__profile_matcher_profiles"
+source "$__profile_matcher_profile_manager" "$__profile_matcher_profiles"
 source "$__profile_matcher_filter_tester"
 source "$__profile_matcher_predicate_tester"
+
+##
+# Matches a given path against a set of predicates
+##
+matcher::match() {
+    local path="$@"
+
+    source "$__profile_matcher_logger"
+
+    for profile in $(profile_manager::get_profiles); do
+        if ! $(__profile_matcher::path_matches_filters "$profile" "$path")
+        then
+            continue # try to match the next profile
+        fi
+
+        # The path matches the profile. If it also matches all of the profile's
+        # predicates, then we have our match
+        if $(__profile_matcher::path_matches_predicates "$profile" "$path")
+        then
+            return 0
+        fi
+    done
+
+    return 1
+}
 
 ##
 # Determines if all filters parsed from the given profile match the given path.
 #
 __profile_matcher::path_matches_filters () {
-    local profile=$1
-    local path=$2
+    local profile="$1"
+    local path="${@:2}"
+
     local flag=false
     local filter
 
-    for item in $(profile_mananger::get_filters $profile); do
+    for item in $(profile_mananger::get_filters "$profile"); do
         case "$item" in
             -f*|--filter*)
                 if ! $(filter_tester::test_filter "$item" "$path"); then
@@ -45,11 +71,12 @@ __profile_matcher::path_matches_filters () {
 # Determines if all predicates parsed from the given profile match the given path.
 ##
 __profile_matcher::path_matches_predicates() {
-    local profile=$1
-    local path=$2
+    local profile="$1"
+    local path="${@:2}"
+
     local flag=false
 
-    for item in $(profile_mananger::get_predicates $profile); do
+    for item in $(profile_mananger::get_predicates "$profile"); do
         case "$item" in
             -d*|--directory*)
                 if ! $(predicate_tester::test_directory "$item" "$path"); then
@@ -77,28 +104,4 @@ __profile_matcher::path_matches_predicates() {
     done
 
     $flag && return 0 || return 1
-}
-
-##
-# Matches a given path against a set of predicates
-##
-matcher::match() {
-    local path=$1
-    local flag=false
-
-    source $__profile_matcher_logger
-
-    for profile in $(profile_manager::get_profiles); do
-        if ! $(__profile_matcher::path_matches_filters $profile $path); then
-            continue # try to match the next profile
-        fi
-
-        # The path matches the profile. If it also matches all of the profile's
-        # predicates, then we have our match
-        if $(__profile_matcher::path_matches_predicates $profile $path); then
-            return 0
-        fi
-    done
-
-    return 1
 }

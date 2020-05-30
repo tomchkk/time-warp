@@ -10,10 +10,10 @@ source $__publish_action_logger
 # Publishes messages received for particular topics
 ##
 action::process_action() {
-    source $__publish_action_bash_clash $@
+    source "$__publish_action_bash_clash" "$@"
 
-    local topic=$(bash_clash::get "topic")
-    local path=$(bash_clash::get "path")
+    local topic="$(bash_clash::get "topic")"
+    local path="$(bash_clash::get "path")"
 
     log::info "Publishing message for topic '$topic' and path '$path'"
 
@@ -21,10 +21,10 @@ action::process_action() {
         # expected subscriber format: @subscriber-alias::topic-name
 
         if [[ "$subscriber_topic" =~ ^(.+)::"$topic"$ ]]; then
-            local subscriber=${BASH_REMATCH[1]}
+            local subscriber="${BASH_REMATCH[1]}"
             log::debug "Found subscriber: '$subscriber'"
 
-            if ! $(source $subscriber && subscriber::on_publish "$@"); then
+            if ! $(source "$subscriber" && subscriber::on_publish "$@"); then
                 log::info "'$subscriber' signaled to stop propagation of 'publish' action."
 
                 return 0
