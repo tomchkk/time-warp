@@ -2,22 +2,26 @@
 	path = submodules/tomchkk-private/projects/bash-container
 	url = git@gitlab.com:tomchkk-private/projects/bash-container.git
 	branch = master
+	version = ^0.5.3
 	super = self
 	dependency = submodules/tomchkk-private/projects/bash-clash
 [submodule "tomchkk-private/projects/bash-clash"]
 	path = submodules/tomchkk-private/projects/bash-clash
 	url = git@gitlab.com:tomchkk-private/projects/bash-clash.git
 	branch = master
+	version = ^1.0.9
 	super = submodules/tomchkk-private/projects/bash-container
 	super = self
 [submodule "tomchkk-private/projects/bash-logger"]
 	path = submodules/tomchkk-private/projects/bash-logger
 	url = git@gitlab.com:tomchkk-private/projects/bash-logger.git
 	branch = master
+	version = ^1.0.1
 	super = self
 [submodule "tomchkk-private/projects/bash-test"]
 	path = submodules/tomchkk-private/projects/bash-test
 	url = git@gitlab.com:tomchkk-private/projects/bash-test.git
 	branch = master
+	version = ^0.4.3
 	super = self
 	dev = true
