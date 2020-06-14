@@ -20,9 +20,11 @@ Options:
 
 Commands:
     queue       Manage $APP_NAME's queue functionality
+    scan        Scan for existing files matching configured profiles and
+                optionally exclude matches from Time Machine backups
     services    Manage $APP_NAME's services
-    watch       Watch for changes to files matching configured profiles, and
-                optionally take action on identified items
+    watch       Watch for changes to files matching configured profiles and
+                optionally exclude matches from Time Machine backups
 
 EOF
 }
@@ -40,6 +42,10 @@ case "$opt" in
     ;;
     queue)
         source "$__app_command_queue_command" $args
+    ;;
+    scan)
+        # TODO: implement the scanner
+        echo "scan!"
     ;;
     services)
         source "$__app_command_services_command" $args
