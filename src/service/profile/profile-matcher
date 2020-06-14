@@ -43,28 +43,33 @@ __profile_matcher::path_matches_filters () {
     local profile="$1"
     local path="${@:2}"
 
-    local flag=false
-    local filter
+    local matches=false
 
-    for item in $(profile_mananger::get_filters "$profile"); do
-        case "$item" in
+    local option
+    for option in $(profile_manager::get_options "$profile"); do
+        case "$option" in
             -f*|--filter*)
-                if ! $(filter_tester::test_filter "$item" "$path"); then
-                    log::debug "Path '$path' does not match filter '$item'"
+                local filter="$option"
+
+                if ! $(filter_tester::test_filter "$filter" "$path"); then
+                    log::debug "Path '$path' does not match filter '$filter'"
+
                     return 1
                 fi
 
-                log::debug "Path '$path' matches filter '$item'"
-                flag=true
+                matches=true
+
+                log::debug "Path '$path' matches filter '$filter'"
             ;;
             *)
-                log::debug "Filter '$item' is not relevant for path matching"
+                log::debug "Option '$option' is not relevant for path matching"
+
                 continue
             ;;
         esac
     done
 
-    $flag && return 0 || return 1
+    $matches && return 0 || return 1
 }
 
 ##
@@ -74,34 +79,40 @@ __profile_matcher::path_matches_predicates() {
     local profile="$1"
     local path="${@:2}"
 
-    local flag=false
+    local matches=false
 
-    for item in $(profile_mananger::get_predicates "$profile"); do
-        case "$item" in
+    local predicate
+    for predicate in $(profile_manager::get_predicates "$profile"); do
+        case "$predicate" in
             -d*|--directory*)
-                if ! $(predicate_tester::test_directory "$item" "$path"); then
-                    log::debug "Failed directory test: '$item'"
+                if ! $(predicate_tester::test_directory "$predicate" "$path"); then
+                    log::debug "Failed directory test: '$predicate'"
+
                     return 1
                 fi
 
-                log::debug "Passed directory test: '$item'"
-                flag=true
+                matches=true
+
+                log::debug "Passed directory test: '$predicate'"
             ;;
             -f*|--file*)
-                if ! $(predicate_tester::test_file "$item" "$path"); then
-                    log::debug "Failed file test: '$item'"
+                if ! $(predicate_tester::test_file "$predicate" "$path"); then
+                    log::debug "Failed file test: '$predicate'"
+
                     return 1
                 fi
 
-                log::debug "Passed file test: '$item'"
-                flag=true
+                matches=true
+
+                log::debug "Passed file test: '$predicate'"
             ;;
             *)
-                log::debug "Predicate '$item' is not supported"
+                log::debug "Predicate '$predicate' is not supported"
+
                 continue
             ;;
         esac
     done
 
-    $flag && return 0 || return 1
+    $matches && return 0 || return 1
 }

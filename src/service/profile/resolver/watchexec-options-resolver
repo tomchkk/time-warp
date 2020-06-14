@@ -1,10 +1,55 @@
 #!/usr/bin/env bash
 
 __watchexec_options_resolver_profile_manager=${1:?"A profile manager is required"}
-__watchexec_options_resolver_filter_validator=${2:?"A filter validator is required"}
-__watchexec_options_resolver_logger=${3:?"A logger is required"}
+__watchexec_options_resolver_logger=${2:?"A logger is required"}
 
 source $__watchexec_options_resolver_logger
+
+##
+# Parses watchexec flags from a given profile file or directory.
+##
+options_resolver::resolve_flags() {
+    local profiles="$1"
+
+    source $__watchexec_options_resolver_profile_manager "$profiles"
+
+    local flags=()
+
+    for profile in $(profile_manager::get_profiles); do
+        local flag; for flag in $(profile_manager::get_flags $profile); do
+            if $(__options_resolver::is_valid_flag "$flag"); then
+                flags+=("$flag")
+            else
+                log::debug "'$flag' is not an applicable profile flag"
+            fi
+        done
+    done
+
+    echo ${flags[@]}
+}
+
+##
+# Parses watchexec options from a given profile file or directory.
+##
+options_resolver::resolve_options() {
+    local profiles="$1"
+
+    source $__watchexec_options_resolver_profile_manager "$profiles"
+
+    local options=()
+
+    for profile in $(profile_manager::get_profiles); do
+        local option; for option in $(profile_manager::get_options $profile); do
+            if $(__options_resolver::is_valid_option "$option"); then
+                options+=("$option")
+            else
+                log::debug "'$option' is not an applicable profile filter"
+            fi
+        done
+    done
+
+    echo ${options[@]}
+}
 
 ##
 # Parses watchexec watch options from a given array of paths.
@@ -27,25 +72,35 @@ options_resolver::resolve_watches() {
 }
 
 ##
-# Parses watchexec filters from a given profile file or directory.
+# Determines if the given flag is valid and applicable to profiles.
 ##
-options_resolver::resolve_filters() {
-    local profiles="$1"
+__options_resolver::is_valid_flag() {
+    local flag="${1:?"A flag to validate is required"}"
 
-    source $__watchexec_options_resolver_profile_manager "$profiles"
-    source $__watchexec_options_resolver_filter_validator
+    case "$flag" in
+        --no-vcs-ignore)
+            return 0 ;;
+        --no-default-ignore)
+            return 0 ;;
+        *)
+            return 1 ;;
+    esac
+}
 
-    local filters=()
+##
+# Determines if the given option is valid and applicable to profiles.
+##
+__options_resolver::is_valid_option() {
+    local option="${1:?"An option to validate is required"}"
 
-    for profile in $(profile_manager::get_profiles); do
-        for item in $(profile_mananger::get_filters $profile); do
-            if $(filter_validator::is_valid "$item"); then
-                filters+=("$item")
-            else
-                log::debug "'$item' is not an applicable profile filter"
-            fi
-        done
-    done
-
-    echo ${filters[@]}
+    case "$option" in
+        -e*|--exts*)
+            return 0 ;;
+        -f*|--filter*)
+            return 0 ;;
+        -i*|--ignore*)
+            return 0 ;;
+        *)
+            return 1 ;;
+    esac
 }

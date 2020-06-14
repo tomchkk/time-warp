@@ -31,11 +31,13 @@ feature::watch() {
         return 1
     fi
 
-    local filters=$(options_resolver::resolve_filters "$profile")
+    local flags=$(options_resolver::resolve_flags "$profile")
+    local options=$(options_resolver::resolve_options "$profile")
     local watches=$(options_resolver::resolve_watches "$dirs")
 
-    if [[ -z $filters ]] || [[ -z $watches ]]; then
-        exit 1
+    if [[ -z $watches ]]; then
+        # we can't start a watch without specifying directories to watch
+        return 1
     fi
 
     trap __watch_feature::on_exit SIGINT
@@ -45,17 +47,18 @@ feature::watch() {
     log::info "Launching $APP_NAME watch (consumer pid: $! | producer pid: $$)"
 
     local resolved=(
-        ${watches[@]}
-        ${filters[@]}
-        $($__watch_feature_watchexec_debug && echo "--verbose")
         # only execute the command after the first triggered watch
         --postpone
+        $($__watch_feature_watchexec_debug && echo "--verbose")
+        ${flags[@]}
+        ${options[@]}
+        ${watches[@]}
         # the producer call _must_ be an external call to the application to
         # enable all required config and services
         -- "$APP_NAME" queue --produce "$profile"
     )
 
-    log::debug "Resolved watchexec options: ${resolved[@]}"
+    log::debug "Resolved watchexec options: " ${resolved[@]}
 
     watchexec ${resolved[@]}
 }

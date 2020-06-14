@@ -165,11 +165,7 @@ __services::define_services() {
     container::add_service "watchexec-options-resolver" \
         "@{project-dir}/src/service/profile/resolver/watchexec-options-resolver" \
             -- "@profile-manager" \
-            -- "@watchexec-filter-validator" \
             -- "@stdout-logger"
-
-    container::add_service "watchexec-filter-validator" \
-        "@{project-dir}/src/service/profile/resolver/watchexec-filter-validator"
 
     # producers
     container::add_service "excluding-producer" \

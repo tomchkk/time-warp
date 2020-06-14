@@ -49,20 +49,31 @@ __profile_manager::convert_profile_inode_to_path() {
 }
 
 ##
-# Gets filters from the given profile file.
+# Gets defined flags from the given profile file.
 ##
-profile_mananger::get_filters() {
+profile_manager::get_flags() {
     local profile="$(__profile_manager::convert_profile_inode_to_path $1)"
 
     source $__profile_manager_parser
 
-    echo $(profile_parser::parse_filters "$profile")
+    echo $(profile_parser::parse_flags "$profile")
+}
+
+##
+# Gets defined options from the given profile file.
+##
+profile_manager::get_options() {
+    local profile="$(__profile_manager::convert_profile_inode_to_path $1)"
+
+    source $__profile_manager_parser
+
+    echo $(profile_parser::parse_options "$profile")
 }
 
 ##
 # Gets predicates from the given profile file.
 ##
-profile_mananger::get_predicates() {
+profile_manager::get_predicates() {
     local profile="$(__profile_manager::convert_profile_inode_to_path $1)"
 
     source $__profile_manager_parser

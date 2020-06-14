@@ -1,15 +1,22 @@
 #!/usr/bin/env bash
 
 ##
-# Parses filters from a profile file.
+# Parses flags from a profile file.
 ##
-profile_parser::parse_filters() {
-    echo $(source "$1" && echo ${filters[@]})
+profile_parser::parse_flags() {
+    echo $(unset flags && source "$1" && echo ${flags[@]})
+}
+
+##
+# Parses options from a profile file.
+##
+profile_parser::parse_options() {
+    echo $(unset options && source "$1" && echo ${options[@]})
 }
 
 ##
 # Parses predicates from a profile file.
 ##
 profile_parser::parse_predicates() {
-    echo $(source "$1" && echo ${predicates[@]})
+    echo $(unset predicates && source "$1" && echo ${predicates[@]})
 }

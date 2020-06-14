@@ -1,4 +1,4 @@
-filters=(
+options=(
     # filter for glob pattern
     --filter="**/node_modules"
     # ignore nested directories

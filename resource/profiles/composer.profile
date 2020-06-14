@@ -1,4 +1,4 @@
-filters=(
+options=(
     # filter for glob pattern
     --filter="**/vendor"
     # ignore nested directories
