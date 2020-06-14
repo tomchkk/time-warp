@@ -58,7 +58,6 @@ feature::watch() {
         $($__watch_feature_watchexec_debug && echo "--verbose")
         # only execute the command after the first triggered watch
         --postpone
-        # Ignore events while the process is still running
         # the producer call _must_ be an external call to the application to
         # enable all required config and services
         -- "$APP_NAME" queue --produce "$profile"
