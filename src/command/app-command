@@ -19,6 +19,9 @@ Options:
     -v, --version   Print the version number
 
 Commands:
+    exclude     Exclude paths from Time Machine backups
+    exemptions  Manage paths exempted from $APP_NAME's monitoring
+    include     Reinclude paths excluded from Time Machine backups
     queue       Manage $APP_NAME's queue functionality
     scan        Scan for existing files matching configured profiles and
                 optionally exclude matches from Time Machine backups
@@ -38,7 +41,16 @@ args="${@:5}"
 
 case "$opt" in
     exclude)
+        # TODO: implement direct exclusion requests
         echo "path(s) to exclude:" $args
+    ;;
+    exemptions)
+        # TODO: add handling of exemptions (add to list in var/exemptions)
+        echo "handle exemptions"
+    ;;
+    include)
+        # TODO: implement direct inclusion requests
+        echo "path(s) to include:" $args
     ;;
     queue)
         source "$__app_command_queue_command" $args
