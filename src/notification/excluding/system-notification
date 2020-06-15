@@ -12,23 +12,22 @@ __excluding_notification_ignore_dnd="$5"
 notification::notify() {
     source "$__excluding_notification_bash_clash" "$@"
 
+    # TODO:
+    # - try changing to alerter
+    # - add a notification follow-up action to exempt the path from exclusions
+
     local args=(
-        -group "$APP_NAME"
+        -sender "${ORG_ID}.${APP_NAME}"
         -title "${__excluding_notification_title:-"Title"}"
         -subtitle "${__excluding_notification_subtitle:-"Subtitle"}"
         -message "$(bash_clash::get "path")"
         -sound "${__excluding_notification_sound:-"Submarine"}"
+        # -execute "$__excluding_notification_action"
         "$($__excluding_notification_ignore_dnd && echo "-ignoreDnD")"
     )
 
     # terminal-notifier is a bit verbose and doesn't return bash exit codes,
     # which can prevent parent processes from working properly, so we'll just
     # redirect any 'noise' that it creates:
-
-    # TODO:
-    # - figure-out why notifications aren't grouped
-    # - figure-out how to create a follow-up action - i.e. adding the path to
-    #   a black-list of paths that can't be excluded from TM backups
-    #   (might also be possible to do via the slack notification)
     terminal-notifier "${args[@]}" &> /dev/null
 }
