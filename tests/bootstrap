@@ -22,8 +22,8 @@ __make_test=(
 make ${__make_test[@]}
 
 ##
-# Makes a temp directory within the app test temp directory, returning the path
-# to the created.
+# Makes a temp directory within a temp app directory, optionally setting its
+# name to the given name, returning the absolute value of the path created.
 ##
 time_warp_test::mktmp_dir() {
     local name="$1"
