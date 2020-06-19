@@ -21,8 +21,9 @@ Usage:  $APP_NAME watch [options] <args>
 
 Options:
     -h, --help      Print usage information
-    -d, --dir       The root directory path from which to watch for changes. This
-                    option may be specified multiple times to set up multiple watches
+    -d, --dir       The root directory path from which to watch for changes.
+                    This option may be specified multiple times to set up
+                    multiple watches
     -p, --profile   A file profile or a directory containing multiple profiles
                     used to identify target file items
 
