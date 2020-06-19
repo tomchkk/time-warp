@@ -25,8 +25,9 @@ __services::define_parameters() {
     # dirs
     container::add_scalar "view-dir" "@{project-dir}/src/view"
 
-    # pipes
+    # files
     container::add_scalar "excluding-pipe" "@{org-tmp}/excluding-pipe"
+    container::add_scalar "exemptions-file" "@{var-dir}/exemptions"
 
     # message routing
     container::add_array "message-routing" \
@@ -51,9 +52,9 @@ __services::define_parameters() {
 
     # authorizer config
     container::add_array "excluding-authorizers" \
-        -- "@deduplication-authorizer"
-        # TODO - add authorizers:
-        # - path-exception-authorizer
+        -- "@deduplication-authorizer" \
+        -- "@exemptions-authorizer"
+        # TODO - potential authorizers:
         # - path-already-excluded-authorizer
 
     # notification config
@@ -86,9 +87,14 @@ __services::define_services() {
     # commands
     container::add_service "app-command" \
         "@{project-dir}/src/command/app-command" \
+            -- "@exemptions-command" \
             -- "@queue-command" \
             -- "@services-command" \
             -- "@watch-command"
+
+    container::add_service "exemptions-command" \
+        "@{project-dir}/src/command/exemptions-command" \
+            -- "@exemptions-feature"
 
     container::add_service "queue-command" \
         "@{project-dir}/src/command/queue-command" \
@@ -111,6 +117,10 @@ __services::define_services() {
         "@{project-dir}/src/feature/consume-feature" \
             -- "@excluding-consumer"
 
+    container::add_service "exemptions-feature" \
+        "@{project-dir}/src/feature/exemptions-feature" \
+            -- "@exemptions-service"
+
     container::add_service "message-feature" \
         "@{project-dir}/src/feature/message-feature" \
             -- "@message-bus"
@@ -118,7 +128,7 @@ __services::define_services() {
     container::add_service "produce-feature" \
         "@{project-dir}/src/feature/produce-feature" \
             -- "@excluding-producer"
-    # comment
+
     container::add_service "services-feature" \
         "@{project-dir}/src/feature/services-feature" \
             -- "@stdout-logger" \
@@ -275,6 +285,17 @@ __services::define_services() {
     # clients
     container::add_service "slack-client" \
         "@{project-dir}/src/service/slack/slack-client"
+
+    # exemptions
+    container::add_service "exemptions-authorizer" \
+        "@{project-dir}/src/service/exemptions/exemptions-authorizer" \
+            -- "@stdout-logger" \
+            -- "@bash-clash" \
+            -- "@exemptions-service"
+
+    container::add_service "exemptions-service" \
+        "@{project-dir}/src/service/exemptions/exemptions-service" \
+            -- "@exemptions-file"
 }
 
 __services::define_config

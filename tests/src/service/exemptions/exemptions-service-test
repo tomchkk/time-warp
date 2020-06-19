@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+
+__script_dir="$(dirname "${BASH_SOURCE[0]}")"
+source "$__script_dir/../../../bootstrap"
+
+exemptions_service="$__project_dir/src/service/exemptions/exemptions-service"
+exemptions_file=""
+
+exemptions_service_test::before_each() {
+    exemptions_file="$(time_warp_test::mktmp_dir "var")/exemptions"
+
+    source "$exemptions_service" "$exemptions_file"
+}
+
+exemptions_service_test::test_add_item() {
+    # adds simple items to the exemptions file
+    exemptions_service::add_item "path/2/file-1"
+    exemptions_service::add_item "path/2/file-2"
+    exemptions_service::add_item "path/2/file 3"
+    exemptions_service::add_item "path/2/file-4"
+    exemptions_service::add_item "**/pattern/**"
+
+    local items=$(__exemptions_service_test::load_exemptions)
+
+    bash_test::assert_contains "$items" "path/2/file-1"
+    bash_test::assert_contains "$items" "path/2/file-2"
+    bash_test::assert_contains "$items" "path/2/file 3"
+    bash_test::assert_contains "$items" "path/2/file-4"
+    bash_test::assert_contains "$items" "**/pattern/**"
+
+    # cannot add an item that already exists
+    local actual="$(exemptions_service::add_item "path/2/file-2"; echo $?)"
+    bash_test::assert_equals 1 "$actual"
+}
+
+exemptions_service_test::test_contains_item() {
+    local item="path/2/file-1"
+    exemptions_service::add_item "$item"
+
+    local contains=$(exemptions_service::contains_item "$item"; echo $?)
+    bash_test::assert_equals 0 $contains
+
+    local not_contains=$(exemptions_service::contains_item "${item}2"; echo $?)
+    bash_test::assert_equals 1 $not_contains
+}
+
+exemptions_service_test::test_remove_item() {
+    exemptions_service::add_item "path/2/file-1"
+    exemptions_service::add_item "path/2/file 2"
+    exemptions_service::add_item "path/2/file 3"
+
+    exemptions_service::remove_item "path/2/file 2"
+
+    local items=$(__exemptions_service_test::load_exemptions)
+
+    bash_test::assert_contains "$items" "path/2/file-1"
+    bash_test::assert_not_contains "$items" "path/2/file 2"
+    bash_test::assert_contains "$items" "path/2/file 3"
+}
+
+exemptions_service_test::test_remove_all() {
+    exemptions_service::add_item "path/2/file-1"
+
+    local items=$(__exemptions_service_test::load_exemptions)
+    bash_test::assert_contains "$items" "path/2/file-1"
+
+    exemptions_service::remove_all
+
+    local items=$(__exemptions_service_test::load_exemptions)
+    bash_test::assert_empty "$items"
+}
+
+exemptions_service_test::test_declare() {
+    exemptions_service::add_item "path/2/file-1"
+    exemptions_service::add_item "path/2/file-2"
+    exemptions_service::add_item "path/2/file 3"
+    exemptions_service::add_item "path/2/file-4"
+
+    local exemptions; eval "$(exemptions_service::declare)"
+
+    bash_test::assert_contains "${exemptions[*]}" "path/2/file-1"
+    bash_test::assert_contains "${exemptions[*]}" "path/2/file-2"
+    bash_test::assert_contains "${exemptions[*]}" "path/2/file 3"
+    bash_test::assert_contains "${exemptions[*]}" "path/2/file-4"
+}
+
+##
+# Loads the temp exemptions files
+##
+__exemptions_service_test::load_exemptions() {
+    echo $(
+        unset exemptions
+        source "$exemptions_file"
+        echo "${exemptions[@]}"
+    )
+}

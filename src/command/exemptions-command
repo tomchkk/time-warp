@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+__exemptions_command_exemptions_feature="${1:?"The exemptions command is required"}"
+
+source "$__exemptions_command_exemptions_feature"
+
+##
+# Cats the command's usage documentation.
+##
+__exemptions_command::usage() {
+    cat << EOF
+$APP_NAME ($APP_VERSION) - Exemptions
+
+Manage items exempted from $APP_NAME's monitoring
+
+Usage:  $APP_NAME exemptions [options] <args>
+
+Options:
+    -h, --help      Print usage information
+    -a, --add       Add a path or a pattern to the exemption list
+    -l, --list      List all exempted items
+    -r, --remove    Remove an item from the list of exemptions, omitting an item
+                    argument will prompt you to remove all exempted items
+EOF
+}
+
+##
+# Handles incoming commands.
+##
+exemptions_command::handle() {
+    local opt="$1"
+    local args="${@:2}"
+
+    case "$1" in
+        -a|--add)
+            if [[ -z "$args" ]]; then
+                echo "An item to exempt is required" >&2 && exit 1
+            fi
+
+            feature::add "$args"
+        ;;
+        -l|--list)
+            feature::list
+        ;;
+        -r|--remove)
+            if [[ -z "$args" ]]; then
+                feature::remove_all
+            else
+                feature::remove "$args"
+            fi
+        ;;
+        -h|--help|*)
+            __exemptions_command::usage && exit 0
+        ;;
+    esac
+}

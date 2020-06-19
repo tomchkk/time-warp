@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+
+__exemptions_feature_service="${1:?"The exemptions service is required"}"
+
+source "$__exemptions_feature_service"
+
+##
+# Add the given paths to the exemptions list.
+##
+feature::add() {
+    local item="${1:?"An item to add is required"}"
+
+    if $(exemptions_service::add_item "$item"); then
+        echo "'$item' was exempted from $APP_NAME monitoring"
+
+        return 0
+    fi
+
+    echo "'$item' is already exempted from $APP_NAME monitoring" >&2
+
+    return 1
+}
+
+##
+# List the current exempted paths.
+##
+feature::list() {
+    local exemptions; eval "$(exemptions_service::declare)"
+    local exemption; for exemption in "${exemptions[@]}"; do
+        echo "$exemption"
+    done
+}
+
+##
+# Remove the given paths from the exemptions list.
+##
+feature::remove() {
+    local item="$1"
+
+    if $(exemptions_service::remove_item "$item"); then
+        echo "'$item' was removed from $APP_NAME monitoring"
+
+        return 0
+    fi
+
+    echo "'$item' could not be removed from $APP_NAME monitoring"
+}
+
+##
+# Removes all items from the exemeptions list.
+##
+feature::remove_all() {
+    read -p "Remove all exempted items? (y|n) " -n 1 -r && echo
+
+    if [[ $REPLY =~ ^[Yy](es)?$ ]]; then
+        exemptions_service::remove_all
+    fi
+}

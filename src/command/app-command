@@ -20,7 +20,7 @@ Options:
 
 Commands:
     exclude     Exclude paths from Time Machine backups
-    exemptions  Manage paths exempted from $APP_NAME's monitoring
+    exemptions  Manage items exempted from $APP_NAME's monitoring
     include     Reinclude paths excluded from Time Machine backups
     queue       Manage $APP_NAME's queue functionality
     scan        Scan for existing files matching configured profiles and
@@ -32,12 +32,13 @@ Commands:
 EOF
 }
 
-__app_command_queue_command="${1:?"A queue command is required"}"
-__app_command_services_command="${2:?"A services command is required"}"
-__app_command_watch_command="${3:?"A watch command is required"}"
+__app_command_exemptions_command="${1:?"The exemptions command is required"}"
+__app_command_queue_command="${2:?"The queue command is required"}"
+__app_command_services_command="${3:?"The services command is required"}"
+__app_command_watch_command="${4:?"The watch command is required"}"
 
-opt="$4"
-args="${@:5}"
+opt="$5"
+args="${@:6}"
 
 case "$opt" in
     exclude)
@@ -45,8 +46,8 @@ case "$opt" in
         echo "path(s) to exclude:" $args
     ;;
     exemptions)
-        # TODO: add handling of exemptions (add to list in var/exemptions)
-        echo "handle exemptions"
+        source "$__app_command_exemptions_command"
+        exemptions_command::handle $args
     ;;
     include)
         # TODO: implement direct inclusion requests

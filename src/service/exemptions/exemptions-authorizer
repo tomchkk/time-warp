@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+__exemptions_authorizer_logger=${1:?"A logger is required"}
+__exemptions_authorizer_bash_clash="${2:?"bash-clash is required"}"
+__exemptions_authorizer_service="${3:?"The exemptions service is required"}"
+
+source "$__exemptions_authorizer_logger"
+source "$__exemptions_authorizer_service"
+
+##
+# Determines if the given message is authorized for further processing.
+##
+authorizer::is_authorized() {
+    if ! $(__exemptions_authorizer::authorize "$@"); then
+        return 1
+    fi
+
+    return 0
+}
+
+##
+# Attempts to authorize the given message by checking if the path is exempted.
+##
+__exemptions_authorizer::authorize() {
+    source $__exemptions_authorizer_bash_clash $@
+
+    local path="$(bash_clash::get "path")"
+    local exemptions; eval "$(exemptions_service::declare)"
+
+    local exemption; for exemption in "${exemptions[@]}"; do
+        if [[ $exemption == $path ]]; then
+            log::info "Path '$path' is exempted from $APP_NAME monitoring"
+
+            return 1 # not authorized
+        fi
+    done
+
+    log::debug "Path '$path' is not exempted from $APP_NAME monitoring"
+
+    return 0 # authorized
+}

@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+
+__exemptions_service_file="${1:?"An exemptions file is required"}"
+
+if [[ ! -f "$__exemptions_service_file" ]]; then
+    touch "$__exemptions_service_file"
+fi
+
+##
+# Adds an item to the exemptions file.
+##
+exemptions_service::add_item() {
+    local item="${1:?"An item to add is required"}"
+
+    local exemptions=()
+    builtin source "$__exemptions_service_file"
+
+    if [[ "${exemptions[@]}" == *"$item"* ]]; then
+        return 1
+    fi
+
+    exemptions+=("$item")
+
+    declare -p exemptions > "$__exemptions_service_file"
+}
+
+##
+# Determines if the exemptions file contains a given item or not.
+##
+exemptions_service::contains_item() {
+    local item="${1:?"An item to check is required"}"
+
+    local exemptions=()
+    builtin source "$__exemptions_service_file"
+
+    if [[ "${exemptions[@]}" != *"$item"* ]]; then
+        return 1
+    fi
+
+    return 0
+}
+
+##
+# Removes an item from the exemptions file.
+##
+exemptions_service::remove_item() {
+    local item="${1:?"An item to remove is required"}"
+
+    local exemptions=() temp=()
+    builtin source "$__exemptions_service_file"
+
+    if [[ "${exemptions[@]}" != *"$item"* ]]; then
+        return 1
+    fi
+
+    local exemption; for exemption in "${exemptions[@]}"; do
+        if [[ "$exemption" != "$item" ]]; then
+            temp+=("$exemption")
+        fi
+    done
+
+    unset exemptions && exemptions=("${temp[@]}")
+
+    declare -p exemptions > "$__exemptions_service_file"
+}
+
+##
+# Removes all items from the exemptions file.
+##
+exemptions_service::remove_all() {
+    echo > "$__exemptions_service_file"
+}
+
+##
+# Declares the contents of the current exemptions file. This enables passing
+# of the exemptions array between functions, preserving any space separated
+# element values.
+#
+# The 'exemptions' array can be hydrated by the caller, for example, as follows:
+# - local exemptions; eval "$(exemptions_service::declare)"
+##
+exemptions_service::declare() {
+    local exemptions=()
+    builtin source "$__exemptions_service_file"
+
+    declare -p exemptions >&1
+}
