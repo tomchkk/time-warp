@@ -254,18 +254,18 @@ __services::define_services() {
             -- "@{cache-dir}/deduplication" \
             -- "$MESSAGE_CACHE_STL"
 
-    # exclude services
+    # editing services
     container::add_service "exclude-service" \
-        "@{project-dir}/src/service/exclude/exclude-service" \
+        "@{project-dir}/src/service/editing/exclude-service" \
             -- "@stdout-logger" \
-            -- "@time-machine-excluder"
+            -- "@time-machine-editor"
 
-    container::add_service "time-machine-excluder" \
-        "@{project-dir}/src/service/exclude/time-machine-excluder" \
+    container::add_service "time-machine-editor" \
+        "@{project-dir}/src/service/editing/time-machine-editor" \
             -- "@x-attribute-editor"
 
     container::add_service "x-attribute-editor" \
-        "@{project-dir}/src/service/exclude/x-attribute-editor"
+        "@{project-dir}/src/service/editing/x-attribute-editor"
 
     # notifications
     container::add_service "system-notification" \

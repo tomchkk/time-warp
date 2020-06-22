@@ -3,23 +3,23 @@
 __script_dir="$(dirname "${BASH_SOURCE[0]}")"
 source "$__script_dir/../../../bootstrap"
 
-x_attribute_editor="$__project_dir/src/service/exclude/x-attribute-editor"
-time_machine_excluder="$__project_dir/src/service/exclude/time-machine-excluder"
+x_attribute_editor="$__project_dir/src/service/editing/x-attribute-editor"
+time_machine_editor="$__project_dir/src/service/editing/time-machine-editor"
 
-time_machine_excluder_test::before_each() {
-    source "$time_machine_excluder" "$x_attribute_editor"
+time_machine_editor_test::before_each() {
+    source "$time_machine_editor" "$x_attribute_editor"
 }
 
-time_machine_excluder_test::test_exclude() {
+time_machine_editor_test::test_exclude() {
     local actual expected
 
     # an error code is returned for a non-existent path
-    time_machine_excluder::exclude "non-existent/path" 2>/dev/null
+    time_machine_editor::exclude "non-existent/path" 2>/dev/null
     bash_test::assert_equals "1" "$?"
 
     # xattrs are updated for a valid path
     local dir=$(time_warp_test::mktmp_dir)
-    time_machine_excluder::exclude "$dir"
+    time_machine_editor::exclude "$dir"
     bash_test::assert_equals "0" "$?"
     bash_test::assert_equals \
         "com.apple.metadata:com_apple_backup_excludeItem: com.apple.backupd" \
@@ -27,7 +27,7 @@ time_machine_excluder_test::test_exclude() {
 
     # xattrs are updated for a valid path with spaces
     local spaced="$(time_warp_test::mktmp_dir "dir with spaces")"
-    time_machine_excluder::exclude "$spaced"
+    time_machine_editor::exclude "$spaced"
     bash_test::assert_equals "0" "$?"
     bash_test::assert_equals \
         "com.apple.metadata:com_apple_backup_excludeItem: com.apple.backupd" \

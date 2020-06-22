@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-__time_machine_excluder_editor="${1:?"An x-attribute editor is required"}"
+__time_machine_editor_x_attribute_editor="${1:?"An x-attribute editor is required"}"
 
-source "$__time_machine_excluder_editor"
+source "$__time_machine_editor_x_attribute_editor"
 
 __X_KEY="com.apple.metadata:com_apple_backup_excludeItem"
 __X_VAL="com.apple.backupd"
@@ -10,7 +10,7 @@ __X_VAL="com.apple.backupd"
 ##
 # Excludes the given paths from macOS Time Machine backups.
 ##
-time_machine_excluder::exclude() {
+time_machine_editor::exclude() {
     local path="$1"
 
     x_attribute_editor::write "$__X_KEY" "$__X_VAL" "$path"

@@ -3,7 +3,7 @@
 __script_dir="$(dirname "${BASH_SOURCE[0]}")"
 source "$__script_dir/../../../bootstrap"
 
-x_attribute_editor="$__project_dir/src/service/exclude/x-attribute-editor"
+x_attribute_editor="$__project_dir/src/service/editing/x-attribute-editor"
 
 __X_KEY="com.tomchkk.x_attribute_editor:com_tomchkk_test"
 __X_VAL="com.tomchkk.testd"
