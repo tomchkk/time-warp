@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-__exemptions_command_exemptions_feature="${1:?"The exemptions command is required"}"
+__exemptions_command_exemptions_feature="${1:?"The exemptions feature is required"}"
 
 source "$__exemptions_command_exemptions_feature"
 
