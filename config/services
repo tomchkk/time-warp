@@ -242,22 +242,23 @@ __services::define_services() {
             -- "@stdout-logger" \
             -- "@excluding-notifications"
 
-    # exclude services
+    # deduplication services
     container::add_service "deduplication-authorizer" \
-        "@{project-dir}/src/service/exclude/deduplication-authorizer" \
+        "@{project-dir}/src/service/deduplication/deduplication-authorizer" \
             -- "@stdout-logger" \
             -- "@bash-clash" \
             -- "@message-cache"
 
+    container::add_service "message-cache" \
+        "@{project-dir}/src/service/deduplication/message-cache" \
+            -- "@{cache-dir}/deduplication" \
+            -- "$MESSAGE_CACHE_STL"
+
+    # exclude services
     container::add_service "exclude-service" \
         "@{project-dir}/src/service/exclude/exclude-service" \
             -- "@stdout-logger" \
             -- "@time-machine-excluder"
-
-    container::add_service "message-cache" \
-        "@{project-dir}/src/service/exclude/message-cache" \
-            -- "@{cache-dir}/messages" \
-            -- "$MESSAGE_CACHE_STL"
 
     container::add_service "time-machine-excluder" \
         "@{project-dir}/src/service/exclude/time-machine-excluder" \

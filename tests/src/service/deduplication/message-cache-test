@@ -3,7 +3,7 @@
 __script_dir="$(dirname "${BASH_SOURCE[0]}")"
 source "$__script_dir/../../../bootstrap"
 
-message_cache="$__project_dir/src/service/exclude/message-cache"
+message_cache="$__project_dir/src/service/deduplication/message-cache"
 message_cache_dir=""
 seconds_to_live=10
 

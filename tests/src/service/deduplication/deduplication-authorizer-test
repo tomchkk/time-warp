@@ -10,7 +10,7 @@ deduplication_authorizer_test::before_each() {
         "$__script_dir/stubs/message-cache"
     )
 
-    source "$__project_dir/src/service/exclude/deduplication-authorizer" \
+    source "$__project_dir/src/service/deduplication/deduplication-authorizer" \
         "${authorizer_args[@]}"
 }
 
