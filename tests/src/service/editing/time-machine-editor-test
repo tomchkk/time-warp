@@ -11,24 +11,50 @@ time_machine_editor_test::before_each() {
 }
 
 time_machine_editor_test::test_exclude() {
-    local actual expected
-
     # an error code is returned for a non-existent path
     time_machine_editor::exclude "non-existent/path" 2>/dev/null
-    bash_test::assert_equals "1" "$?"
+    bash_test::assert_equals 1 $?
 
-    # xattrs are updated for a valid path
+    # an existing path is given excluding x-attributes
     local dir=$(time_warp_test::mktmp_dir)
     time_machine_editor::exclude "$dir"
-    bash_test::assert_equals "0" "$?"
+    bash_test::assert_equals 0 $?
     bash_test::assert_equals \
         "com.apple.metadata:com_apple_backup_excludeItem: com.apple.backupd" \
         "$(xattr -l "$dir")"
 
-    # xattrs are updated for a valid path with spaces
+    # an existing path with spaces is given excluding x-attributes
     local spaced="$(time_warp_test::mktmp_dir "dir with spaces")"
     time_machine_editor::exclude "$spaced"
-    bash_test::assert_equals "0" "$?"
+    bash_test::assert_equals 0 $?
+    bash_test::assert_equals \
+        "com.apple.metadata:com_apple_backup_excludeItem: com.apple.backupd" \
+        "$(xattr -l "$spaced")"
+}
+
+time_machine_editor_test::test_exclude() {
+    # an error code is returned for a non-existent path
+    time_machine_editor::include "non-existent/path" 2>/dev/null
+    bash_test::assert_equals 1 $?
+
+    # an excluded existing path is re-included
+    local dir=$(time_warp_test::mktmp_dir)
+    time_machine_editor::exclude "$dir"
+    bash_test::assert_equals \
+        "com.apple.metadata:com_apple_backup_excludeItem: com.apple.backupd" \
+        "$(xattr -l "$dir")"
+
+    time_machine_editor::include "$dir"
+    bash_test::assert_equals 0 $?
+    bash_test::assert_empty "$(xattr -l "$dir")"
+
+    time_machine_editor::include "$dir" 2>/dev/null
+    bash_test::assert_equals 1 $?
+
+    # an excluded existing path with spaces is re-included
+    local spaced="$(time_warp_test::mktmp_dir "dir with spaces")"
+    time_machine_editor::exclude "$spaced"
+    bash_test::assert_equals 0 $?
     bash_test::assert_equals \
         "com.apple.metadata:com_apple_backup_excludeItem: com.apple.backupd" \
         "$(xattr -l "$spaced")"
