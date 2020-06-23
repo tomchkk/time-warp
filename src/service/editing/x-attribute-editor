@@ -5,7 +5,7 @@
 ##
 x_attribute_editor::write() {
     local x_key="${1:?"An x-attribute key is required"}"
-    local x_val="${2:?"An value is required"}"
+    local x_val="${2:?"A value is required"}"
     local path="${@:3}"
 
     if [[ ! -e "$path" ]]; then
@@ -15,6 +15,25 @@ x_attribute_editor::write() {
     fi
 
     xattr -w "$x_key" "$x_val" "$path"
+
+    return $?
+}
+
+##
+# Deletes the given extended attribute from the target path, if the attribute
+# exists.
+##
+x_attribute_editor::delete() {
+    local x_key="${1:?"An x-attribute key is required"}"
+    local path="${@:2}"
+
+    if [[ ! -e "$path" ]]; then
+        echo "Target path '$path' does not exist" >&2
+
+        return 1
+    fi
+
+    xattr -d "$x_key" "$path"
 
     return $?
 }

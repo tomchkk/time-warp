@@ -16,7 +16,6 @@ x_attribute_editor_test::test_write() {
     local actual expected
     local dir=$(time_warp_test::mktmp_dir)
     local not_path="no/path"
-    local paths=("$dir" "$not_path")
 
     # a path must exist
     actual=$(x_attribute_editor::write "$__X_KEY" "$__X_VAL" "$not_path" 2>&1)
@@ -32,4 +31,30 @@ x_attribute_editor_test::test_write() {
     x_attribute_editor::write "$__X_KEY" "$__X_VAL" "$spaced"
     bash_test::assert_equals "0" "$?"
     bash_test::assert_equals "$__X_KEY: $__X_VAL" "$(xattr -l "$spaced")"
+}
+
+x_attribute_editor_test::test_delete() {
+    local actual expected
+    local dir=$(time_warp_test::mktmp_dir)
+    local not_path="no/path"
+
+    # a path must exist
+    actual=$(x_attribute_editor::delete "$__X_KEY" "$not_path" 2>&1)
+    expected="Target path '$not_path' does not exist"
+    bash_test::assert_equals "$expected" "$actual"
+
+    # an existing attribute is deleted
+    x_attribute_editor::write "$__X_KEY" "$__X_VAL" "$dir"
+    bash_test::assert_equals "$__X_KEY: $__X_VAL" "$(xattr -l "$dir")"
+    x_attribute_editor::delete "$__X_KEY" "$dir"
+    bash_test::assert_equals "0" "$?"
+    bash_test::assert_empty "$(xattr -l "$dir")"
+
+    # attributes on a path with spaces can be deleted
+    local spaced="$(time_warp_test::mktmp_dir "foo bar")"
+    x_attribute_editor::write "$__X_KEY" "$__X_VAL" "$spaced"
+    bash_test::assert_equals "$__X_KEY: $__X_VAL" "$(xattr -l "$spaced")"
+    x_attribute_editor::delete "$__X_KEY" "$spaced"
+    bash_test::assert_equals "0" "$?"
+    bash_test::assert_empty "$(xattr -l "$spaced")"
 }
