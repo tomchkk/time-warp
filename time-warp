@@ -33,5 +33,3 @@ __make_run=(
 make ${__make_run[@]}
 
 source "$__project_dir/src/kernel" $APP_ENV $DEBUG $@
-
-# TODO: check variable collisions in each script using `declare -p`
