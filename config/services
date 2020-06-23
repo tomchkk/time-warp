@@ -54,8 +54,6 @@ __services::define_parameters() {
     container::add_array "excluding-authorizers" \
         -- "@deduplication-authorizer" \
         -- "@exemptions-authorizer"
-        # TODO - potential authorizers:
-        # - path-already-excluded-authorizer
 
     # notification config
     container::add_array "excluding-notifications" \
