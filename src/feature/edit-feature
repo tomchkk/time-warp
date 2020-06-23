@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+__edit_feature_service="${1:?"The Time Machine editor service is required"}"
+
+source "$__edit_feature_service"
+
+##
+# Exclude a path from Time Machine backups.
+##
+feature::exclude() {
+    local path="${1:?"A path to exclude is required"}"
+
+    time_machine_editor::exclude "$path"
+
+    return $?
+}
+
+##
+# Include a path in Time Machine backups.
+##
+feature::include() {
+    local path="${1:?"A path to include is required"}"
+
+    time_machine_editor::include "$path"
+
+    return $?
+}

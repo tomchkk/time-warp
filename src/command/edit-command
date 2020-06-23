@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+__edit_command_edit_feature="${1:?"The edit feature is required"}"
+
+source "$__edit_command_edit_feature"
+
+##
+# Cats the command's usage documentation.
+##
+__edit_command::usage() {
+    cat << EOF
+$APP_NAME ($APP_VERSION) - Edit
+
+Edit paths for exclusion from, or re-inclusion in Time Machine backups.
+
+Usage:  $APP_NAME edit [option] <args>
+
+Options:
+    -h, --help      Print usage information
+    -e, --exlude    Exclude a path from Time Machine backups
+    -i, --include   Re-include a path excluded from Time Machine backups
+EOF
+}
+
+##
+# Handles incoming commands.
+##
+edit_command::handle() {
+    local opt="$1"
+    local args="${@:2}"
+
+    case "$1" in
+        -e|--exclude)
+            feature::exclude "$args"
+        ;;
+        -i|--include)
+            feature::include "$args"
+        ;;
+        -h|--help|*)
+            __edit_command::usage && exit 0
+        ;;
+    esac
+}

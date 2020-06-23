@@ -19,9 +19,9 @@ Options:
     -v, --version   Print the version number
 
 Commands:
-    exclude     Exclude paths from Time Machine backups
+    edit        Edit paths for exclusion from, or re-inclusion in Time Machine
+                backups
     exemptions  Manage items exempted from $APP_NAME's monitoring
-    include     Reinclude paths excluded from Time Machine backups
     queue       Manage $APP_NAME's queue functionality
     scan        Scan for existing files matching configured profiles and
                 optionally exclude matches from Time Machine backups
@@ -32,26 +32,23 @@ Commands:
 EOF
 }
 
-__app_command_exemptions_command="${1:?"The exemptions command is required"}"
-__app_command_queue_command="${2:?"The queue command is required"}"
-__app_command_services_command="${3:?"The services command is required"}"
-__app_command_watch_command="${4:?"The watch command is required"}"
+__app_command_edit_command="${1:?"The edit command is required"}"
+__app_command_exemptions_command="${2:?"The exemptions command is required"}"
+__app_command_queue_command="${3:?"The queue command is required"}"
+__app_command_services_command="${4:?"The services command is required"}"
+__app_command_watch_command="${5:?"The watch command is required"}"
 
-opt="$5"
-args="${@:6}"
+opt="$6"
+args="${@:7}"
 
 case "$opt" in
-    exclude)
-        # TODO: implement direct exclusion requests
-        echo "path(s) to exclude:" $args
+    edit)
+        source "$__app_command_edit_command"
+        edit_command::handle $args
     ;;
     exemptions)
         source "$__app_command_exemptions_command"
         exemptions_command::handle $args
-    ;;
-    include)
-        # TODO: implement direct inclusion requests
-        echo "path(s) to include:" $args
     ;;
     queue)
         source "$__app_command_queue_command" $args

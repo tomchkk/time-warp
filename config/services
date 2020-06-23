@@ -87,10 +87,15 @@ __services::define_services() {
     # commands
     container::add_service "app-command" \
         "@{project-dir}/src/command/app-command" \
+            -- "@edit-command" \
             -- "@exemptions-command" \
             -- "@queue-command" \
             -- "@services-command" \
             -- "@watch-command"
+
+    container::add_service "edit-command" \
+        "@{project-dir}/src/command/edit-command" \
+            -- "@edit-feature"
 
     container::add_service "exemptions-command" \
         "@{project-dir}/src/command/exemptions-command" \
@@ -116,6 +121,10 @@ __services::define_services() {
     container::add_service "consume-feature" \
         "@{project-dir}/src/feature/consume-feature" \
             -- "@excluding-consumer"
+
+    container::add_service "edit-feature" \
+        "@{project-dir}/src/feature/edit-feature" \
+            -- "@time-machine-editor"
 
     container::add_service "exemptions-feature" \
         "@{project-dir}/src/feature/exemptions-feature" \
