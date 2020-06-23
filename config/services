@@ -60,7 +60,6 @@ __services::define_parameters() {
         "${SUBSCRIBED_NOTIFICATIONS[@]//@/-- @}"
 
     container::add_scalar "slack-webhook" "${SLACK_WEBHOOK:-false}"
-
 }
 
 ##
