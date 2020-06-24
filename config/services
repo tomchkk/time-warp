@@ -125,7 +125,8 @@ __services::define_services() {
 
     container::add_service "exemptions-feature" \
         "@{project-dir}/src/feature/exemptions-feature" \
-            -- "@exemptions-service"
+            -- "@exemptions-service" \
+            -- "@time-machine-editor"
 
     container::add_service "message-feature" \
         "@{project-dir}/src/feature/message-feature" \

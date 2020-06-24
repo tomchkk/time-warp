@@ -1,17 +1,22 @@
 #!/usr/bin/env bash
 
 __exemptions_feature_service="${1:?"The exemptions service is required"}"
+__exemptions_feature_editor="${2:?"The Time Machine editor service is required"}"
 
 source "$__exemptions_feature_service"
+source "$__exemptions_feature_editor"
 
 ##
-# Add the given paths to the exemptions list.
+# Add the given path to the exemptions list and re-includ it in Time Machine
+# backups.
 ##
 feature::add() {
     local item="${1:?"An item to add is required"}"
 
     if $(exemptions_service::add_item "$item"); then
-        echo "'$item' was exempted from $APP_NAME monitoring"
+        time_machine_editor::include "$item"
+
+        echo "'$item' was exempted from $APP_NAME monitoring and re-included in Time Machine backups"
 
         return 0
     fi
@@ -32,7 +37,7 @@ feature::list() {
 }
 
 ##
-# Remove the given paths from the exemptions list.
+# Remove the given path from the exemptions list.
 ##
 feature::remove() {
     local item="$1"

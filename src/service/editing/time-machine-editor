@@ -23,6 +23,7 @@ time_machine_editor::exclude() {
 ##
 time_machine_editor::include() {
     local path="$1"
+
     x_attribute_editor::delete "$__X_KEY" "$path"
 
     return $?
