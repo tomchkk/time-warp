@@ -28,7 +28,7 @@ __exemptions_authorizer::authorize() {
     local exemptions; eval "$(exemptions_service::declare)"
 
     local exemption; for exemption in "${exemptions[@]}"; do
-        if [[ $exemption == $path ]]; then
+        if [[ ${exemption%/} == $path ]]; then
             log::info "Path '$path' is exempted from $APP_NAME monitoring"
 
             return 1 # not authorized
