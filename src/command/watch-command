@@ -14,8 +14,8 @@ __watch_command::usage() {
 
 $APP_NAME ($APP_VERSION) - Watch
 
-Watch for changes to files matching configured profiles and optionally exclude
-matches from Time Machine backups
+Watch for changes to files matching configured profiles and exclude matches
+from Time Machine backups
 
 Usage:  $APP_NAME watch [options] <args>
 
@@ -29,8 +29,6 @@ Options:
 
 EOF
 }
-
-# TODO: implement optional functionality, perhaps --force (i.e. dry-run by default)
 
 ##
 # Handles incoming watch commands.

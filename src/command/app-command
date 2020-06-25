@@ -27,7 +27,7 @@ Commands:
                 optionally exclude matches from Time Machine backups
     services    Manage $APP_NAME's services
     watch       Watch for changes to files matching configured profiles and
-                optionally exclude matches from Time Machine backups
+                exclude matches from Time Machine backups
 
 EOF
 }
