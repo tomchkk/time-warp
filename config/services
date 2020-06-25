@@ -53,7 +53,8 @@ __services::define_parameters() {
     # authorizer config
     container::add_array "excluding-authorizers" \
         -- "@deduplication-authorizer" \
-        -- "@exemptions-authorizer"
+        -- "@exemptions-authorizer" \
+        -- "@excluding-authorizer"
 
     # notification config
     container::add_array "excluding-notifications" \
@@ -266,6 +267,12 @@ __services::define_services() {
         "@{project-dir}/src/service/editing/exclude-service" \
             -- "@stdout-logger" \
             -- "@time-machine-editor"
+
+    container::add_service "excluding-authorizer" \
+        "@{project-dir}/src/service/editing/excluding-authorizer" \
+            -- "@stdout-logger" \
+            -- "@time-machine-editor" \
+            -- "@bash-clash"
 
     container::add_service "time-machine-editor" \
         "@{project-dir}/src/service/editing/time-machine-editor" \

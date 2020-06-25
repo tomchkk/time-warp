@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+__excluding_authorizer_logger=${1:?"A logger is required"}
+__excluding_authorizer_editor="${2:?"The Time Machine editor service is required"}"
+__excluding_authorizer_bash_clash="${3:?"bash-clash is required"}"
+
+source "$__excluding_authorizer_logger"
+source "$__excluding_authorizer_editor"
+
+##
+# Determines if the given message is authorized for further processing.
+##
+authorizer::is_authorized() {
+    if ! $(__excluding_authorizer::authorize "$@"); then
+        return 1
+    fi
+
+    return 0
+}
+
+##
+# Attempts to authorize the given message by checking if the path is exempted.
+##
+__excluding_authorizer::authorize() {
+    source $__excluding_authorizer_bash_clash $@
+
+    local path="$(bash_clash::get "path")"
+    if $(time_machine_editor::is_excluded "$path"); then
+        log::info "Path '$path' is already excluded from Time Machine backups"
+
+        return 1 # not authorized
+    fi
+
+    log::debug "Path '$path' is not currently excluded from Time Machine backups"
+
+    return 0 # authorized
+}
