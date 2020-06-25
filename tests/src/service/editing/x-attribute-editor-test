@@ -23,14 +23,38 @@ x_attribute_editor_test::test_write() {
     bash_test::assert_equals "$expected" "$actual"
 
     x_attribute_editor::write "$__X_KEY" "$__X_VAL" "$dir"
-    bash_test::assert_equals "0" "$?"
+    bash_test::assert_equals 0 $?
     bash_test::assert_equals "$__X_KEY: $__X_VAL" "$(xattr -l "$dir")"
 
     # a path can have spaces
     local spaced="$(time_warp_test::mktmp_dir "foo bar")"
     x_attribute_editor::write "$__X_KEY" "$__X_VAL" "$spaced"
-    bash_test::assert_equals "0" "$?"
+    bash_test::assert_equals 0 $?
     bash_test::assert_equals "$__X_KEY: $__X_VAL" "$(xattr -l "$spaced")"
+}
+
+x_attribute_editor_test::test_contains() {
+    local actual expected
+    local dir=$(time_warp_test::mktmp_dir)
+    local not_path="no/path"
+
+    # a path must exist
+    actual=$(
+        x_attribute_editor::contains "$__X_KEY" "$__X_VAL" "$not_path" 2>&1
+    )
+    expected="Target path '$not_path' does not exist"
+    bash_test::assert_equals "$expected" "$actual"
+
+    x_attribute_editor::contains "$__X_KEY" "$__X_VAL" "$dir"
+    bash_test::assert_equals 1 $?
+
+    x_attribute_editor::write "$__X_KEY" "$__X_VAL" "$dir"
+    bash_test::assert_equals 0 $?
+    x_attribute_editor::contains "$__X_KEY" "$__X_VAL" "$dir"
+    bash_test::assert_equals 0 $?
+
+    x_attribute_editor::contains "$__X_KEY" "not_val" "$dir"
+    bash_test::assert_equals 1 $?
 }
 
 x_attribute_editor_test::test_delete() {
@@ -47,7 +71,7 @@ x_attribute_editor_test::test_delete() {
     x_attribute_editor::write "$__X_KEY" "$__X_VAL" "$dir"
     bash_test::assert_equals "$__X_KEY: $__X_VAL" "$(xattr -l "$dir")"
     x_attribute_editor::delete "$__X_KEY" "$dir"
-    bash_test::assert_equals "0" "$?"
+    bash_test::assert_equals 0 $?
     bash_test::assert_empty "$(xattr -l "$dir")"
 
     # attributes on a path with spaces can be deleted
@@ -55,6 +79,6 @@ x_attribute_editor_test::test_delete() {
     x_attribute_editor::write "$__X_KEY" "$__X_VAL" "$spaced"
     bash_test::assert_equals "$__X_KEY: $__X_VAL" "$(xattr -l "$spaced")"
     x_attribute_editor::delete "$__X_KEY" "$spaced"
-    bash_test::assert_equals "0" "$?"
+    bash_test::assert_equals 0 $?
     bash_test::assert_empty "$(xattr -l "$spaced")"
 }
