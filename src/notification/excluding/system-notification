@@ -12,17 +12,14 @@ __excluding_notification_ignore_dnd="$5"
 notification::notify() {
     source "$__excluding_notification_bash_clash" "$@"
 
-    # TODO:
-    # - try changing to alerter
-    # - add a notification follow-up action to exempt the path from exclusions
+    local path="$(bash_clash::get "path")"
 
     local args=(
-        -sender "${ORG_ID}.${APP_NAME}"
         -title "${__excluding_notification_title:-"Title"}"
         -subtitle "${__excluding_notification_subtitle:-"Subtitle"}"
-        -message "$(bash_clash::get "path")"
+        -message "$path"
         -sound "${__excluding_notification_sound:-"Submarine"}"
-        # -execute "$__excluding_notification_action"
+        -execute "$(which $APP_NAME) exemptions --add $path"
         "$($__excluding_notification_ignore_dnd && echo "-ignoreDnD")"
     )
 
