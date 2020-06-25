@@ -32,7 +32,24 @@ time_machine_editor_test::test_exclude() {
         "$(xattr -l "$spaced")"
 }
 
-time_machine_editor_test::test_exclude() {
+time_machine_editor_test::test_is_excluded() {
+    # an error code is returned for a non-existent path
+    time_machine_editor::exclude "non-existent/path" 2>/dev/null
+    bash_test::assert_equals 1 $?
+
+    local dir=$(time_warp_test::mktmp_dir)
+
+    time_machine_editor::is_excluded "$dir"
+    bash_test::assert_equals 1 $?
+
+    time_machine_editor::exclude "$dir"
+    bash_test::assert_equals 0 $?
+
+    time_machine_editor::is_excluded "$dir"
+    bash_test::assert_equals 0 $?
+}
+
+time_machine_editor_test::test_include() {
     # an error code is returned for a non-existent path
     time_machine_editor::include "non-existent/path" 2>/dev/null
     bash_test::assert_equals 1 $?

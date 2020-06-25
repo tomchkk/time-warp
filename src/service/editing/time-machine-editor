@@ -28,3 +28,16 @@ time_machine_editor::include() {
 
     return $?
 }
+
+##
+# Determines if the given path is currently excluded from Time Machine backups.
+##
+time_machine_editor::is_excluded() {
+    local path="$1"
+
+    if $(x_attribute_editor::contains "$__X_KEY" "$__X_VAL" "$path"); then
+        return 0
+    fi
+
+    return 1
+}
