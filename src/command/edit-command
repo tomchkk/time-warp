@@ -29,7 +29,7 @@ edit_command::handle() {
     local opt="$1"
     local args="${@:2}"
 
-    case "$1" in
+    case "$opt" in
         -e|--exclude)
             feature::exclude "$args"
         ;;
