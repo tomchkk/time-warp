@@ -15,7 +15,7 @@ fi
 
 ##
 # Produces publishable topic messages into the given message bus.
-#
+##
 producer::produce() {
     local path_profiles=${1:?"A path profile is required"}
 
@@ -81,7 +81,7 @@ producer::produce() {
 
 ##
 # Determines if the given event is configured to be watched.
-#
+##
 __producer::event_is_watched() {
     if $(printf '%s\n' ${__producer_watching[@]} | grep -q -E ^$1$); then
         return 0
