@@ -12,7 +12,7 @@ source "$__profile_matcher_filter_tester"
 source "$__profile_matcher_predicate_tester"
 
 ##
-# Matches a given path against a set of predicates
+# Matches a given path against a set of predicates.
 ##
 matcher::match() {
     local path="$@"
