@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
 
-__profile_manager_parser=${1:?"A profile parser is required"}
-__profile_manager_logger=${2:?"A logger is required"}
+source ${1:?"A logger is required"}
 
-__profile_manager_profiles=${3:?"A profile file or directory is required"}
-
-source $__profile_manager_logger
+__profile_manager_profiles=${2:?"A profile file or directory is required"}
 
 if [[ ! -e "$__profile_manager_profiles" ]]; then
     log::error "The profile file or directory '$__profile_manager_profiles' does not exist"
@@ -54,9 +51,7 @@ __profile_manager::convert_profile_inode_to_path() {
 profile_manager::get_flags() {
     local profile="$(__profile_manager::convert_profile_inode_to_path $1)"
 
-    source $__profile_manager_parser
-
-    echo $(profile_parser::parse_flags "$profile")
+    echo $(unset flags && source "$profile" && echo ${flags[@]})
 }
 
 ##
@@ -65,9 +60,7 @@ profile_manager::get_flags() {
 profile_manager::get_options() {
     local profile="$(__profile_manager::convert_profile_inode_to_path $1)"
 
-    source $__profile_manager_parser
-
-    echo $(profile_parser::parse_options "$profile")
+    echo $(unset options && source "$profile" && echo ${options[@]})
 }
 
 ##
@@ -76,7 +69,5 @@ profile_manager::get_options() {
 profile_manager::get_predicates() {
     local profile="$(__profile_manager::convert_profile_inode_to_path $1)"
 
-    source $__profile_manager_parser
-
-    echo $(profile_parser::parse_predicates "$profile")
+    echo $(unset predicates && source "$profile" && echo ${predicates[@]})
 }

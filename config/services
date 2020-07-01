@@ -159,12 +159,8 @@ __services::define_services() {
            --  "@message-handler"
 
     # file profilers
-    container::add_service "profile-parser" \
-        "@{project-dir}/src/service/profile/profile-parser"
-
     container::add_service "profile-manager" \
         "@{project-dir}/src/service/profile/profile-manager" \
-            -- "@profile-parser" \
             -- "@stdout-logger"
 
     container::add_service "watchexec-tester" \
