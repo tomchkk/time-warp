@@ -158,28 +158,31 @@ __services::define_services() {
            --  "@stdout-logger" \
            --  "@message-handler"
 
-    # file profilers
+    # file profile services
+    ## manager
     container::add_service "profile-manager" \
         "@{project-dir}/src/service/profile/profile-manager" \
             -- "@stdout-logger"
 
-    container::add_service "watchexec-tester" \
-        "@{project-dir}/src/service/profile/tester/watchexec-tester"
+    ## resolver
+    container::add_service "watchexec-options-resolver" \
+        "@{project-dir}/src/service/profile/resolver/watchexec-options-resolver" \
+            -- "@profile-manager" \
+            -- "@stdout-logger"
 
-    container::add_service "predicate-tester" \
-        "@{project-dir}/src/service/profile/tester/predicate-tester"
-
+    ## matcher
     container::add_service "profile-matcher" \
-        "@{project-dir}/src/service/profile/profile-matcher" \
+        "@{project-dir}/src/service/profile/matcher/profile-matcher" \
             -- "@profile-manager" \
             -- "@watchexec-tester" \
             -- "@predicate-tester" \
             -- "@stdout-logger"
 
-    container::add_service "watchexec-options-resolver" \
-        "@{project-dir}/src/service/profile/resolver/watchexec-options-resolver" \
-            -- "@profile-manager" \
-            -- "@stdout-logger"
+    container::add_service "watchexec-tester" \
+        "@{project-dir}/src/service/profile/matcher/tester/watchexec-tester"
+
+    container::add_service "predicate-tester" \
+        "@{project-dir}/src/service/profile/matcher/tester/predicate-tester"
 
     # producers
     container::add_service "excluding-producer" \
