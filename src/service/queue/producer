@@ -56,7 +56,7 @@ producer::produce() {
             # be concatenated to get a full path to a changed file
             path="${WATCHEXEC_COMMON_PATH}${path}"
 
-            log::debug "Detected modification to '$path'."
+            log::info "Detected notable modification to '$path'."
 
             if $(matcher::match $path); then
                 log::info "Matcher matched path '$path'"
