@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+
+source ${1:?"A filter tester is required"}
+source ${2:?"A predicate tester is required"}
+source ${3:?"A logger is required"}
+
+__watch_strategy_path=""
+
+##
+# Sets the path the strategy will use to determine matches.
+##
+strategy::set_path() {
+    __watch_strategy_path="$@"
+}
+
+##
+# Determines if all relevant profile options match the set path.
+##
+strategy::path_matches_options() {
+    local options="$@"
+    local path="${__watch_strategy_path:?"A path must be set"}"
+    local matches=false
+
+    local option; for option in $options; do
+        case "$option" in
+            -f*|--filter*)
+                local filter="$option"
+
+                if ! $(filter_tester::test_filter "$filter" "$path"); then
+                    log::debug "Path '$path' does not match filter '$filter'"
+
+                    return 1
+                fi
+
+                matches=true
+                log::debug "Path '$path' matches filter '$filter'"
+            ;;
+            *)
+                log::debug "Option '$option' is not relevant for path matching"
+                continue
+            ;;
+        esac
+    done
+
+    $matches && return 0 || return 1
+}
+
+##
+# Determines if all relevant profile predicates match the set path.
+##
+strategy::path_matches_predicates() {
+    local predicates="$@"
+    local path="${__watch_strategy_path:?"A path must be set"}"
+    local matches=false
+
+    local predicate; for predicate in $predicates; do
+        case "$predicate" in
+            -d*|--directory*)
+                if ! $(predicate_tester::test_directory "$predicate" "$path"); then
+                    log::debug "Failed directory test: '$predicate'"
+
+                    return 1
+                fi
+
+                matches=true
+                log::debug "Passed directory test: '$predicate'"
+            ;;
+            -f*|--file*)
+                if ! $(predicate_tester::test_file "$predicate" "$path"); then
+                    log::debug "Failed file test: '$predicate'"
+
+                    return 1
+                fi
+
+                matches=true
+                log::debug "Passed file test: '$predicate'"
+            ;;
+            *)
+                log::debug "Predicate '$predicate' is not supported"
+                continue
+            ;;
+        esac
+    done
+
+    $matches && return 0 || return 1
+}

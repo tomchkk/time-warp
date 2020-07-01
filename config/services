@@ -171,9 +171,14 @@ __services::define_services() {
             -- "@stdout-logger"
 
     ## matcher
-    container::add_service "profile-matcher" \
+    container::add_service "watch-profile-matcher" \
         "@{project-dir}/src/service/profile/matcher/profile-matcher" \
             -- "@profile-manager" \
+            -- "@watch-strategy" \
+            -- "@stdout-logger"
+
+    container::add_service "watch-strategy" \
+        "@{project-dir}/src/service/profile/matcher/strategy/watch-strategy" \
             -- "@watchexec-tester" \
             -- "@predicate-tester" \
             -- "@stdout-logger"
@@ -191,7 +196,7 @@ __services::define_services() {
             -- "@bash-clash" \
             -- "@message-bus" \
             -- "@time-machine-exclude-topic" \
-            -- "@profile-matcher" \
+            -- "@watch-profile-matcher" \
             -- "@excluding-producer-events"
 
     # buses

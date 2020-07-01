@@ -1,118 +1,42 @@
 #!/usr/bin/env bash
 
-__profile_matcher_profile_manager=${1:?"A profile manager is required"}
-__profile_matcher_filter_tester=${2:?"A filter tester is required"}
-__profile_matcher_predicate_tester=${3:?"A predicate tester is required"}
-__profile_matcher_logger=${4:?"A logger is required"}
-
-__profile_matcher_profiles=${5:?"A profile file or directory is required"}
-
-source "$__profile_matcher_profile_manager" "$__profile_matcher_profiles"
-source "$__profile_matcher_filter_tester"
-source "$__profile_matcher_predicate_tester"
+source "${1:?"A profile manager is required"}" "${4:?"A profile is required"}"
+source "${2:?"A matching strategy is required"}"
+source "${3:?"A logger is required"}"
 
 ##
-# Matches a given path against a set of predicates.
+# Matches a given path against a set of filter and predicate matching
+# strategies for the set profile(s).
 ##
 matcher::match() {
     local path="$@"
+    strategy::set_path "$path"
 
-    source "$__profile_matcher_logger"
+    log::debug "Matching path '$path' against profile(s)"
 
     for profile in $(profile_manager::get_profiles); do
-        if ! $(__profile_matcher::path_matches_filters "$profile" "$path")
-        then
+        log::debug "Matching profile options..."
+
+        local options=$(profile_manager::get_options "$profile")
+        if ! $(strategy::path_matches_options "$options"); then
+            log::debug "Options do not match!"
+
             continue # try to match the next profile
         fi
 
-        # The path matches the profile. If it also matches all of the profile's
+        log::debug "Options matched! Now matching profile predicates..."
+
+        local predicates=$(profile_manager::get_predicates "$profile")
+        # the path matches the profile. If it also matches all of the profile's
         # predicates, then we have our match
-        if $(__profile_matcher::path_matches_predicates "$profile" "$path")
-        then
+        if $(strategy::path_matches_predicates "$predicates"); then
+            log::debug "Predicates matched!"
+
             return 0
         fi
+
+        log::debug "Predicates do not match!"
     done
 
     return 1
-}
-
-##
-# Determines if all filters parsed from the given profile match the given path.
-#
-__profile_matcher::path_matches_filters () {
-    local profile="$1"
-    local path="${@:2}"
-
-    local matches=false
-
-    local option
-    for option in $(profile_manager::get_options "$profile"); do
-        case "$option" in
-            -f*|--filter*)
-                local filter="$option"
-
-                if ! $(filter_tester::test_filter "$filter" "$path"); then
-                    log::debug "Path '$path' does not match filter '$filter'"
-
-                    return 1
-                fi
-
-                matches=true
-
-                log::debug "Path '$path' matches filter '$filter'"
-            ;;
-            *)
-                log::debug "Option '$option' is not relevant for path matching"
-
-                continue
-            ;;
-        esac
-    done
-
-    $matches && return 0 || return 1
-}
-
-##
-# Determines if all predicates parsed from the given profile match the given path.
-##
-__profile_matcher::path_matches_predicates() {
-    local profile="$1"
-    local path="${@:2}"
-
-    local matches=false
-
-    local predicate
-    for predicate in $(profile_manager::get_predicates "$profile"); do
-        case "$predicate" in
-            -d*|--directory*)
-                if ! $(predicate_tester::test_directory "$predicate" "$path"); then
-                    log::debug "Failed directory test: '$predicate'"
-
-                    return 1
-                fi
-
-                matches=true
-
-                log::debug "Passed directory test: '$predicate'"
-            ;;
-            -f*|--file*)
-                if ! $(predicate_tester::test_file "$predicate" "$path"); then
-                    log::debug "Failed file test: '$predicate'"
-
-                    return 1
-                fi
-
-                matches=true
-
-                log::debug "Passed file test: '$predicate'"
-            ;;
-            *)
-                log::debug "Predicate '$predicate' is not supported"
-
-                continue
-            ;;
-        esac
-    done
-
-    $matches && return 0 || return 1
 }
