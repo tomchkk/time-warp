@@ -1,42 +1,47 @@
 #!/usr/bin/env bash
 
-source "${1:?"A profile manager is required"}" "${4:?"A profile is required"}"
-source "${2:?"A matching strategy is required"}"
-source "${3:?"A logger is required"}"
+source "${1:?"A matching strategy is required"}"
+source "${2:?"A logger is required"}"
+
+__profile_matcher_options=""
+__profile_matcher_predicates=""
 
 ##
-# Matches a given path against a set of filter and predicate matching
-# strategies for the set profile(s).
+# Sets options to match against a path.
 ##
-matcher::match() {
+profile_matcher::set_options() {
+    __profile_matcher_options="$@"
+}
+
+##
+# Sets predicates to match against a path.
+##
+profile_matcher::set_predicates() {
+    __profile_matcher_predicates="$@"
+}
+
+##
+# Matches a given path against a set of profile option and predicate matching
+# strategies.
+##
+profile_matcher::match() {
     local path="$@"
+    local options="$__profile_matcher_options"
+    local predicates="$__profile_matcher_predicates"
+
     strategy::set_path "$path"
 
-    log::debug "Matching path '$path' against profile(s)"
+    if ! $(strategy::path_matches_options "$options"); then
+        log::debug "Options do not match!"
 
-    for profile in $(profile_manager::get_profiles); do
-        log::debug "Matching profile options..."
+        return 1
+    fi
 
-        local options=$(profile_manager::get_options "$profile")
-        if ! $(strategy::path_matches_options "$options"); then
-            log::debug "Options do not match!"
-
-            continue # try to match the next profile
-        fi
-
-        log::debug "Options matched! Now matching profile predicates..."
-
-        local predicates=$(profile_manager::get_predicates "$profile")
-        # the path matches the profile. If it also matches all of the profile's
-        # predicates, then we have our match
-        if $(strategy::path_matches_predicates "$predicates"); then
-            log::debug "Predicates matched!"
-
-            return 0
-        fi
-
+    if ! $(strategy::path_matches_predicates "$predicates"); then
         log::debug "Predicates do not match!"
-    done
 
-    return 1
+        return 1
+    fi
+
+    return 0
 }
