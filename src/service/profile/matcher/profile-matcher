@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
 source "${1:?"A logger is required"}"
-source "${2:?"A matcher type is required"}"
-source "${3:?"A profile manager is required"}" "${4:?"A profile is required"}"
+source "${2:?"A matcher type is required"}" "${3:?"A profile is required"}"
 
 __profile_matcher_options=""
 __profile_matcher_predicates=""

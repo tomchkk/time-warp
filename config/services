@@ -174,12 +174,12 @@ __services::define_services() {
     container::add_service "watch-profile-matcher" \
         "@{project-dir}/src/service/profile/matcher/profile-matcher" \
             -- "@stdout-logger" \
-            -- "@watch-matcher-type" \
-            -- "@profile-manager"
+            -- "@watch-matcher-type"
 
     container::add_service "watch-matcher-type" \
         "@{project-dir}/src/service/profile/matcher/type/watch-type" \
-            -- "@watch-strategy"
+            -- "@watch-strategy" \
+            -- "@profile-manager"
 
     container::add_service "watch-strategy" \
         "@{project-dir}/src/service/profile/matcher/strategy/watch-strategy" \
