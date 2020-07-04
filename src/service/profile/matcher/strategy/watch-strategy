@@ -27,16 +27,17 @@ strategy::path_matches_options() {
                 local filter="$option"
 
                 if ! $(filter_tester::test_filter "$filter" "$path"); then
-                    log::debug "Path '$path' does not match filter '$filter'"
+                    __watch_strategy::log_failed "$filter"
 
                     return 1
                 fi
 
                 matches=true
-                log::debug "Path '$path' matches filter '$filter'"
+                __watch_strategy::log_passed "$filter"
             ;;
             *)
-                log::debug "Option '$option' is not relevant for path matching"
+                __watch_strategy::log_skipped "$option" "not relevant"
+
                 continue
             ;;
         esac
@@ -57,30 +58,52 @@ strategy::path_matches_predicates() {
         case "$predicate" in
             -d*|--directory*)
                 if ! $(predicate_tester::test_directory "$predicate" "$path"); then
-                    log::debug "Failed directory test: '$predicate'"
+                    __watch_strategy::log_failed "$predicate"
 
                     return 1
                 fi
 
                 matches=true
-                log::debug "Passed directory test: '$predicate'"
+                __watch_strategy::log_passed "$predicate"
             ;;
             -f*|--file*)
                 if ! $(predicate_tester::test_file "$predicate" "$path"); then
-                    log::debug "Failed file test: '$predicate'"
+                    __watch_strategy::log_failed "$predicate"
 
                     return 1
                 fi
 
                 matches=true
-                log::debug "Passed file test: '$predicate'"
+                __watch_strategy::log_passed "$predicate"
             ;;
             *)
-                log::debug "Predicate '$predicate' is not supported"
+                __watch_strategy::log_skipped "$predicate" "not implemented"
+
                 continue
             ;;
         esac
     done
 
     $matches && return 0 || return 1
+}
+
+__watch_strategy::log_passed() {
+    local type="$1"
+    local reason="$([[ -n "$2" ]] && echo " ($2)")"
+
+    log::debug "Passed: '$type'$reason"
+}
+
+__watch_strategy::log_failed() {
+    local type="$1"
+    local reason="$([[ -n "$2" ]] && echo " ($2)")"
+
+    log::debug "Failed: '$type'$reason"
+}
+
+__watch_strategy::log_skipped() {
+    local type="$1"
+    local reason="$([[ -n "$2" ]] && echo " ($2)")"
+
+    log::debug "Skipped: '$type'$reason"
 }

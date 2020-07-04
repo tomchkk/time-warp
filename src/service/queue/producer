@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
 
-__producer_logger=${1:?"A logger is required"}
+source ${1:?"A logger is required"}
+
 __producer_bash_clash=${2:?"bash-clash is required"}
 __producer_bus=${3:?"A message bus is required"}
 __producer_topic=${4:?"A publishable topic is required"}
-__producer_profile_manager=${5:?"A profile manager is required"}
-__producer_profile_matcher=${6:?"A profile matcher is required"}
-__producer_watching=${@:7}
-
-source $__producer_logger
+__producer_matcher=${5:?"A profile matcher is required"}
+__producer_watching=${@:6}
 
 if [[ -z "$__producer_watching" ]]; then
     log::error "No events to watch are defined" && exit 1
@@ -45,8 +43,7 @@ producer::produce() {
         log::debug "Watched event '$event' was fired"
 
         # now that shit is getting real, let's charge our weapons!
-        source "$__producer_profile_manager" "$profiles"
-        source "$__producer_profile_matcher"
+        source "$__producer_matcher" "$profiles"
         source "$__producer_bus"
         source "$__producer_bash_clash" "$(
             __producer::parameterize_paths "${!changes[$key]}"
@@ -58,38 +55,23 @@ producer::produce() {
             # be concatenated to get a full path to a changed file
             path="${WATCHEXEC_COMMON_PATH}${path}"
 
-            log::debug "Checking '$path' for profile matches."
+            if $(profile_matcher::match "$path"); then
+                log::debug "A matching profile was found for path '$path'"
 
-            local profile; for profile in $(profile_manager::get_profiles); do
-                local options=$(profile_manager::get_options "$profile")
-                profile_matcher::set_options "$options"
+                local message=(
+                    "PUBLISH"
+                    --producer-pid "$$"
+                    --topic "$__producer_topic"
+                    --event "$event"
+                    --path "$path"
+                )
 
-                local predicates=$(profile_manager::get_predicates "$profile")
-                profile_matcher::set_predicates "$predicates"
-
-                if $(profile_matcher::match "$path"); then
-                    log::debug "A profile match was found for path '$path'"
-
-                    local message=(
-                        "PUBLISH"
-                        --producer-pid "$$"
-                        --topic "$__producer_topic"
-                        --event "$event"
-                        --path "$path"
-                    )
-
-                    # this statement must be called in the foreground; calling
-                    # in the background may cause messages to be missed
-                    message_bus::dispatch_message ${message[@]}
-
-                     # we've got what we came for (for the current path)
-                    continue 2
-                fi
-
-                # let's try to match against the next profile
-            done
-
-            log::info "No profile match was found for path '$path'"
+                # this statement must be called in the foreground; calling
+                # in the background may cause messages to be missed
+                message_bus::dispatch_message ${message[@]}
+            else
+                log::info "No matching profile was found for path '$path'"
+            fi
         done
     done
 }

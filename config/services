@@ -173,8 +173,13 @@ __services::define_services() {
     ## matcher
     container::add_service "watch-profile-matcher" \
         "@{project-dir}/src/service/profile/matcher/profile-matcher" \
-            -- "@watch-strategy" \
-            -- "@stdout-logger"
+            -- "@stdout-logger" \
+            -- "@watch-matcher-type" \
+            -- "@profile-manager"
+
+    container::add_service "watch-matcher-type" \
+        "@{project-dir}/src/service/profile/matcher/type/watch-type" \
+            -- "@watch-strategy"
 
     container::add_service "watch-strategy" \
         "@{project-dir}/src/service/profile/matcher/strategy/watch-strategy" \
@@ -195,7 +200,6 @@ __services::define_services() {
             -- "@bash-clash" \
             -- "@message-bus" \
             -- "@time-machine-exclude-topic" \
-            -- "@profile-manager" \
             -- "@watch-profile-matcher" \
             -- "@excluding-producer-events"
 

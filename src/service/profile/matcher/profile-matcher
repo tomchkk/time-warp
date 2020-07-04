@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-source "${1:?"A matching strategy is required"}"
-source "${2:?"A logger is required"}"
+source "${1:?"A logger is required"}"
+source "${2:?"A matcher type is required"}"
+source "${3:?"A profile manager is required"}" "${4:?"A profile is required"}"
 
 __profile_matcher_options=""
 __profile_matcher_predicates=""
@@ -24,12 +25,15 @@ profile_matcher::set_predicates() {
 # Matches a given path against a set of profile option and predicate matching
 # strategies.
 ##
-profile_matcher::match() {
+__profile_matcher::matches_strategy() {
     local path="$@"
+
     local options="$__profile_matcher_options"
     local predicates="$__profile_matcher_predicates"
 
     strategy::set_path "$path"
+
+    log::debug "Checking profile matches for path '$path'..."
 
     if ! $(strategy::path_matches_options "$options"); then
         log::debug "Options do not match!"

@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+source "${1:?"A watch profile matching strategy is required"}"
+
+##
+# Attempts to match a given path against a set of profile option and predicate
+# matching strategies.
+##
+profile_matcher::match() {
+    local path="$@"
+
+    local profile; for profile in $(profile_manager::get_profiles); do
+        local options=$(profile_manager::get_options "$profile")
+        profile_matcher::set_options "$options"
+
+        local predicates=$(profile_manager::get_predicates "$profile")
+        profile_matcher::set_predicates "$predicates"
+
+        if $(__profile_matcher::matches_strategy "$path"); then
+            return 0
+        fi
+    done
+
+    return 1 # no match is found
+}
