@@ -2,7 +2,7 @@ options=(
     # filter for glob pattern
     --filter="**/node_modules"
     # ignore nested directories
-    --ignore="**/node_modules/**/node_modules/**"
+    --ignore="**/node_modules/**/node_modules*"
 )
 
 predicates=(

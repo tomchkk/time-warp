@@ -2,7 +2,7 @@ options=(
     # filter for glob pattern
     --filter="**/vendor"
     # ignore nested directories
-    --ignore="**/vendor/**/vendor/**"
+    --ignore="**/vendor/**/vendor*"
 )
 
 predicates=(
