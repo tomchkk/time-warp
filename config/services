@@ -307,7 +307,7 @@ __services::define_services() {
 
     # clients
     container::add_service "slack-client" \
-        "@{project-dir}/src/service/slack/slack-client"
+        "@{project-dir}/src/service/client/slack-client"
 
     # exemptions
     container::add_service "exemptions-authorizer" \
