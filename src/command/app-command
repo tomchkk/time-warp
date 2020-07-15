@@ -23,8 +23,8 @@ Commands:
                 backups
     exemptions  Manage items exempted from $APP_NAME's monitoring
     queue       Manage $APP_NAME's queue functionality
-    scan        Scan for existing files matching configured profiles and
-                optionally exclude matches from Time Machine backups
+    scan        Scan for existing files matching configured profiles and,
+                optionally, exclude from or re-include in Time Machine backups
     services    Manage $APP_NAME's services
     watch       Watch for changes to files matching configured profiles and
                 exclude matches from Time Machine backups
@@ -35,11 +35,12 @@ EOF
 __app_command_edit_command="${1:?"The edit command is required"}"
 __app_command_exemptions_command="${2:?"The exemptions command is required"}"
 __app_command_queue_command="${3:?"The queue command is required"}"
-__app_command_services_command="${4:?"The services command is required"}"
-__app_command_watch_command="${5:?"The watch command is required"}"
+__app_command_scan_command="${4:?"The scan command is required"}"
+__app_command_services_command="${5:?"The services command is required"}"
+__app_command_watch_command="${6:?"The watch command is required"}"
 
-opt="$6"
-args="${@:7}"
+opt="$7"
+args="${@:8}"
 
 case "$opt" in
     edit)
@@ -54,8 +55,8 @@ case "$opt" in
         source "$__app_command_queue_command" $args
     ;;
     scan)
-        # TODO: implement the scanner
-        echo "scan!"
+        source "$__app_command_scan_command"
+        scan_command::handle $args
     ;;
     services)
         source "$__app_command_services_command" $args

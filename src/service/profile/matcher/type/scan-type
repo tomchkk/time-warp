@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+source "${1:?"A scan profile matching strategy is required"}"
+
+##
+# Attempts to match a given path against a set of profile option and predicate
+# matching strategies.
+##
+profile_matcher::match() {
+    return $(__profile_matcher::matches_strategy "$@")
+}

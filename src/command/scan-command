@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+
+__scan_command_scan_feature="${1:?"The scan feature is required"}"
+__scan_command_default_dir="${2:?"A default scan dir is required"}"
+__scan_command_default_profile="${3:?"A default profile dir is required"}"
+
+source "$__scan_command_scan_feature"
+
+##
+# Cats the command's usage documentation.
+##
+__scan_command::usage() {
+    cat << EOF
+$APP_NAME ($APP_VERSION) - Scan
+
+Scan for existing files matching configured profiles and, optionally, exclude
+from or re-include in Time Machine backups.
+
+Usage:  $APP_NAME scan <path> [options]
+
+Argument:
+    <path>          The path to scan - default '$__scan_command_default_dir'
+
+Options:
+    -h, --help      Print usage information
+    -p, --profile   A file profile or a directory containing multiple profiles
+                    used to identify target file items
+                    default: '$__scan_command_default_profile'
+    -e, --exclude   Exclude from Time Machine backups all identified files and
+                    folders (that are currently included)
+    -i, --include   Include in Time Machine backups all identified files and
+                    folders (that are currently excluded)
+    -f, --force     Perform the actual exclusion or inclusion actions, rather
+                    than the default of printing at list of matched files
+EOF
+}
+
+##
+# Handles incoming commands.
+##
+scan_command::handle() {
+    local dir=""
+    local profile="$__scan_command_default_profile"
+    local action="exclude"
+    local force=false
+
+    # handle empty args
+    [[ -z "$@" ]] && set -- "--help"
+
+    while [[ "$#" -gt 0 ]]; do
+        case "$1" in
+            -p|--profile)
+                if [[ -d "$2" ]]; then
+                    profile="$(cd "$2"; pwd)" && shift
+                elif [[ -f "$2" ]]; then
+                    profile="$(cd $(dirname "$2"); pwd)/$(basename "$2")"
+                    shift
+                else
+                    echo "'$2' is not a valid profile" >&2
+
+                    exit 1
+                fi
+            ;;
+            -e|--exclude) action="exclude" ;;
+            -i|--include) action="include" ;;
+            -f|--force) force=true ;;
+            -h|--help|--*)
+                __scan_command::usage && exit 0
+            ;;
+            *)
+                [[ -z "$dir" ]] && dir="$1" || dir+=" $1"
+            ;;
+        esac
+
+        shift
+    done
+
+    feature::set_scan_dir "${dir:-$__scan_command_default_dir}"
+    feature::set_profile "$profile"
+    feature::$action $force
+}

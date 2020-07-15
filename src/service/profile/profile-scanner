@@ -1,0 +1,182 @@
+#!/usr/bin/env bash
+
+__profile_scanner_manager="${1:?"A profile manager is required"}"
+__profile_scanner_matcher="${2:?"A profile matcher is required"}"
+__profile_scanner_fifo="${3:?"A fifo pipe path is required"}"
+__profile_scanner_filter="${4:?"A scanner filter is required"}"
+
+__profile_scanner_profile=""
+
+__profile_scanner_matches=()
+__profile_scanner_scan_jobs=()
+
+##
+# Sets the profile file or directory to be scanned.
+##
+profile_scanner::set_profile() {
+    __profile_scanner_profile="$@"
+}
+
+##
+# Finds paths in the given base directory that match the set profiles and
+# sets them on the '__profile_scanner_matches' property.
+##
+profile_scanner::find_matches() {
+    local dir="${@:?"A directory to scan is required"}"
+
+    trap __profile_scanner::tear_down EXIT
+
+    __profile_scanner::produce_matches "$dir"
+    if [[ $? -gt 0  ]]; then
+        return 1
+    fi
+
+    __profile_scanner::consume_matches
+
+    return $?
+}
+
+##
+# Iterates over all matches found by profile_scanner::find_matches.
+##
+profile_scanner::iterate_matches() {
+    local match; for match in "${__profile_scanner_matches[@]}"; do
+        echo "$match"
+    done
+}
+
+##
+# Perform tear-down sequences.
+##
+__profile_scanner::tear_down() {
+    echo # let's just distance amy messaging from anything else going on
+    __profile_scanner::destroy_pipe
+    __profile_scanner::destroy_processes
+}
+
+##
+# Produces profile matches in the given directory.
+##
+__profile_scanner::produce_matches() {
+    local dir="${@:?"A directory to scan is required"}"
+
+    source "$__profile_scanner_manager" "$__profile_scanner_profile"
+    source "$__profile_scanner_filter"
+
+    echo "Scanning files for profile matches in '$dir'."
+    echo "This action may take some time (ctrl+c to cancel)."
+    echo
+
+    # TODO: add checking for profile file type!?
+    # TODO: manage _base.profile by merging options into subsequent profiles
+
+    local profile; for profile in $(profile_manager::get_profiles); do
+        source "$__profile_scanner_matcher"
+
+        local options=$(profile_manager::get_options "$profile")
+        profile_matcher::set_options "$options"
+
+        local glob="$(profile_matcher::get_option "filter" "f")"
+
+        if [[ -z "$glob" ]]; then
+            continue
+        fi
+
+        local predicates=$(profile_manager::get_predicates "$profile")
+        profile_matcher::set_predicates "$predicates"
+
+        {
+            local path; while IFS= read -r  -d $'\0' path; do
+                echo -en "▒" # display scan progress
+
+                if ! $(profile_matcher::match "$path"); then
+                    continue
+                elif ! $(scanner_filter::permit "$path"); then
+                    continue
+                elif [[ ! -e "$__profile_scanner_fifo" ]]; then
+                    # we can make the pipe at this point, because we have at
+                    # lease one permitted match
+                    __profile_scanner::make_pipe
+                fi
+
+                __profile_scanner::enqueue_match "$path"
+
+            # finds all items in the base dir which match the filter glob
+            done < <(find "$dir" -xdev -path "$glob" -print0 2>/dev/null)
+
+            # N.B. it would be much quicker to use mdfind instead of find to
+            # scan for profile matches, but mdfind can't do glob matching, so
+            # the implmentation of profiles would need to be completely
+            # re-engineer. Scanning should be an infrequent event though, so
+            # speed isn't the priority here.
+        } &
+
+        __profile_scanner_scan_jobs+=($!)
+    done
+
+    if [[ ${#__profile_scanner_scan_jobs[@]} -eq 0 ]]; then
+        echo "No valid profiles were detected!" >&2
+
+        return 1 # no scan jobs were created
+    fi
+
+    wait ${__profile_scanner_scan_jobs[@]} 2>/dev/null
+
+    echo # separate progress from subsequent feedback
+
+    if [[ ! -e "$__profile_scanner_fifo" ]]; then
+        echo " No matches were found!" >&2
+
+        return 1
+    fi
+}
+
+##
+# Consumes the matches written to the scanner pipe.
+##
+__profile_scanner::consume_matches() {
+    if [[ ! -e "$__profile_scanner_fifo" ]]; then
+        return 1
+    fi
+
+    local line; while IFS= read -r line; do
+        __profile_scanner_matches+=("$line")
+    done < "$__profile_scanner_fifo"
+}
+
+##
+# Creates a background process to write a match to the scanner pipe.
+##
+__profile_scanner::enqueue_match() {
+    echo "$@" > "$__profile_scanner_fifo" &
+}
+
+##
+# Makes the scanner pipe.
+##
+__profile_scanner::make_pipe() {
+    if [[ -e "$__profile_scanner_fifo" ]]; then
+        # we should start with a fresh pipe
+        __profile_scanner::destroy_pipe
+    fi
+
+    mkfifo "$__profile_scanner_fifo"
+}
+
+##
+# Destroys the scanner pipe.
+##
+__profile_scanner::destroy_pipe() {
+    rm -f "$__profile_scanner_fifo"
+}
+
+##
+# Destroys all related jobs and processes.
+##
+__profile_scanner::destroy_processes() {
+    if [[ -z $(jobs) ]]; then
+        return 0
+    fi
+
+    kill 0
+}

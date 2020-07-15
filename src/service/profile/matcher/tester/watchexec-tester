@@ -16,3 +16,13 @@ option_tester::test_filter() {
 
     [[ $path == $filter ]] && return 0 || return 1
 }
+
+##
+# Tests whether the given path matches the given ignore glob.
+##
+option_tester::test_ignore() {
+    local ignore=$(echo $1 | sed -E 's/^-(i|-ignore)=//')
+    local path="$2"
+
+    [[ $path == $ignore ]] && return 0 || return 1
+}

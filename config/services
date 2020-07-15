@@ -27,6 +27,7 @@ __services::define_parameters() {
 
     # files
     container::add_scalar "excluding-pipe" "@{org-tmp}/excluding-pipe"
+    container::add_scalar "scanning-pipe" "@{org-tmp}/scanning-pipe"
     container::add_scalar "exemptions-file" "@{var-dir}/exemptions"
 
     # message routing
@@ -88,6 +89,7 @@ __services::define_services() {
             -- "@edit-command" \
             -- "@exemptions-command" \
             -- "@queue-command" \
+            -- "@scan-command" \
             -- "@services-command" \
             -- "@watch-command"
 
@@ -104,6 +106,12 @@ __services::define_services() {
             -- "@consume-feature" \
             -- "@message-feature" \
             -- "@produce-feature"
+
+    container::add_service "scan-command" \
+        "@{project-dir}/src/command/scan-command" \
+            -- "@scan-feature" \
+            -- "$HOME" \
+            -- "@profiles-dir"
 
     container::add_service "services-command" \
         "@{project-dir}/src/command/services-command" \
@@ -137,6 +145,11 @@ __services::define_services() {
         "@{project-dir}/src/feature/produce-feature" \
             -- "@excluding-producer"
 
+    container::add_service "scan-feature" \
+        "@{project-dir}/src/feature/scan-feature" \
+            -- "@profile-scanner" \
+            -- "@time-machine-editor"
+
     container::add_service "services-feature" \
         "@{project-dir}/src/feature/services-feature" \
             -- "@stdout-logger" \
@@ -164,13 +177,20 @@ __services::define_services() {
         "@{project-dir}/src/service/profile/profile-manager" \
             -- "@stdout-logger"
 
+    ## scanner
+    container::add_service "profile-scanner" \
+        "@{project-dir}/src/service/profile/profile-scanner" \
+            -- "@profile-manager" \
+            -- "@scan-profile-matcher" \
+            -- "@scanning-pipe"
+
     ## resolver
     container::add_service "watchexec-options-resolver" \
         "@{project-dir}/src/service/profile/resolver/watchexec-options-resolver" \
             -- "@profile-manager" \
             -- "@stdout-logger"
 
-    ## matcher
+    ## matchers
     container::add_service "watch-profile-matcher" \
         "@{project-dir}/src/service/profile/matcher/profile-matcher" \
             -- "@stdout-logger" \
@@ -187,6 +207,23 @@ __services::define_services() {
             -- "@predicate-tester" \
             -- "@stdout-logger"
 
+    # TODO: consider implementing a null-logger for this service
+    container::add_service "scan-profile-matcher" \
+        "@{project-dir}/src/service/profile/matcher/profile-matcher" \
+            -- "@file-logger" \
+            -- "@scan-matcher-type"
+
+    container::add_service "scan-matcher-type" \
+        "@{project-dir}/src/service/profile/matcher/type/scan-type" \
+            -- "@scan-strategy"
+
+    container::add_service "scan-strategy" \
+        "@{project-dir}/src/service/profile/matcher/strategy/scan-strategy" \
+            -- "@watchexec-tester" \
+            -- "@predicate-tester" \
+            -- "@file-logger"
+
+    # TODO: change this to option-tester
     container::add_service "watchexec-tester" \
         "@{project-dir}/src/service/profile/matcher/tester/watchexec-tester"
 
@@ -319,6 +356,17 @@ __services::define_services() {
     container::add_service "exemptions-service" \
         "@{project-dir}/src/service/exemptions/exemptions-service" \
             -- "@exemptions-file"
+
+    # scan filters
+    container::add_service "scan-exclude-filter" \
+        "@{project-dir}/src/service/scan/exclude-filter" \
+            -- "@time-machine-editor" \
+            -- "@file-logger"
+
+    container::add_service "scan-include-filter" \
+        "@{project-dir}/src/service/scan/include-filter" \
+            -- "@time-machine-editor" \
+            -- "@file-logger"
 }
 
 __services::define_config

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+source "${1:?"A Time Machine editor is required"}"
+source "${2:?"A logger is required"}"
+
+##
+# Determines if the given path can be permitted by this filter.
+##
+scanner_filter::permit() {
+    local path="${@:?"A path to filter is required"}"
+
+    if $(time_machine_editor::is_excluded "$path"); then
+        log::info "Excluded path '$path' can be re-included in Time Machine backups"
+
+        return 0 # permitted path
+    fi
+
+    log::debug "Included path '$path' does not require re-inclusion in Time Machine backups"
+
+    return 1 # not permitted path
+}

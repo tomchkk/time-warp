@@ -1,0 +1,260 @@
+#!/usr/bin/env bash
+
+__scan_feature_profile_scanner="${1:?"A profile scanner is required"}"
+__scan_feature_editor="${2:?"A Time Machine editor is required"}"
+
+__scan_feature_dir=""
+__scan_feature_profile=""
+__scan_feature_matches=()
+__scan_feature_selections=()
+
+##
+# Sets the directory to be scanned.
+##
+feature::set_scan_dir() {
+    if [[ ! -d "$@" ]]; then
+        echo "'$@' is not a directory" >&2
+
+        return 1
+    fi
+
+    __scan_feature_dir="${@%/}"
+}
+
+##
+# Sets the profile file or directory to use in the scan.
+##
+feature::set_profile() {
+    __scan_feature_profile="$@"
+}
+
+##
+# Scans the set directory for files matched by the set profile and optionally
+# excludes them from Time Machine backups - if they're currently included.
+##
+feature::exclude() {
+    local force="${1:-false}"
+
+    __scan_feature::handle "exclude" $force
+}
+
+##
+# Scans the set directory for files matched by the set profile and optionally
+# re-includes them in Time Machine backups - if they're already excluded.
+##
+feature::include() {
+    local force="${1:-false}"
+
+    __scan_feature::handle "include" $force
+}
+
+##
+# Handles the action request.
+##
+__scan_feature::handle() {
+    local action="${1:?"An action type is required"}"
+    local force="${2:-false}"
+
+    if ! $(__scan_feature::action_is_valid "$action"); then
+        echo "Invalid scan action type '$action'" >&2
+
+        return 1
+    fi
+
+    __scan_feature::hydrate_matches "$action"
+    if [[ $? -gt 0 ]]; then
+        return 1
+    fi
+
+    __scan_feature::select_matches
+    if [[ $? -gt 0 ]]; then
+        return 1
+    fi
+
+    if $force; then
+        # TODO: what happens when we're watching and force a scan ex/in-clude
+        __scan_feature::${action}_selections
+    else
+        __scan_feature::display_selections
+    fi
+}
+
+##
+# Validates the action choice.
+##
+__scan_feature::action_is_valid() {
+    case "$1" in
+        include|exclude) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+##
+# Excludes selected items from Time Machine backups.
+##
+__scan_feature::exclude_selections() {
+    source "$__scan_feature_editor"
+
+    echo "Excluding from Time Machine backups:"
+
+    local path; for path in "${__scan_feature_selections[@]}"; do
+        if $(time_machine_editor::exclude "$path"); then
+            echo "- '$path'" # successfully excluded
+        else
+            echo "+ '$path'" # still included
+        fi
+    done
+}
+
+##
+# Includes selected items in Time Machine backups.
+##
+__scan_feature::include_selections() {
+    source "$__scan_feature_editor"
+
+    echo "Including in Time Machine backups:"
+
+    local path; for path in "${__scan_feature_selections[@]}"; do
+        if $(time_machine_editor::include "$path"); then
+            echo "+ '$path'" # successfully included
+        else
+            echo "- '$path'" # still excluded
+        fi
+    done
+}
+
+##
+# Displays items selected for exclusion or inclusion.
+##
+__scan_feature::display_selections() {
+    echo "Selected from matched items (dry run):"
+
+    local path; for path in "${__scan_feature_selections[@]}"; do
+        echo "-> $path"
+    done
+}
+
+##
+# Hydrates the __scan_feature_matches property with paths that match the set
+# profiles.
+##
+__scan_feature::hydrate_matches() {
+    local action="$1"
+
+    source "$__scan_feature_profile_scanner" "@scan-${action}-filter"
+
+    profile_scanner::set_profile "$__scan_feature_profile"
+    profile_scanner::find_matches "$__scan_feature_dir"
+    if [[ $? -gt 0 ]]; then
+        return 1
+    fi
+
+    local match; while read match; do
+        __scan_feature_matches+=("$match")
+    done < <(profile_scanner::iterate_matches)
+}
+
+##
+# User interface to select matched paths found during a scan.
+##
+__scan_feature::select_matches() {
+    local size="${#__scan_feature_matches[@]}"
+    local items_per_page=10 # configurable items per page
+    local page_count=$((((size + ((items_per_page - 1)))) / items_per_page))
+
+    local page_no=0
+    local page=()
+
+    __scan_feature_selections=()
+
+    local key; for key in "${!__scan_feature_matches[@]}"; do
+        if [[ ${#page[@]} -le $items_per_page ]]; then
+            page+=("${__scan_feature_matches[$key]}")
+
+            if [[ ${#page[@]} -lt $items_per_page ]] \
+            && [[ $key -lt $(($size - 1)) ]]; then
+                continue
+            else
+                page_no=$((++page_no))
+            fi
+        fi
+
+        local selections_count="${#__scan_feature_selections[@]}"
+        local items_count="${#page[@]}"
+        local selected=()
+
+        echo
+        echo "----------------------------------------------------"
+        echo
+        echo "Select matched paths for action"
+        echo
+        echo " [index]  - select individual matched paths"
+        echo " a|all    - select all matched paths (total: $size)"
+        echo " c|cancel - cancel the command"
+        echo " f|finish - proceed with items selected so far ($selections_count)"
+        echo " n|next   - go to the next page "
+        echo " p|page   - select a whole page (items: $items_count)"
+        echo
+        echo "   - page $page_no of $page_count - "
+        echo
+
+        local newline=$'\n'
+        PS3="- selected: ~${newline}#?: "
+
+        select match in "${page[@]}"; do
+            local warning=""
+
+            case "$REPLY" in
+                a|all)
+                    __scan_feature_selections=("${__scan_feature_matches[@]}")
+
+                    break 2
+                ;;
+                c|cancel)
+                    __scan_feature_selections=()
+
+                    return 1
+                ;;
+                f|finish) break 2 ;;
+                n|next) break ;;
+                p|page)
+                    local item; for item in "${page[@]}"; do
+                        if [[ "${__scan_feature_selections[*]}" == *"$item"* ]]
+                        then
+                            continue # item is already selected
+                        fi
+
+                        __scan_feature_selections+=("${item}")
+                    done
+
+                    break
+                ;;
+                *)
+                    if [[ $REPLY -ge 1 ]] && [[ $REPLY -le $items_count ]]; then
+                        if [[ "${selected[*]}" == *"$REPLY"* ]]; then
+                            warning=" (item already selected!)"
+                        else
+                            selected+=("$REPLY")
+                            __scan_feature_selections+=("$match")
+
+                            if [[ "${#selected[@]}" -eq $items_count ]]; then
+                                # all items in the page have been selected
+                                break
+                            fi
+                        fi
+                    else
+                        warning=" (invalid selection!)"
+                    fi
+                ;;
+            esac
+            echo -en "\r\033[2A\033[0K"
+            PS3="- selected: ${selected[@]:-~}${warning}${newline}#?: "
+        done
+
+        page=()
+    done
+
+    echo
+    echo "----------------------------------------------------"
+    echo
+}
