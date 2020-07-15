@@ -17,7 +17,7 @@ Usage:  $APP_NAME edit [option] <args>
 
 Options:
     -h, --help      Print usage information
-    -e, --exlude    Exclude a path from Time Machine backups
+    -e, --exclude   Exclude a path from Time Machine backups
     -i, --include   Re-include a path excluded from Time Machine backups
 EOF
 }
