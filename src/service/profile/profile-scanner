@@ -67,7 +67,6 @@ __profile_scanner::produce_matches() {
     echo "This action may take some time (ctrl+c to cancel)."
     echo
 
-    # TODO: add checking for profile file type!?
     # TODO: manage _base.profile by merging options into subsequent profiles
 
     local profile; for profile in $(profile_manager::get_profiles); do
