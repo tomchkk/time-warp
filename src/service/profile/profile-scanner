@@ -91,9 +91,13 @@ __profile_scanner::produce_matches() {
 
                 if ! $(profile_matcher::match "$path"); then
                     continue
-                elif ! $(scanner_filter::permit "$path"); then
+                fi
+
+                if ! $(scanner_filter::permit "$path"); then
                     continue
-                elif [[ ! -e "$__profile_scanner_fifo" ]]; then
+                fi
+
+                if [[ ! -e "$__profile_scanner_fifo" ]]; then
                     # we can make the pipe at this point, because we have at
                     # lease one permitted match
                     __profile_scanner::make_pipe
