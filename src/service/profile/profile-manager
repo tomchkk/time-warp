@@ -31,21 +31,6 @@ profile_manager::get_profiles() {
 }
 
 ##
-# Converts an inode to a file path, if profile is not a file and
-# __profile_manager_profiles is a directory
-##
-__profile_manager::convert_profile_inode_to_path() {
-    local profile="$1"
-
-    if [[ ! -f "$profile" ]] && [[ -d "$__profile_manager_profiles" ]]; then
-        # convert an inode to a file path
-        profile=$(find "$__profile_manager_profiles" -xdev -inum $profile)
-    fi
-
-    echo "$profile"
-}
-
-##
 # Gets defined flags from the given profile file.
 ##
 profile_manager::get_flags() {
@@ -70,4 +55,19 @@ profile_manager::get_predicates() {
     local profile="$(__profile_manager::convert_profile_inode_to_path $1)"
 
     echo $(unset predicates && source "$profile" && echo ${predicates[@]})
+}
+
+##
+# Converts an inode to a file path, if profile is not a file and
+# __profile_manager_profiles is a directory
+##
+__profile_manager::convert_profile_inode_to_path() {
+    local profile="$1"
+
+    if [[ ! -f "$profile" ]] && [[ -d "$__profile_manager_profiles" ]]; then
+        # convert an inode to a file path
+        profile=$(find "$__profile_manager_profiles" -xdev -inum $profile)
+    fi
+
+    echo "$profile"
 }
