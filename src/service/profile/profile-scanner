@@ -67,14 +67,19 @@ __profile_scanner::produce_matches() {
     echo "This action may take some time (ctrl+c to cancel)."
     echo
 
-    # TODO: manage _base.profile by merging options into subsequent profiles
-
     local profile; for profile in $(profile_manager::get_profiles); do
         source "$__profile_scanner_matcher"
 
-        local options=$(profile_manager::get_options "$profile")
-        profile_matcher::set_options "$options"
+        if $(profile_manager::is_base_profile "$profile"); then
+            local base_options=$(profile_manager::get_options "$profile")
 
+            continue # a base profile should not be used for a scan
+        fi
+
+        local options=$(profile_manager::get_options "$profile")
+        profile_matcher::set_options "$base_options" "$options"
+
+        # TODO: what happens if there are more than one filter options?
         local glob="$(profile_matcher::get_option "filter" "f")"
 
         if [[ -z "$glob" ]]; then
@@ -163,7 +168,7 @@ __profile_scanner::make_pipe() {
         __profile_scanner::destroy_pipe
     fi
 
-    mkfifo "$__profile_scanner_fifo"
+    mkfifo "$__profile_scanner_fifo" 2>/dev/null
 }
 
 ##

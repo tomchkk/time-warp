@@ -31,6 +31,20 @@ profile_manager::get_profiles() {
 }
 
 ##
+# Determines if a given profile is considered a 'base' profile - i.e. a profile
+# which carries defaults useable for other profiles.
+##
+profile_manager::is_base_profile() {
+    local profile="$(__profile_manager::convert_profile_inode_to_path $1)"
+
+    if [[ "$profile" == *"/_base.profile" ]]; then
+        return 0
+    fi
+
+    return 1
+}
+
+##
 # Gets defined flags from the given profile file.
 ##
 profile_manager::get_flags() {
