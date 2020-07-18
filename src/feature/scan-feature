@@ -33,9 +33,7 @@ feature::set_profile() {
 # excludes them from Time Machine backups - if they're currently included.
 ##
 feature::exclude() {
-    local force="${1:-false}"
-
-    __scan_feature::handle "exclude" $force
+    __scan_feature::handle "exclude"
 }
 
 ##
@@ -43,9 +41,7 @@ feature::exclude() {
 # re-includes them in Time Machine backups - if they're already excluded.
 ##
 feature::include() {
-    local force="${1:-false}"
-
-    __scan_feature::handle "include" $force
+    __scan_feature::handle "include"
 }
 
 ##
@@ -70,7 +66,9 @@ __scan_feature::handle() {
         return 1
     fi
 
-    if $force; then
+    read -p "Are you sure you want to $action selected items? (y|n) " && echo
+
+    if [[ $REPLY =~ ^[Yy](es)?$ ]]; then
         # TODO: what happens when we're watching and force a scan ex/in-clude?
         __scan_feature::${action}_selections
     else
@@ -116,7 +114,7 @@ __scan_feature::include_selections() {
 # Displays items selected for exclusion or inclusion.
 ##
 __scan_feature::display_selections() {
-    echo "Selected from matched items (dry run):"
+    echo "Selected from matched items:"
 
     local path; for path in "${__scan_feature_selections[@]}"; do
         echo "-> $path"
@@ -201,6 +199,7 @@ __scan_feature::select_matches() {
                 ;;
                 c|cancel)
                     __scan_feature_selections=()
+                    echo "Scan selection was cancelled"
 
                     return 1
                 ;;

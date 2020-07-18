@@ -30,8 +30,6 @@ Options:
                     folders (that are currently included)
     -i, --include   Include in Time Machine backups all identified files and
                     folders (that are currently excluded)
-    -f, --force     Perform the actual exclusion or inclusion actions, rather
-                    than the default of printing at list of matched files
 EOF
 }
 
@@ -42,7 +40,6 @@ scan_command::handle() {
     local dir=""
     local profile="$__scan_command_default_profile"
     local action="exclude"
-    local force=false
 
     # handle empty args
     [[ -z "$@" ]] && set -- "--help"
@@ -63,7 +60,6 @@ scan_command::handle() {
             ;;
             -e|--exclude) action="exclude" ;;
             -i|--include) action="include" ;;
-            -f|--force) force=true ;;
             -h|--help|--*)
                 __scan_command::usage && exit 0
             ;;
@@ -77,5 +73,5 @@ scan_command::handle() {
 
     feature::set_scan_dir "${dir:-$__scan_command_default_dir}"
     feature::set_profile "$profile"
-    feature::$action $force
+    feature::$action
 }
