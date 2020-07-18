@@ -53,9 +53,8 @@ feature::include() {
 ##
 __scan_feature::handle() {
     local action="${1:?"An action type is required"}"
-    local force="${2:-false}"
 
-    if ! $(__scan_feature::action_is_valid "$action"); then
+    if [[ ! "$action" =~ ^(include|exclude)$ ]]; then
         echo "Invalid scan action type '$action'" >&2
 
         return 1
@@ -77,16 +76,6 @@ __scan_feature::handle() {
     else
         __scan_feature::display_selections
     fi
-}
-
-##
-# Validates the action choice.
-##
-__scan_feature::action_is_valid() {
-    case "$1" in
-        include|exclude) return 0 ;;
-        *) return 1 ;;
-    esac
 }
 
 ##
