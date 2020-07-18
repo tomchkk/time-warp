@@ -66,7 +66,8 @@ __scan_feature::handle() {
         return 1
     fi
 
-    read -p "Are you sure you want to $action selected items? (y|n) " && echo
+    read -p "Are you sure you want to $action the ${#__scan_feature_selections[@]} selected item(s)? (y|n) "
+    echo
 
     if [[ $REPLY =~ ^[Yy](es)?$ ]]; then
         # TODO: what happens when we're watching and force a scan ex/in-clude?
@@ -74,6 +75,8 @@ __scan_feature::handle() {
     else
         __scan_feature::display_selections
     fi
+
+    echo && echo "Done!"
 }
 
 ##
@@ -82,7 +85,7 @@ __scan_feature::handle() {
 __scan_feature::exclude_selections() {
     source "$__scan_feature_editor"
 
-    echo "Excluding from Time Machine backups:"
+    echo "Excluding from Time Machine backups:" && echo
 
     local path; for path in "${__scan_feature_selections[@]}"; do
         if $(time_machine_editor::exclude "$path"); then
@@ -99,7 +102,7 @@ __scan_feature::exclude_selections() {
 __scan_feature::include_selections() {
     source "$__scan_feature_editor"
 
-    echo "Including in Time Machine backups:"
+    echo "Including in Time Machine backups:" && echo
 
     local path; for path in "${__scan_feature_selections[@]}"; do
         if $(time_machine_editor::include "$path"); then
