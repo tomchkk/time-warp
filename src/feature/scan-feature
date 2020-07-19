@@ -71,11 +71,13 @@ __scan_feature::handle() {
 
     if [[ $REPLY =~ ^[Yy](es)?$ ]]; then
         __scan_feature::${action}_selections
+
+        echo && echo "Done!"
     else
         __scan_feature::display_selections
-    fi
 
-    echo && echo "Done!"
+        echo && echo "No action was taken."
+    fi
 }
 
 ##
@@ -116,7 +118,7 @@ __scan_feature::include_selections() {
 # Displays items selected for exclusion or inclusion.
 ##
 __scan_feature::display_selections() {
-    echo "Selected from matched items:"
+    echo "Selected from matched items:" && echo
 
     local path; for path in "${__scan_feature_selections[@]}"; do
         echo "-> $path"
