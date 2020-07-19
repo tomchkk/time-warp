@@ -48,7 +48,6 @@ consumer::consume() {
                 --queue-pid=$$
                 --timestamp=$timestamp
                 --uptime=$uptime
-                # TODO: look into adding consumer memory usage (current, average, min and max)
                 --message-count=$((++message_count))
             )
 

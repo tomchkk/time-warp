@@ -207,7 +207,6 @@ __services::define_services() {
             -- "@predicate-tester" \
             -- "@stdout-logger"
 
-    # TODO: consider implementing a null-logger for this service
     container::add_service "scan-profile-matcher" \
         "@{project-dir}/src/service/profile/matcher/profile-matcher" \
             -- "@file-logger" \
