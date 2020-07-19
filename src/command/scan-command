@@ -23,13 +23,13 @@ Argument:
 
 Options:
     -h, --help      Print usage information
-    -p, --profile   A file profile or a directory containing multiple profiles
-                    used to identify target file items
-                    default: '$__scan_command_default_profile'
     -e, --exclude   Exclude from Time Machine backups all identified files and
                     folders (that are currently included)
     -i, --include   Include in Time Machine backups all identified files and
                     folders (that are currently excluded)
+    -p, --profile   A file profile or a directory containing multiple profiles
+                    used to identify target file items
+                    default: '$__scan_command_default_profile'
 EOF
 }
 
