@@ -1,5 +1,6 @@
 # _base.profile contains sensible defaults for Time Warp's use of watchexec
-# and working with dependencies. It may not be suitable for _all_ use cases.
+# and working with dependencies, which will be used in combination with all
+# other defined profiles. Its settings may not be suitable for _all_ use cases.
 
 flags=(
     # Skip loading of version control system (VCS) ignore files. By default,

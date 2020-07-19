@@ -79,7 +79,7 @@ __profile_scanner::produce_matches() {
         local options=$(profile_manager::get_options "$profile")
         profile_matcher::set_options "$base_options" "$options"
 
-        # TODO: what happens if there are more than one filter options?
+        # gets the first encountered filter option
         local glob="$(profile_matcher::get_option "filter" "f")"
 
         if [[ -z "$glob" ]]; then

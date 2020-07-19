@@ -14,7 +14,8 @@ profile_matcher::set_options() {
 }
 
 ##
-# Gets an option value from a set profile's options
+# Gets the first encountered occurrence of a given option value from a set
+# profile's options.
 ##
 profile_matcher::get_option() {
     local long="${1:?"A long option must be specified"}"
