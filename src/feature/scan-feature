@@ -70,7 +70,6 @@ __scan_feature::handle() {
     echo
 
     if [[ $REPLY =~ ^[Yy](es)?$ ]]; then
-        # TODO: what happens when we're watching and force a scan ex/in-clude?
         __scan_feature::${action}_selections
     else
         __scan_feature::display_selections
