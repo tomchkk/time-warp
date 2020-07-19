@@ -9,7 +9,7 @@ producer_test::before_each() {
         "$__bash_clash"
         "/dev/null" # message-bus
         "test-topic"
-        "/dev/null" # matcher
+        "$__script_dir/stubs/profile-matcher"
         "create" "rename" "meta"
     )
     source "$__project_dir/src/service/queue/producer" ${producer_args[@]}
@@ -35,14 +35,14 @@ producer_test::test_produce() {
 
     # watched modification for unmatched path does nothing
     WATCHEXEC_CREATED_PATH="path/2/file"
-    bash_test::mock "matcher::match" "" 1
+    bash_test::mock "profile_matcher::match" "" 1
     actual=$(producer::produce "$profiles"; echo $?)
     bash_test::assert_equals 0 "$actual"
     __producer_test::unset_modifications
 
     # watched modification for matched path dispatches a message
     WATCHEXEC_CREATED_PATH="path/2/file"
-    bash_test::mock "matcher::match" "" 0
+    bash_test::mock "profile_matcher::match" "" 0
     bash_test::mock "message_bus::dispatch_message" '$@' 0
     message=$(producer::produce "$profiles")
     actual="$?"
@@ -53,7 +53,7 @@ producer_test::test_produce() {
     # watched modifications for two matched paths dispatches two messages
     WATCHEXEC_CREATED_PATH="file-1:file-2"
     WATCHEXEC_COMMON_PATH="path/2/"
-    bash_test::mock "matcher::match" "" 0
+    bash_test::mock "profile_matcher::match" "" 0
     bash_test::mock "message_bus::dispatch_message" '$@' 0
     message=$(producer::produce "$profiles")
     actual="$?"
@@ -64,7 +64,7 @@ producer_test::test_produce() {
 
     # watched modifications for a matched path with spaces functions correctly
     WATCHEXEC_CREATED_PATH="path/2/file 1"
-    bash_test::mock "matcher::match" "" 0
+    bash_test::mock "profile_matcher::match" "" 0
     bash_test::mock "message_bus::dispatch_message" '$@' 0
     message=$(producer::produce "$profiles")
     actual="$?"
@@ -75,7 +75,7 @@ producer_test::test_produce() {
     # watched modifications for matched paths with spaces functions correctly
     WATCHEXEC_CREATED_PATH="file 1:file 2"
     WATCHEXEC_COMMON_PATH="path/2/"
-    bash_test::mock "matcher::match" "" 0
+    bash_test::mock "profile_matcher::match" "" 0
     bash_test::mock "message_bus::dispatch_message" '$@' 0
     message=$(producer::produce "$profiles")
     actual="$?"
