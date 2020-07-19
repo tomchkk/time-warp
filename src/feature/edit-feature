@@ -25,3 +25,14 @@ feature::include() {
 
     return $?
 }
+
+##
+#
+##
+feature::read() {
+    local path="${1:?"A directory to read is required"}"
+
+    time_machine_editor::read "$path"
+
+    return $?
+}

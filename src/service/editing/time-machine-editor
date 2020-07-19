@@ -4,7 +4,10 @@ __time_machine_editor_x_attribute_editor="${1:?"An x-attribute editor is require
 
 source "$__time_machine_editor_x_attribute_editor"
 
-__X_KEY="com.apple.metadata:com_apple_backup_excludeItem"
+__X_ORG="com.apple.metadata"
+__X_NAME="com_apple_backup_excludeItem"
+
+__X_KEY="${__X_ORG}:${__X_NAME}"
 __X_VAL="com.apple.backupd"
 
 ##
@@ -25,6 +28,24 @@ time_machine_editor::include() {
     local path="$1"
 
     x_attribute_editor::delete "$__X_KEY" "$path"
+
+    return $?
+}
+
+##
+# Reads a given directory for paths currently excluded from Time Machine
+# backups.
+##
+time_machine_editor::read() {
+    local path="$1"
+
+    if [[ ! -d "$path" ]]; then
+        echo "'$path' is not a directory!"
+
+        return 1
+    fi
+
+    mdfind -onlyin "$path" "$__X_NAME = '$__X_VAL'"
 
     return $?
 }

@@ -13,12 +13,14 @@ $APP_NAME ($APP_VERSION) - Edit
 
 Edit paths for exclusion from, or re-inclusion in Time Machine backups.
 
-Usage:  $APP_NAME edit [option] <args>
+Usage:  $APP_NAME edit [option] <path>
 
 Options:
     -h, --help      Print usage information
     -e, --exclude   Exclude a path from Time Machine backups
     -i, --include   Re-include a path excluded from Time Machine backups
+    -r, --read      Read a base directory for paths currently excluded from Time
+                    Machine backups
 EOF
 }
 
@@ -27,14 +29,17 @@ EOF
 ##
 edit_command::handle() {
     local opt="$1"
-    local args="${@:2}"
+    local path="${@:2}"
 
     case "$opt" in
         -e|--exclude)
-            feature::exclude "$args"
+            feature::exclude "$path"
         ;;
         -i|--include)
-            feature::include "$args"
+            feature::include "$path"
+        ;;
+        -r|--read)
+            feature::read "$path"
         ;;
         -h|--help|*)
             __edit_command::usage && exit 0
