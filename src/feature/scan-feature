@@ -239,7 +239,10 @@ __scan_feature::select_matches() {
                     fi
                 ;;
             esac
-            echo -en "\r\033[2A\033[0K"
+
+            # source: https://stackoverflow.com/questions/11283625/overwrite-last-line-on-terminal
+            # \r move to the beginning \033[1A move up \033[0K erase to the end
+            echo -en "\r\033[1A\033[0K\033[1A\033[0K"
             PS3="- selected: ${selected[@]:-~}${warning}${newline}#?: "
         done
 
