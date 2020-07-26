@@ -31,6 +31,7 @@ profile_matcher::get_option() {
 
     return 1
 }
+
 ##
 # Sets predicates to match against a path.
 ##
