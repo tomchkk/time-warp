@@ -19,7 +19,7 @@ profile_matcher::set_options() {
 ##
 profile_matcher::get_option() {
     local long="${1:?"A long option must be specified"}"
-    local short="$2"
+    local short="${2:-"~"}"
 
     local option; for option in $__profile_matcher_options; do
         if [[ "$option" =~ ^-("$short"|-"$long")=(.+)$ ]]; then
