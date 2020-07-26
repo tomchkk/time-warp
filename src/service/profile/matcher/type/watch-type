@@ -3,13 +3,12 @@
 source "${1:?"A watch profile matching strategy is required"}"
 __watch_type_profile_manager="${2:?"A profile manager is required"}"
 
-__watch_type_profiles=""
-
 ##
-# Sets the profiles to be used by the matching type.
+# Sets the profiles to be used by the matching type by sourcing the profile
+# manager with the given profiles.
 ##
 profile_matcher::set_profiles() {
-    __watch_type_profiles="$@"
+    source "$__watch_type_profile_manager" "$@"
 }
 
 ##
@@ -18,8 +17,6 @@ profile_matcher::set_profiles() {
 ##
 profile_matcher::match() {
     local path="$@"
-
-    source "$__watch_type_profile_manager" "$__watch_type_profiles"
 
     local profile; for profile in $(profile_manager::get_profiles); do
         local options=$(profile_manager::get_options "$profile")
