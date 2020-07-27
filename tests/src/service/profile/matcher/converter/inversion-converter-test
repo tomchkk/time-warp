@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+
+__script_dir="$(dirname "${BASH_SOURCE[0]}")"
+source "$__script_dir/../../../../../bootstrap"
+
+converter="$__project_dir/src/service/profile/matcher/converter/inversion-converter"
+
+base_dir=$(time_warp_test::mktmp_dir)
+base_file="$base_dir/base_file"
+test_project="$base_dir/project"
+project_file="$test_project/project_file"
+package_dir="$test_project/package_dir"
+package_dir_child_dir="$package_dir/package_dir_child_dir"
+package_dir_child_file="$package_dir/package_dir_child_file"
+package_file="$test_project/package_file"
+
+mkdir -p "$package_dir_child_dir"
+touch "$base_file"
+touch "$project_file"
+touch "$package_dir_child_file"
+touch "$package_file"
+
+inversion_converter_test::test_convert_to() {
+    local actual
+
+    # a non-existent path is returned unconverted
+    source "$converter" "$base_dir/foo"
+    actual=$(inversion_converter::convert_to "./bar")
+    bash_test::assert_equals 1 "$?"
+    bash_test::assert_empty "$actual"
+
+    # an non-existent target returns nothing
+    source "$converter" "$package_file"
+    actual=$(inversion_converter::convert_to "./foo-bar")
+    bash_test::assert_equals 1 "$?"
+    bash_test::assert_empty "$actual"
+
+    # a file is converted to its sibling directory target
+    source "$converter" "$package_file"
+    actual=$(inversion_converter::convert_to "./package_dir")
+    bash_test::assert_equals 0 "$?"
+    bash_test::assert_equals "$package_dir" "$actual"
+
+    # a file is converted to its sibling file target
+    source "$converter" "$package_file"
+    actual=$(inversion_converter::convert_to "./project_file")
+    bash_test::assert_equals 0 "$?"
+    bash_test::assert_equals "$project_file" "$actual"
+
+    # a file is converted to its parent file target
+    source "$converter" "$package_file"
+    actual=$(inversion_converter::convert_to "../base_file")
+    bash_test::assert_equals 0 "$?"
+    bash_test::assert_equals "$base_file" "$actual"
+
+    # a file is converted to its parent directory target
+    source "$converter" "$package_file"
+    actual=$(inversion_converter::convert_to ".")
+    bash_test::assert_equals 0 "$?"
+    bash_test::assert_equals "$test_project" "$actual"
+
+    # a file is converted to its grandparent directory target
+    source "$converter" "$package_file"
+    actual=$(inversion_converter::convert_to "..")
+    bash_test::assert_equals 0 "$?"
+    bash_test::assert_equals "$base_dir" "$actual"
+
+    # a directory is converted to its child directory target
+    source "$converter" "$package_dir"
+    actual=$(inversion_converter::convert_to "./package_dir_child_dir")
+    bash_test::assert_equals 0 "$?"
+    bash_test::assert_equals "$package_dir_child_dir" "$actual"
+
+    # a directory is converted to its child file target
+    source "$converter" "$package_dir"
+    actual=$(inversion_converter::convert_to "./package_dir_child_file")
+    bash_test::assert_equals 0 "$?"
+    bash_test::assert_equals "$package_dir_child_file" "$actual"
+
+    # a directory is converted to its sibling file target
+    source "$converter" "$package_dir"
+    actual=$(inversion_converter::convert_to "../package_file")
+    bash_test::assert_equals 0 "$?"
+    bash_test::assert_equals "$package_file" "$actual"
+
+    # a directory is *not* converted to itself as a target
+    source "$converter" "$package_dir"
+    actual=$(inversion_converter::convert_to ".")
+    bash_test::assert_equals 1 "$?"
+    bash_test::assert_empty "$actual"
+
+    # a directory is converted to its parent directory target
+    source "$converter" "$package_dir"
+    actual=$(inversion_converter::convert_to "..")
+    bash_test::assert_equals 0 "$?"
+    bash_test::assert_equals "$test_project" "$actual"
+}

@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+__inversion_converter_path="${@:?"A path to convert is required"}"
+
+##
+# Converts a set path to the given target path.
+##
+inversion_converter::convert_to() {
+    local target="${@:?"A target to convert to is required"}"
+
+    if [[ ! -e "$__inversion_converter_path" ]]; then
+        return 1
+    fi
+
+    local base="$__inversion_converter_path"
+    if [[ -f "$base" ]]; then
+        base=$(dirname "$base")
+    fi
+
+    local inverted=""
+    if [[ -d "$base/$target" ]]; then
+        inverted=$(cd "$base/$target" &> /dev/null && pwd)
+    elif [[ -f "$base/$target" ]]; then
+        inverted=$(
+            cd $(dirname "$base/$target") &> /dev/null \
+            && echo "${PWD}/$(basename $base/$target)"
+        )
+    fi
+
+    if [[ "$inverted" == "$__inversion_converter_path" ]] \
+    || [[ ! -e "$inverted" ]]; then
+        echo
+
+        return 1
+    fi
+
+    echo "$inverted"
+
+    return 0
+}
