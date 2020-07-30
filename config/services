@@ -199,7 +199,8 @@ __services::define_services() {
     container::add_service "watch-matcher-type" \
         "@{project-dir}/src/service/profile/matcher/type/watch-type" \
             -- "@watch-strategy" \
-            -- "@profile-manager"
+            -- "@profile-manager" \
+            -- "@inversion-converter"
 
     container::add_service "watch-strategy" \
         "@{project-dir}/src/service/profile/matcher/strategy/watch-strategy" \

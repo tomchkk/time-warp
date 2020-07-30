@@ -72,6 +72,15 @@ profile_manager::get_predicates() {
 }
 
 ##
+# Gets inversions from the given profile file.
+##
+profile_manager::get_inversions() {
+    local profile="$(__profile_manager::convert_profile_inode_to_path $1)"
+
+    echo $(unset inversions && source "$profile" && echo ${inversions[@]})
+}
+
+##
 # Converts an inode to a file path, if profile is not a file and
 # __profile_manager_profiles is a directory
 ##

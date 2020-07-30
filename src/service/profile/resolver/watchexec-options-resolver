@@ -43,7 +43,15 @@ options_resolver::resolve_options() {
             if $(__options_resolver::is_valid_option "$option"); then
                 options+=("$option")
             else
-                log::debug "'$option' is not an applicable profile filter"
+                log::debug "'$option' is not an applicable profile option"
+            fi
+        done
+
+        local inv; for inv in $(profile_manager::get_inversions $profile); do
+            if $(__options_resolver::is_valid_inversion "$inv"); then
+                options+=("$inv")
+            else
+                log::debug "'$inv' is not an applicable inversion option"
             fi
         done
     done
@@ -96,6 +104,22 @@ __options_resolver::is_valid_option() {
     case "$option" in
         -e*|--exts*)
             return 0 ;;
+        -f*|--filter*)
+            return 0 ;;
+        -i*|--ignore*)
+            return 0 ;;
+        *)
+            return 1 ;;
+    esac
+}
+
+##
+# Determines if the given option is valid and applicable to inversions.
+##
+__options_resolver::is_valid_inversion() {
+    local option="${1:?"An option to validate is required"}"
+
+    case "$option" in
         -f*|--filter*)
             return 0 ;;
         -i*|--ignore*)

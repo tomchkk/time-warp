@@ -35,6 +35,18 @@ strategy::path_matches_options() {
                 matches=true
                 __watch_strategy::log_passed "$filter"
             ;;
+            -i*|--ignore*)
+                local ignore="$option"
+
+                if $(option_tester::test_ignore "$ignore" "$path"); then
+                    __watch_strategy::log_failed "$ignore"
+
+                    return 1
+                fi
+
+                matches=true
+                __watch_strategy::log_passed "$ignore"
+            ;;
             *)
                 __watch_strategy::log_skipped "$option" "not relevant"
 

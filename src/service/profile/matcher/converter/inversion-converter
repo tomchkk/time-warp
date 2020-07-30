@@ -9,6 +9,8 @@ inversion_converter::convert_to() {
     local target="${@:?"A target to convert to is required"}"
 
     if [[ ! -e "$__inversion_converter_path" ]]; then
+        echo "$__inversion_converter_path"
+
         return 1
     fi
 
@@ -29,7 +31,7 @@ inversion_converter::convert_to() {
 
     if [[ "$inverted" == "$__inversion_converter_path" ]] \
     || [[ ! -e "$inverted" ]]; then
-        echo
+        echo "$__inversion_converter_path"
 
         return 1
     fi

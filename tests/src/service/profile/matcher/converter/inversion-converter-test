@@ -27,13 +27,13 @@ inversion_converter_test::test_convert_to() {
     source "$converter" "$base_dir/foo"
     actual=$(inversion_converter::convert_to "./bar")
     bash_test::assert_equals 1 "$?"
-    bash_test::assert_empty "$actual"
+    bash_test::assert_equals "$base_dir/foo" "$actual"
 
-    # an non-existent target returns nothing
+    # an non-existent target returns the original path
     source "$converter" "$package_file"
     actual=$(inversion_converter::convert_to "./foo-bar")
     bash_test::assert_equals 1 "$?"
-    bash_test::assert_empty "$actual"
+    bash_test::assert_equals "$package_file" "$actual"
 
     # a file is converted to its sibling directory target
     source "$converter" "$package_file"
@@ -83,11 +83,11 @@ inversion_converter_test::test_convert_to() {
     bash_test::assert_equals 0 "$?"
     bash_test::assert_equals "$package_file" "$actual"
 
-    # a directory is *not* converted to itself as a target
+    # a directory is converted to itself as a target
     source "$converter" "$package_dir"
     actual=$(inversion_converter::convert_to ".")
     bash_test::assert_equals 1 "$?"
-    bash_test::assert_empty "$actual"
+    bash_test::assert_equals "$package_dir" "$actual"
 
     # a directory is converted to its parent directory target
     source "$converter" "$package_dir"

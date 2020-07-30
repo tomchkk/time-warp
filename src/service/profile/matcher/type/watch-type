@@ -2,6 +2,9 @@
 
 source "${1:?"A watch profile matching strategy is required"}"
 __watch_type_profile_manager="${2:?"A profile manager is required"}"
+__watch_type_inversion_converter="${3:?"An inversion converter is required"}"
+
+__profile_matcher_inversions=""
 
 ##
 # Sets the profiles to be used by the matching type by sourcing the profile
@@ -31,4 +34,80 @@ profile_matcher::match() {
     done
 
     return 1 # no match is found
+}
+
+##
+# Determines if the given path matches an inversion filter and, if so, try to
+# return the target path of the inversion. If no conversion takes place, the
+# original path will be returned.
+##
+profile_matcher::convert_if_inversion() {
+    local path="$@"
+
+    local profile; for profile in $(profile_manager::get_profiles); do
+        local inversions=$(profile_manager::get_inversions $profile)
+        __profile_matcher::set_inversions "$inversions"
+
+        local filter=$(__profile_matcher::get_inversion "filter" "f")
+        if [[ -z "$filter" ]] || [[ "$path" != $filter ]]; then
+            continue
+        fi
+
+        log::debug "Path '$path' matches inversion filter '$filter'"
+
+        local target=$(__profile_matcher::get_inversion "target")
+        if [[ -z "$target" ]]; then
+            log::error "A target was not found for the inversion of '$path'"
+
+            continue
+        fi
+
+        # we have filter match and a target \o/!
+        source "$__watch_type_inversion_converter" "$path"
+        local converted=$(inversion_converter::convert_to "$target")
+
+        if [[ "$converted" == "$path" ]]; then
+            log::error "Unable to convert path '$path' to target '$target'"
+
+            continue # a conversion did not happen. Let's try a different profile
+        fi
+
+        log::info "Path '$path' was converted to target '$converted'"
+
+        echo "$converted"
+
+        return 0
+    done
+
+    log::debug "Path '$path' is not an inversion, or could not be inverted."
+
+    echo "$path"
+
+    return 1
+}
+
+##
+# Sets inversions to match against a path.
+##
+__profile_matcher::set_inversions() {
+    __profile_matcher_inversions="$@"
+}
+
+##
+# Gets the first encountered occurrence of a given option value from a set
+# profile's inversions.
+##
+__profile_matcher::get_inversion() {
+    local long="${1:?"A long option must be specified"}"
+    local short="${2:-"~"}"
+
+    local inversion; for inversion in $__profile_matcher_inversions; do
+        if [[ "$inversion" =~ ^-("$short"|-"$long")=(.+)$ ]]; then
+            echo "${BASH_REMATCH[2]}"
+
+            return 0
+        fi
+    done
+
+    return 1
 }

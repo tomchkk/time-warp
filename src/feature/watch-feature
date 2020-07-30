@@ -35,10 +35,6 @@ feature::watch() {
     local options=$(options_resolver::resolve_options "$profile")
     local watches=$(options_resolver::resolve_watches "$dirs")
 
-    # TODO: figure out the inverse case - i.e.:
-    # - when, say, a composer.json file is created where it has a /vendor
-    # sibling, it also needs to be updated
-
     if [[ -z $watches ]]; then
         # we can't start a watch without specifying directories to watch
         return 1

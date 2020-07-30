@@ -55,6 +55,8 @@ producer::produce() {
             # be concatenated to get a full path to a changed file
             path="${WATCHEXEC_COMMON_PATH}${path}"
 
+            path=$(profile_matcher::convert_if_inversion "$path")
+
             if $(profile_matcher::match "$path"); then
                 log::debug "A matching profile was found for path '$path'"
 
