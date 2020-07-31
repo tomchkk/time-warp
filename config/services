@@ -88,6 +88,7 @@ __services::define_services() {
         "@{project-dir}/src/command/app-command" \
             -- "@edit-command" \
             -- "@exemptions-command" \
+            -- "@profiles-command" \
             -- "@queue-command" \
             -- "@scan-command" \
             -- "@services-command" \
@@ -96,6 +97,10 @@ __services::define_services() {
     container::add_service "edit-command" \
         "@{project-dir}/src/command/edit-command" \
             -- "@edit-feature"
+
+    container::add_service "profiles-command" \
+        "@{project-dir}/src/command/profiles-command" \
+            -- "@profiles-feature"
 
     container::add_service "exemptions-command" \
         "@{project-dir}/src/command/exemptions-command" \
@@ -144,6 +149,12 @@ __services::define_services() {
     container::add_service "produce-feature" \
         "@{project-dir}/src/feature/produce-feature" \
             -- "@excluding-producer"
+
+    container::add_service "profiles-feature" \
+        "@{project-dir}/src/feature/profiles-feature" \
+            -- "@project-dir" \
+            -- "@resource-dir" \
+            -- "@user-config-dir"
 
     container::add_service "scan-feature" \
         "@{project-dir}/src/feature/scan-feature" \

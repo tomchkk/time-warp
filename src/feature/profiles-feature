@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+__profiles_feature_project_dir="${1:?"The project dir is required"}"
+__profiles_feature_resource_dir="${2:?"The resources dir is required"}"
+__profiles_feature_config_dir="${3:?"The config dir is required"}"
+
+##
+# Publishes the default profiles to the users config dir.
+##
+feature::publish() {
+    local arguments=(
+        --file="$__profiles_feature_project_dir/Makefile"
+        --warn-undefined-variables
+        profiles
+        resource_dir="$__profiles_feature_resource_dir"
+        user_config="$__profiles_feature_config_dir"
+    )
+
+    make ${arguments[@]}
+}

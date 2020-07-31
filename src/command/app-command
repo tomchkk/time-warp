@@ -22,6 +22,7 @@ Commands:
     edit        Edit paths for exclusion from, or re-inclusion in Time Machine
                 backups
     exemptions  Manage items exempted from $APP_NAME's monitoring
+    profiles    Manage profile resource files
     queue       Manage $APP_NAME's queue functionality
     scan        Scan for existing files matching configured profiles and,
                 optionally, exclude from or re-include in Time Machine backups
@@ -34,13 +35,14 @@ EOF
 
 __app_command_edit_command="${1:?"The edit command is required"}"
 __app_command_exemptions_command="${2:?"The exemptions command is required"}"
-__app_command_queue_command="${3:?"The queue command is required"}"
-__app_command_scan_command="${4:?"The scan command is required"}"
-__app_command_services_command="${5:?"The services command is required"}"
-__app_command_watch_command="${6:?"The watch command is required"}"
+__app_command_profiles_command="${3:?"The profiles command is required"}"
+__app_command_queue_command="${4:?"The queue command is required"}"
+__app_command_scan_command="${5:?"The scan command is required"}"
+__app_command_services_command="${6:?"The services command is required"}"
+__app_command_watch_command="${7:?"The watch command is required"}"
 
-opt="$7"
-args="${@:8}"
+opt="$8"
+args="${@:9}"
 
 case "$opt" in
     edit)
@@ -50,6 +52,10 @@ case "$opt" in
     exemptions)
         source "$__app_command_exemptions_command"
         exemptions_command::handle $args
+    ;;
+    profiles)
+        source "$__app_command_profiles_command"
+        profiles_command::handle $args
     ;;
     queue)
         source "$__app_command_queue_command" $args

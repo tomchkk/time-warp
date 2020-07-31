@@ -6,10 +6,12 @@ __kernel_config=(
     debug="${2:?"DEBUG must be set"}"
     log-level="${LOG_LEVEL:-"DEBUG"}"
     project-dir="$__project_dir"
+    resource-dir="$__resource_dir"
     submodules-dir="$__submodules_dir"
     var-dir="$__var_dir"
     cache-dir="$__cache_dir"
     log-dir="$__log_dir"
+    user-config-dir="$__user_config_dir"
     profiles-dir="$__profiles_dir"
     org-tmp="$__org_tmp"
 )

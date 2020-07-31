@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+source "${1:?"The profiles feature is required"}"
+
+##
+# Cats the command's usage documentation.
+##
+__profiles_command::usage() {
+    cat << EOF
+$APP_NAME ($APP_VERSION) - Profiles
+
+Manage profile resource files.
+
+Usage:  $APP_NAME profiles [option]
+
+Options:
+    -h, --help      Print usage information
+    -p, --publish   Publish the default $APP_NAME profiles.
+EOF
+}
+
+##
+# Handles incoming commands.
+##
+profiles_command::handle() {
+    local opt="$1"
+
+    case "$opt" in
+        -p|--publish)
+            feature::publish
+        ;;
+        -h|--help|*)
+            __profiles_command::usage && exit 0
+        ;;
+    esac
+}
