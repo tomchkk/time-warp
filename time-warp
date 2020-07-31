@@ -18,7 +18,7 @@ __var_dir="$__project_dir/var"
 __cache_dir="$__var_dir/cache"
 __log_dir="$__var_dir/log"
 __user_config_dir="$HOME/.config/$APP_NAME"
-__profiles_dir="$__user_config/profiles"
+__profiles_dir="$__user_config_dir/profiles"
 __org_tmp="/tmp/${ORG_ID:-com.org}.$APP_NAME"
 
 __make_run=(
