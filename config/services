@@ -238,7 +238,7 @@ __services::define_services() {
         "@{project-dir}/src/service/profile/matcher/strategy/scan-strategy" \
             -- "@option-tester" \
             -- "@predicate-tester" \
-            -- "@{default-logger}"
+            -- "@file-logger"
 
     container::add_service "option-tester" \
         "@{project-dir}/src/service/profile/matcher/tester/option-tester"
@@ -377,12 +377,12 @@ __services::define_services() {
     container::add_service "scan-exclude-filter" \
         "@{project-dir}/src/service/scan/exclude-filter" \
             -- "@time-machine-editor" \
-            -- "@{default-logger}"
+            -- "@file-logger"
 
     container::add_service "scan-include-filter" \
         "@{project-dir}/src/service/scan/include-filter" \
             -- "@time-machine-editor" \
-            -- "@{default-logger}"
+            -- "@file-logger"
 }
 
 __services::define_config
