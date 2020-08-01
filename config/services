@@ -62,6 +62,9 @@ __services::define_parameters() {
         "${SUBSCRIBED_NOTIFICATIONS[@]//@/-- @}"
 
     container::add_scalar "slack-webhook" "${SLACK_WEBHOOK:-false}"
+
+    # logger config
+    container::add_scalar "default-logger" "${LOG_CHANNEL:-"stdout-logger"}"
 }
 
 ##
@@ -163,7 +166,7 @@ __services::define_services() {
 
     container::add_service "services-feature" \
         "@{project-dir}/src/feature/services-feature" \
-            -- "@stdout-logger" \
+            -- "@{default-logger}" \
             -- "@container-cache-dir"
 
     container::add_service "watch-feature" \
@@ -171,7 +174,7 @@ __services::define_services() {
             -- "@watchexec-options-resolver" \
             -- "@excluding-consumer" \
             -- "@message-bus" \
-            -- "@stdout-logger" \
+            -- "@{default-logger}" \
             -- "@excluding-pipe" \
             -- "$WATCHEXEC_DEBUG"
 
@@ -179,14 +182,14 @@ __services::define_services() {
     container::add_service "excluding-consumer" \
         "@{project-dir}/src/service/queue/consumer" \
            --  "@excluding-pipe" \
-           --  "@stdout-logger" \
+           --  "@{default-logger}" \
            --  "@message-handler"
 
     # file profile services
     ## manager
     container::add_service "profile-manager" \
         "@{project-dir}/src/service/profile/profile-manager" \
-            -- "@stdout-logger"
+            -- "@{default-logger}"
 
     ## scanner
     container::add_service "profile-scanner" \
@@ -199,12 +202,12 @@ __services::define_services() {
     container::add_service "watchexec-options-resolver" \
         "@{project-dir}/src/service/profile/resolver/watchexec-options-resolver" \
             -- "@profile-manager" \
-            -- "@stdout-logger"
+            -- "@{default-logger}"
 
     ## matchers
     container::add_service "watch-profile-matcher" \
         "@{project-dir}/src/service/profile/matcher/profile-matcher" \
-            -- "@stdout-logger" \
+            -- "@{default-logger}" \
             -- "@watch-matcher-type"
 
     container::add_service "watch-matcher-type" \
@@ -217,14 +220,14 @@ __services::define_services() {
         "@{project-dir}/src/service/profile/matcher/strategy/watch-strategy" \
             -- "@option-tester" \
             -- "@predicate-tester" \
-            -- "@stdout-logger"
+            -- "@{default-logger}"
 
     container::add_service "inversion-converter" \
         "@{project-dir}/src/service/profile/matcher/converter/inversion-converter"
 
     container::add_service "scan-profile-matcher" \
         "@{project-dir}/src/service/profile/matcher/profile-matcher" \
-            -- "@file-logger" \
+            -- "@{default-logger}" \
             -- "@scan-matcher-type"
 
     container::add_service "scan-matcher-type" \
@@ -235,7 +238,7 @@ __services::define_services() {
         "@{project-dir}/src/service/profile/matcher/strategy/scan-strategy" \
             -- "@option-tester" \
             -- "@predicate-tester" \
-            -- "@file-logger"
+            -- "@{default-logger}"
 
     container::add_service "option-tester" \
         "@{project-dir}/src/service/profile/matcher/tester/option-tester"
@@ -246,7 +249,7 @@ __services::define_services() {
     # producers
     container::add_service "excluding-producer" \
         "@{project-dir}/src/service/queue/producer" \
-            -- "@stdout-logger" \
+            -- "@{default-logger}" \
             -- "@bash-clash" \
             -- "@message-bus" \
             -- "@time-machine-exclude-topic" \
@@ -256,7 +259,7 @@ __services::define_services() {
     # buses
     container::add_service "message-bus" \
         "@{project-dir}/src/bus/message-bus" \
-            -- "@stdout-logger" \
+            -- "@{default-logger}" \
             -- "@message-routing"
 
     # messages
@@ -273,17 +276,17 @@ __services::define_services() {
     # handlers
     container::add_service "message-handler" \
         "@{project-dir}/src/handler/message-handler" \
-            -- "@stdout-logger"
+            -- "@{default-logger}"
 
     # message actions
     container::add_service "kill-action" \
         "@{project-dir}/src/action/kill-action" \
             -- "@bash-clash" \
-            -- "@stdout-logger"
+            -- "@{default-logger}"
 
     container::add_service "publish-action" \
         "@{project-dir}/src/action/publish-action" \
-            -- "@stdout-logger" \
+            -- "@{default-logger}" \
             -- "@bash-clash" \
             -- "@publish-action-subscribers"
 
@@ -295,7 +298,7 @@ __services::define_services() {
     # subscribers
     container::add_service "authorizing-events-subscriber" \
         "@{project-dir}/src/subscriber/authorizing-subscriber" \
-            -- "@stdout-logger" \
+            -- "@{default-logger}" \
             -- "@excluding-authorizers"
 
     container::add_service "excluding-action-subscriber" \
@@ -305,13 +308,13 @@ __services::define_services() {
 
     container::add_service "excluding-notification-subscriber" \
         "@{project-dir}/src/subscriber/notifying-subscriber" \
-            -- "@stdout-logger" \
+            -- "@{default-logger}" \
             -- "@excluding-notifications"
 
     # deduplication services
     container::add_service "deduplication-authorizer" \
         "@{project-dir}/src/service/deduplication/deduplication-authorizer" \
-            -- "@stdout-logger" \
+            -- "@{default-logger}" \
             -- "@bash-clash" \
             -- "@message-cache"
 
@@ -323,12 +326,12 @@ __services::define_services() {
     # editing services
     container::add_service "exclude-service" \
         "@{project-dir}/src/service/editing/exclude-service" \
-            -- "@stdout-logger" \
+            -- "@{default-logger}" \
             -- "@time-machine-editor"
 
     container::add_service "excluding-authorizer" \
         "@{project-dir}/src/service/editing/excluding-authorizer" \
-            -- "@stdout-logger" \
+            -- "@{default-logger}" \
             -- "@time-machine-editor" \
             -- "@bash-clash"
 
@@ -351,7 +354,7 @@ __services::define_services() {
     container::add_service "slack-notification" \
         "@{project-dir}/src/notification/excluding/slack-notification" \
             -- "@bash-clash" \
-            -- "@stdout-logger" \
+            -- "@{default-logger}" \
             -- "@slack-client" \
             -- "@slack-webhook"
 
@@ -362,7 +365,7 @@ __services::define_services() {
     # exemptions
     container::add_service "exemptions-authorizer" \
         "@{project-dir}/src/service/exemptions/exemptions-authorizer" \
-            -- "@stdout-logger" \
+            -- "@{default-logger}" \
             -- "@bash-clash" \
             -- "@exemptions-service"
 
@@ -374,12 +377,12 @@ __services::define_services() {
     container::add_service "scan-exclude-filter" \
         "@{project-dir}/src/service/scan/exclude-filter" \
             -- "@time-machine-editor" \
-            -- "@file-logger"
+            -- "@{default-logger}"
 
     container::add_service "scan-include-filter" \
         "@{project-dir}/src/service/scan/include-filter" \
             -- "@time-machine-editor" \
-            -- "@file-logger"
+            -- "@{default-logger}"
 }
 
 __services::define_config
