@@ -18,7 +18,7 @@ feature::set_scan_dir() {
         return 1
     fi
 
-    __scan_feature_dir="${@%/}"
+    __scan_feature_dir="$(cd ${@%/}; pwd)"
 }
 
 ##
