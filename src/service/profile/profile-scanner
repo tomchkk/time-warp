@@ -37,7 +37,7 @@ profile_scanner::find_matches() {
 }
 
 ##
-# Iterates over all matches found by profile_scanner::find_matches.
+# Iterates over and echos all matches found by profile_scanner::find_matches.
 ##
 profile_scanner::iterate_matches() {
     local match; for match in "${__profile_scanner_matches[@]}"; do
@@ -115,8 +115,8 @@ __profile_scanner::produce_matches() {
             # N.B. it would be much quicker to use mdfind instead of find to
             # scan for profile matches, but mdfind can't do glob matching, so
             # the implmentation of profiles would need to be completely
-            # re-engineer. Scanning should be an infrequent event though, so
-            # speed isn't the priority here.
+            # re-engineered. Scanning is intended to be an infrequent event
+            # though, so speed shouldn't be the priority here.
         } &
 
         __profile_scanner_scan_jobs+=($!)
