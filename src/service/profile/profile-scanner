@@ -123,7 +123,7 @@ __profile_scanner::produce_matches() {
     done
 
     if [[ ${#__profile_scanner_scan_jobs[@]} -eq 0 ]]; then
-        echo "No valid profiles were detected!" >&2
+        echo "Error: No valid profiles were detected!" >&2
 
         return 1 # no scan jobs were created
     fi
@@ -133,7 +133,7 @@ __profile_scanner::produce_matches() {
     echo # separate progress from subsequent feedback
 
     if [[ ! -e "$__profile_scanner_fifo" ]]; then
-        echo " No matches were found!" >&2
+        echo -e "\nNo matches were found!" >&2
 
         return 1
     fi
