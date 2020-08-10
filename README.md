@@ -1,5 +1,8 @@
-TIME WARP - A MacOS Time Machine Tinkerer
-=========================================
+TIME WARP
+=========
+
+A MacOS Time Machine Tinkerer
+-----------------------------
 
 Ever wish Time Machine for MacOS didn't back-up all of your composer or npm dependencies?
 
