@@ -7,7 +7,7 @@ __project_dir="$(dirname "$__test_dir")"
 
 source "$__test_dir/../submodules/autoload"
 
-__bash_clash="$tomchkk_private_projects_bash_clash/src/index"
+__bash_clash="$tomchkk_bash_clash/src/index"
 
 source "$__project_dir/.env.test"
 

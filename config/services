@@ -73,15 +73,15 @@ __services::define_parameters() {
 __services::define_services() {
     # submodule services
     container::add_service "bash-clash" \
-        "$tomchkk_private_projects_bash_clash/src/index"
+        "$tomchkk_bash_clash/src/index"
 
     container::add_service "file-logger" \
-        "$tomchkk_private_projects_bash_logger/src/index" \
+        "$tomchkk_bash_logger/src/index" \
             -- "@log-level" \
             -- "@file-channel"
 
     container::add_service "stdout-logger" \
-        "$tomchkk_private_projects_bash_logger/src/index" \
+        "$tomchkk_bash_logger/src/index" \
             -- "@log-level" \
             -- "@stdout-channel" \
             -- "->"

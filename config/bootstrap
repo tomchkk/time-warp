@@ -5,8 +5,8 @@ source "$__submodules_dir/autoload"
 
 # import container functionality
 for file in container loader; do
-    source "$tomchkk_private_projects_bash_container/src/$file" \
-        "$tomchkk_private_projects_bash_clash/src/index"
+    source "$tomchkk_bash_container/src/$file" \
+        "$tomchkk_bash_clash/src/index"
 done
 
 __services_cache_dir="$__cache_dir/container"

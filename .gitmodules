@@ -1,27 +1,27 @@
-[submodule "tomchkk-private/projects/bash-container"]
-	path = submodules/tomchkk-private/projects/bash-container
-	url = git@gitlab.com:tomchkk-private/projects/bash-container.git
-	branch = master
-	version = ^0.5.3
-	super = self
-	dependency = submodules/tomchkk-private/projects/bash-clash
-[submodule "tomchkk-private/projects/bash-clash"]
-	path = submodules/tomchkk-private/projects/bash-clash
-	url = git@gitlab.com:tomchkk-private/projects/bash-clash.git
-	branch = master
-	version = ^1.0.9
-	super = submodules/tomchkk-private/projects/bash-container
-	super = self
-[submodule "tomchkk-private/projects/bash-logger"]
-	path = submodules/tomchkk-private/projects/bash-logger
-	url = git@gitlab.com:tomchkk-private/projects/bash-logger.git
-	branch = master
-	version = ^1.0.1
-	super = self
 [submodule "tomchkk/bash-test"]
 	path = submodules/tomchkk/bash-test
-	url = git@github.com:tomchkk/bash-test.git
+	url = https://github.com/tomchkk/bash-test
 	branch = master
 	super = self
 	dev = true
 	version = ^0.5.0
+[submodule "tomchkk/bash-container"]
+	path = submodules/tomchkk/bash-container
+	url = https://github.com/tomchkk/bash-container
+	branch = master
+	super = self
+	version = ^0.6.0
+	dependency = submodules/tomchkk/bash-clash
+[submodule "tomchkk/bash-clash"]
+	path = submodules/tomchkk/bash-clash
+	url = https://github.com/tomchkk/bash-clash
+	branch = master
+	super = self
+	version = ^1.1.0
+	super = submodules/tomchkk/bash-container
+[submodule "tomchkk/bash-logger"]
+	path = submodules/tomchkk/bash-logger
+	url = https://github.com/tomchkk/bash-logger
+	branch = master
+	super = self
+	version = ^1.1.0
