@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+##
+# Starts the main process
+##
+time_warp_bin::main() {
+    local __script=$(readlink ${BASH_SOURCE[0]} || echo ${BASH_SOURCE[0]})
+    local __project_dir=$(
+        # cd first to the source dir, in case $script is relative
+        cd $(dirname ${BASH_SOURCE[0]}) 2>/dev/null
+        cd $(dirname "$__script") 2>/dev/null
+        cd ..
+        pwd
+    )
+
+    source "$__project_dir/time-warp" $@
+}
+
+time_warp_bin::main $@

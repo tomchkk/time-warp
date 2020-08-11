@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-__script=$(readlink "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}")
-__project_dir="$(cd $(dirname "$__script"); pwd)"
-
 APP_VERSION="$(cat $__project_dir/version)"
 
 source "$__project_dir/.env"
