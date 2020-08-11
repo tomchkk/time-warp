@@ -1,17 +1,16 @@
-all: clean version
+VERSION?=$(shell git describe --always --first-parent HEAD)
 
-# install: bin
-# 	@cp ./src/* ./bin
+all: env version
 
-# bin: clean
-# 	@mkdir ./bin
+env:
+	@cp -n ${PWD}/.env.example ${PWD}/.env || :
+
+version: clean
+	@echo $(VERSION) > ./version
 
 clean:
-	@rm -rf ./bin
-	@rm ./version
+	@rm -f ./version
 
-version:
-	@git describe --always --first-parent HEAD > ./version
 
 profiles: user_config
 	@cp -iR ${resource_dir}/profiles ${user_config}/
@@ -19,7 +18,6 @@ profiles: user_config
 user_config:
 	@mkdir -p ${user_config}
 
-test: org_tmp
 
 run: cache_dir log_dir org_tmp
 
@@ -34,3 +32,6 @@ log_dir: var_dir
 
 org_tmp:
 	@mkdir -p ${org_tmp}
+
+
+test: org_tmp
