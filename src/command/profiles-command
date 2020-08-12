@@ -15,7 +15,7 @@ Usage:  $APP_NAME profiles [option]
 
 Options:
     -h, --help      Print usage information
-    -p, --publish   Publish the default $APP_NAME profiles.
+    -p, --publish   Publish the default $APP_NAME profiles
 EOF
 }
 

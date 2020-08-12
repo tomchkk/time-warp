@@ -157,7 +157,8 @@ __services::define_services() {
         "@{project-dir}/src/feature/profiles-feature" \
             -- "@project-dir" \
             -- "@resource-dir" \
-            -- "@user-config-dir"
+            -- "@user-config-dir" \
+            -- "@profiles-dir"
 
     container::add_service "scan-feature" \
         "@{project-dir}/src/feature/scan-feature" \

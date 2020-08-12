@@ -3,18 +3,28 @@
 __profiles_feature_project_dir="${1:?"The project dir is required"}"
 __profiles_feature_resource_dir="${2:?"The resources dir is required"}"
 __profiles_feature_config_dir="${3:?"The config dir is required"}"
+__profiles_feature_profiles_dir="${4:?"The profiles dir is required"}"
 
 ##
 # Publishes the default profiles to the users config dir.
 ##
 feature::publish() {
-    local arguments=(
+    if [[ -d "$__profiles_feature_profiles_dir" ]] \
+    && [[ -n "$(ls -A $__profiles_feature_profiles_dir)" ]]; then
+        read -p "Overwrite existing profiles? (y|n) " -r && echo
+
+        if [[ $REPLY =~ ^[Nn](o)?$ ]]; then
+            return 0
+        fi
+    fi
+
+    local make_profiles=(
         --file="$__profiles_feature_project_dir/Makefile"
         --warn-undefined-variables
         profiles
         resource_dir="$__profiles_feature_resource_dir"
-        user_config="$__profiles_feature_config_dir"
+        user_config_dir="$__profiles_feature_config_dir"
     )
 
-    make ${arguments[@]}
+    make ${make_profiles[@]}
 }
