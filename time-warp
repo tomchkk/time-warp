@@ -18,10 +18,22 @@ __user_config_dir="$HOME/.config/$APP_NAME"
 __profiles_dir="$__user_config_dir/profiles"
 __org_tmp="/tmp/${ORG_ID:-com.org}.$APP_NAME"
 
+if [[ -d "$__profiles_dir" ]] \
+&& [[ -n "$(ls -A $__profiles_dir)" ]]; then
+      __make_profiles=()
+else
+    __make_profiles=(
+        profiles
+        resource_dir="$__resource_dir"
+        user_config_dir="$__user_config_dir"
+    )
+fi
+
 __make_run=(
     --file="$__project_dir/Makefile"
     --warn-undefined-variables
     run
+    "${__make_profiles[@]}"
     var_dir="$__var_dir"
     cache_dir="$__cache_dir"
     log_dir="$__log_dir"

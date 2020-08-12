@@ -12,13 +12,6 @@ clean:
 	@rm -f ./version
 
 
-profiles: user_config
-	@cp -iR ${resource_dir}/profiles ${user_config}/
-
-user_config:
-	@mkdir -p ${user_config}
-
-
 run: cache_dir log_dir org_tmp
 
 var_dir:
@@ -32,6 +25,13 @@ log_dir: var_dir
 
 org_tmp:
 	@mkdir -p ${org_tmp}
+
+
+profiles: user_config_dir
+	@cp -R ${resource_dir}/profiles ${user_config_dir}/
+
+user_config_dir:
+	@mkdir -p ${user_config_dir}
 
 
 test: org_tmp
