@@ -5,7 +5,9 @@ __watch_feature_consumer=${2:?"A consumer is required"}
 __watch_feature_bus=${3:?"A message bus is required"}
 __watch_feature_logger=${4:?"A logger is required"}
 __watch_feature_fifo=${5:?"The fifo pipe path is required"}
-__watch_feature_watchexec_debug=${6:-false}
+__watch_feature_app_bin=${6:?"The app bin is required"}
+__watch_feature_watchexec_bin=${7:?"The watchexec bin is required"}
+__watch_feature_watchexec_debug=${8:-false}
 
 source $__watch_feature_options_resolver
 source $__watch_feature_logger
@@ -55,10 +57,10 @@ feature::watch() {
         ${watches[@]}
         # the producer call _must_ be an external call to the application to
         # enable all required config and services
-        -- "$APP_NAME" queue --produce "$profile"
+        -- "$__watch_feature_app_bin" queue --produce "$profile"
     )
 
     log::debug "Resolved watchexec options: " ${resolved[@]}
 
-    watchexec ${resolved[@]}
+    "$__watch_feature_watchexec_bin" ${resolved[@]}
 }

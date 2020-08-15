@@ -71,6 +71,11 @@ __services::define_parameters() {
 # Defines available services.
 ##
 __services::define_services() {
+    # binary services
+    container::add_scalar "app-bin" "/usr/local/bin/$APP_NAME"
+    container::add_scalar "notifier-bin" "/usr/local/bin/terminal-notifier"
+    container::add_scalar "watchexec-bin" "/usr/local/bin/watchexec"
+
     # submodule services
     container::add_service "bash-clash" \
         "$tomchkk_bash_clash/src/index"
@@ -177,6 +182,8 @@ __services::define_services() {
             -- "@message-bus" \
             -- "@{default-logger}" \
             -- "@excluding-pipe" \
+            -- "@app-bin" \
+            -- "@watchexec-bin" \
             -- "$WATCHEXEC_DEBUG"
 
     # consumers
@@ -347,6 +354,8 @@ __services::define_services() {
     container::add_service "system-notification" \
         "@{project-dir}/src/notification/excluding/system-notification" \
             -- "@bash-clash" \
+            -- "@app-bin" \
+            -- "@notifier-bin" \
             -- "Time Warp" \
             -- "Path excluded from Time Machine backups:" \
             -- "Submarine" \
