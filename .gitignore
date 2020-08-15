@@ -3,4 +3,5 @@
 /var/
 version
 submodules/autoload
+submodules/autoload.cache
 submodules/bin

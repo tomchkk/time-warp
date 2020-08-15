@@ -16,6 +16,10 @@ __X_VAL="com.apple.backupd"
 time_machine_editor::exclude() {
     local path="$1"
 
+    if $(time_machine_editor::is_excluded "$path"); then
+        return 1 # already excluded
+    fi
+
     x_attribute_editor::write "$__X_KEY" "$__X_VAL" "$path"
 
     return $?
@@ -26,6 +30,10 @@ time_machine_editor::exclude() {
 ##
 time_machine_editor::include() {
     local path="$1"
+
+    if ! $(time_machine_editor::is_excluded "$path"); then
+        return 1 # already included
+    fi
 
     x_attribute_editor::delete "$__X_KEY" "$path"
 
