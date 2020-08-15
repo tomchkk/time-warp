@@ -5,8 +5,8 @@ __watch_feature_consumer=${2:?"A consumer is required"}
 __watch_feature_bus=${3:?"A message bus is required"}
 __watch_feature_logger=${4:?"A logger is required"}
 __watch_feature_fifo=${5:?"The fifo pipe path is required"}
-__watch_feature_app_bin=${6:?"The app bin is required"}
-__watch_feature_watchexec_bin=${7:?"The watchexec bin is required"}
+__watch_feature_app=${6:?"The app binary is required"}
+__watch_feature_watchexec=${7:?"The watchexec binary is required"}
 __watch_feature_watchexec_debug=${8:-false}
 
 source $__watch_feature_options_resolver
@@ -57,12 +57,12 @@ feature::watch() {
         ${watches[@]}
         # the producer call _must_ be an external call to the application to
         # enable all required config and services
-        -- "$__watch_feature_app_bin" queue --produce "$profile"
+        -- "$__watch_feature_app" queue --produce "$profile"
     )
 
     log::debug "Resolved watchexec options: " ${resolved[@]}
 
-    "$__watch_feature_watchexec_bin" ${resolved[@]}
+    "$__watch_feature_watchexec" ${resolved[@]}
 
     log::info "The watch process was terminated"
 }

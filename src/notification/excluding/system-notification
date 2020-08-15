@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 __excluding_notification_bash_clash="${1:?"bash-clash is required"}"
-__excluding_notification_app_bin="${2:?"The app bin is required"}"
-__excluding_notification_notifier_bin="${3:?"The notifier bin is required"}"
+__excluding_notification_app="${2:?"The app binary is required"}"
+__excluding_notification_notifier="${3:?"The notifier binary is required"}"
 __excluding_notification_title="${4}"
 __excluding_notification_subtitle="${5}"
 __excluding_notification_sound="${6}"
@@ -21,12 +21,12 @@ notification::notify() {
         -subtitle "${__excluding_notification_subtitle:-"Subtitle"}"
         -message "$path"
         -sound "${__excluding_notification_sound:-"Submarine"}"
-        -execute "$__excluding_notification_app_bin exemptions --add $path"
+        -execute "$__excluding_notification_app exemptions --add $path"
         "$($__excluding_notification_ignore_dnd && echo "-ignoreDnD")"
     )
 
     # terminal-notifier is a bit verbose and doesn't return bash exit codes,
     # which can prevent parent processes from working properly, so we'll just
     # redirect any 'noise' that it creates:
-    "$__excluding_notification_notifier_bin" "${args[@]}" &> /dev/null
+    "$__excluding_notification_notifier" "${args[@]}" &> /dev/null
 }
