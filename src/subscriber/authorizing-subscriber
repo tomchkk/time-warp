@@ -13,13 +13,13 @@ subscriber::on_publish() {
 
     for authorizer in ${__authorizing_subscriber_authorizers[@]}; do
         if ! $(source "$authorizer" && authorizer::is_authorized $@); then
-            log::debug "Authorization denied by '$authorizer' authorizer"
+            log::info "Authorization denied by '$authorizer' authorizer"
 
             # stop propagation of unauthorized events
             return 1
         fi
 
-        log::debug "Authorization granted by '$authorizer' authorizer"
+        log::info "Authorization granted by '$authorizer' authorizer"
     done
 
     return 0

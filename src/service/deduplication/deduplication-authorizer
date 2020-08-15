@@ -25,7 +25,7 @@ authorizer::is_authorized() {
 __deduplication_authorizer::authorize() {
     source "$__deduplication_authorizer_bash_clash" $@
 
-    log::info "Checking event processing status"
+    log::debug "Checking event processing status"
 
     local event=$(bash_clash::get "event")
     local message_hash=$(
@@ -35,7 +35,7 @@ __deduplication_authorizer::authorize() {
     case "$event" in
         create|rename)
             if $(message_cache::contains "$message_hash"); then
-                log::debug "Status: processing on-going."
+                log::info "Status: processing on-going."
 
                 return 1 # not authorized
             fi
