@@ -64,7 +64,8 @@ __services::define_parameters() {
     container::add_scalar "slack-webhook" "${SLACK_WEBHOOK:-false}"
 
     # logger config
-    container::add_scalar "default-logger" "${LOG_CHANNEL:-"stdout-logger"}"
+    container::add_scalar "default-logger" "${DEFAULT_LOGGER:-"stdout-logger"}"
+    container::add_scalar "scan-logger" "${SCAN_LOGGER:-"file-logger"}"
 }
 
 ##
@@ -80,10 +81,16 @@ __services::define_services() {
     container::add_service "bash-clash" \
         "$tomchkk_bash_clash/src/index"
 
+    container::add_service "daily-logger" \
+        "@{project-dir}/src/logger/daily-logger" \
+            -- "$tomchkk_bash_logger/src/index" \
+            -- "@log-level" \
+            -- "@{log-dir}"
+
     container::add_service "file-logger" \
         "$tomchkk_bash_logger/src/index" \
             -- "@log-level" \
-            -- "@file-channel"
+            -- "@{log-dir}/${APP_NAME}.log"
 
     container::add_service "stdout-logger" \
         "$tomchkk_bash_logger/src/index" \
@@ -246,7 +253,7 @@ __services::define_services() {
         "@{project-dir}/src/service/profile/matcher/strategy/scan-strategy" \
             -- "@option-tester" \
             -- "@predicate-tester" \
-            -- "@file-logger"
+            -- "@{scan-logger}"
 
     container::add_service "option-tester" \
         "@{project-dir}/src/service/profile/matcher/tester/option-tester"
@@ -387,12 +394,12 @@ __services::define_services() {
     container::add_service "scan-exclude-filter" \
         "@{project-dir}/src/service/scan/exclude-filter" \
             -- "@time-machine-editor" \
-            -- "@file-logger"
+            -- "@{scan-logger}"
 
     container::add_service "scan-include-filter" \
         "@{project-dir}/src/service/scan/include-filter" \
             -- "@time-machine-editor" \
-            -- "@file-logger"
+            -- "@{scan-logger}"
 }
 
 __services::define_config

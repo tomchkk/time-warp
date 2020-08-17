@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+__daily_logger_logger="${1:?"bash-log is required"}"
+__daily_logger_arguments=(
+    "${2:?"A log level must be set"}"
+    "${3:?"A log dir must be set"}/$(date '+%Y-%m-%d').log"
+)
+
+builtin source "$__daily_logger_logger" "${__daily_logger_arguments[@]}"
