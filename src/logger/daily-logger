@@ -20,5 +20,5 @@ eval __parent_"$(declare -f log::log)"
 log::log() {
     __bash_logger_channel="$__daily_logger_log_dir/$(date '+%Y-%m-%d').log"
 
-    __parent_log::log $@
+    __parent_log::log "$1" "$2" "${@:3}"
 }
