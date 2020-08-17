@@ -1,9 +1,24 @@
 #!/usr/bin/env bash
 
 __daily_logger_logger="${1:?"bash-log is required"}"
+__daily_logger_log_level="${2:?"A log level must be set"}"
+__daily_logger_log_dir="${3:?"A log dir must be set"}"
+
 __daily_logger_arguments=(
-    "${2:?"A log level must be set"}"
-    "${3:?"A log dir must be set"}/$(date '+%Y-%m-%d').log"
+    "$__daily_logger_log_level"
+    "$__daily_logger_log_dir/default.log"
 )
 
-builtin source "$__daily_logger_logger" "${__daily_logger_arguments[@]}"
+source "$__daily_logger_logger" "${__daily_logger_arguments[@]}"
+
+# create parent method
+eval __parent_"$(declare -f log::log)"
+
+##
+# Sets the channel name dynamically before calling the parent function.
+##
+log::log() {
+    __bash_logger_channel="$__daily_logger_log_dir/$(date '+%Y-%m-%d').log"
+
+    __parent_log::log $@
+}
