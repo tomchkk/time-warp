@@ -67,17 +67,17 @@ __services::define_parameters() {
     # logger config
     container::add_scalar "default-logger" "${DEFAULT_LOGGER:-"stdout-logger"}"
     container::add_scalar "scan-logger" "${SCAN_LOGGER:-"file-logger"}"
+
+    # binary references
+    container::add_scalar "app" "/usr/local/bin/$APP_NAME"
+    container::add_scalar "terminal-notifier" "/usr/local/bin/terminal-notifier"
+    container::add_scalar "watchexec" "/usr/local/bin/watchexec"
 }
 
 ##
 # Defines available services.
 ##
 __services::define_services() {
-    # binary services
-    container::add_scalar "app" "/usr/local/bin/$APP_NAME"
-    container::add_scalar "terminal-notifier" "/usr/local/bin/terminal-notifier"
-    container::add_scalar "watchexec" "/usr/local/bin/watchexec"
-
     # submodule services
     container::add_service "bash-clash" \
         "$tomchkk_bash_clash/src/index"
