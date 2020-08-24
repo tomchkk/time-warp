@@ -7,7 +7,8 @@ __watch_feature_logger=${4:?"A logger is required"}
 __watch_feature_fifo=${5:?"The fifo pipe path is required"}
 __watch_feature_app=${6:?"The app binary is required"}
 __watch_feature_watchexec=${7:?"The watchexec binary is required"}
-__watch_feature_watchexec_debug=${8:-false}
+__watch_feature_producer_pid_file="${8:?"The producer pid file path is required"}"
+__watch_feature_watchexec_debug=${9:-false}
 
 source $__watch_feature_options_resolver
 source $__watch_feature_logger
@@ -18,6 +19,8 @@ source $__watch_feature_logger
 __watch_feature::on_exit() {
     source $__watch_feature_bus
     message_bus::dispatch_message "KILL"
+
+    __watch_feature::remove_producer_pid_file
 }
 
 ##
@@ -48,9 +51,11 @@ feature::watch() {
 
     log::info "Launching $APP_NAME watch (consumer pid: $! | producer pid: $$)"
 
+    __watch_feature::remove_producer_pid_file
+
     local resolved=(
         # only execute the command after the first triggered watch
-        --postpone
+        # --postpone
         $($__watch_feature_watchexec_debug && echo "--verbose")
         ${flags[@]}
         ${options[@]}
@@ -63,4 +68,13 @@ feature::watch() {
     log::debug "Resolved watchexec options: " ${resolved[@]}
 
     "$__watch_feature_watchexec" ${resolved[@]}
+}
+
+##
+# Removes the producer pid file, if it exists.
+##
+__watch_feature::remove_producer_pid_file() {
+    if [[ -f "$__watch_feature_producer_pid_file" ]]; then
+        rm -f "$__watch_feature_producer_pid_file"
+    fi
 }

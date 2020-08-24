@@ -6,7 +6,8 @@ __producer_bash_clash=${2:?"bash-clash is required"}
 __producer_bus=${3:?"A message bus is required"}
 __producer_topic=${4:?"A publishable topic is required"}
 __producer_matcher=${5:?"A profile matcher is required"}
-__producer_watching=${@:6}
+__producer_pid_file="${6:?"The producer pid file path is required"}"
+__producer_watching=${@:7}
 
 if [[ -z "$__producer_watching" ]]; then
     log::error "No events to watch are defined" && exit 1
@@ -76,6 +77,8 @@ producer::produce() {
             fi
         done
     done
+
+    echo $$ > "$__producer_pid_file"
 }
 
 ##
