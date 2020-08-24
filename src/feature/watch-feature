@@ -63,6 +63,4 @@ feature::watch() {
     log::debug "Resolved watchexec options: " ${resolved[@]}
 
     "$__watch_feature_watchexec" ${resolved[@]}
-
-    log::info "The watch process was terminated"
 }
