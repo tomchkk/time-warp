@@ -69,9 +69,9 @@ __services::define_parameters() {
     container::add_scalar "scan-logger" "${SCAN_LOGGER:-"file-logger"}"
 
     # binary references
-    container::add_scalar "app" "/usr/local/bin/$APP_NAME"
-    container::add_scalar "terminal-notifier" "/usr/local/bin/terminal-notifier"
-    container::add_scalar "watchexec" "/usr/local/bin/watchexec"
+    container::add_scalar "app" "@{project-dir}/bin/time-warp"
+    container::add_scalar "terminal-notifier" "$(which terminal-notifier)"
+    container::add_scalar "watchexec" "$(which watchexec)"
 }
 
 ##
