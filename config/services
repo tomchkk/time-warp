@@ -82,6 +82,7 @@ __services::define_services() {
     container::add_service "bash-clash" \
         "$tomchkk_bash_clash/src/index"
 
+    # logging services
     container::add_service "daily-logger" \
         "@{project-dir}/src/logger/daily-logger" \
             -- "$tomchkk_bash_logger/src/index" \

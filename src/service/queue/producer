@@ -30,7 +30,7 @@ producer::produce() {
 
     for key in ${!changes[@]}; do
         if [[ -z ${!changes[$key]} ]]; then
-            # no detectable change occurred: no changec path was given
+            # no detectable change occurred: no changed path was given
             continue
         fi
 
