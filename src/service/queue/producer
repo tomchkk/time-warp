@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 
 source ${1:?"A logger is required"}
+source ${2:?"A status indicator is required"}
 
-__producer_bash_clash=${2:?"bash-clash is required"}
-__producer_bus=${3:?"A message bus is required"}
-__producer_topic=${4:?"A publishable topic is required"}
-__producer_matcher=${5:?"A profile matcher is required"}
-__producer_pid_file="${6:?"The producer pid file path is required"}"
-__producer_watching=${@:7}
+__producer_bash_clash=${3:?"bash-clash is required"}
+__producer_bus=${4:?"A message bus is required"}
+__producer_topic=${5:?"A publishable topic is required"}
+__producer_matcher=${6:?"A profile matcher is required"}
+__producer_pid_file="${7:?"The producer pid file path is required"}"
+__producer_watching=${@:8}
 
 if [[ -z "$__producer_watching" ]]; then
     log::error "No events to watch are defined" && exit 1
@@ -28,7 +29,9 @@ producer::produce() {
         'WATCHEXEC_META_CHANGED_PATH'
     )
 
-    for key in ${!changes[@]}; do
+    status_indicator::action
+
+    local key; for key in ${!changes[@]}; do
         if [[ -z ${!changes[$key]} ]]; then
             # no detectable change occurred: no changed path was given
             continue
@@ -78,7 +81,14 @@ producer::produce() {
         done
     done
 
+    if [[ ! -f "$__producer_pid_file" ]]; then
+        # there's no previous pid file, so this is the initial call
+        log::debug "Producer is up and running"
+    fi
+
     echo $$ > "$__producer_pid_file"
+
+    status_indicator::ok
 }
 
 ##

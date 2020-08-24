@@ -56,10 +56,8 @@ __anybar_client::open() {
         return 0
     fi
 
-    log::info "Attempting to start AnyBar"
-
     if ! $(ANYBAR_PORT=$__anybar_client_port open -na AnyBar 2>/dev/null); then
-        log::info "AnyBar is not installed!"
+        log::debug "AnyBar is not installed!"
 
         return 1
     fi

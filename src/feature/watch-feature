@@ -8,19 +8,25 @@ __watch_feature_fifo=${5:?"The fifo pipe path is required"}
 __watch_feature_app=${6:?"The app binary is required"}
 __watch_feature_watchexec=${7:?"The watchexec binary is required"}
 __watch_feature_producer_pid_file="${8:?"The producer pid file path is required"}"
-__watch_feature_watchexec_debug=${9:-false}
+__watch_feature_status_indicator=${9:?"A status indicator is required"}
+__watch_feature_watchexec_debug=${10:-false}
 
 source $__watch_feature_options_resolver
 source $__watch_feature_logger
+source $__watch_feature_status_indicator
 
 ##
 # Feature exit strategy
 ##
 __watch_feature::on_exit() {
+    status_indicator::warn
+
     source $__watch_feature_bus
     message_bus::dispatch_message "KILL"
+    log::info "The watch process ($$) was terminated"
 
     __watch_feature::remove_producer_pid_file
+    status_indicator::quit
 }
 
 ##
@@ -47,15 +53,15 @@ feature::watch() {
 
     trap __watch_feature::on_exit SIGINT
 
+    status_indicator::caution
+
     source $__watch_feature_consumer && consumer::consume &
 
-    log::info "Launching $APP_NAME watch (consumer pid: $! | producer pid: $$)"
+    log::info "Launching $APP_NAME watch (consumer pid: $! | watch pid: $$)"
 
     __watch_feature::remove_producer_pid_file
 
     local resolved=(
-        # only execute the command after the first triggered watch
-        # --postpone
         $($__watch_feature_watchexec_debug && echo "--verbose")
         ${flags[@]}
         ${options[@]}

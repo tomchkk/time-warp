@@ -72,6 +72,7 @@ __services::define_parameters() {
     container::add_scalar "app" "@{project-dir}/bin/time-warp"
     container::add_scalar "terminal-notifier" "$(which terminal-notifier)"
     container::add_scalar "watchexec" "$(which watchexec)"
+    container::add_scalar "netcat" "$(which nc)"
 }
 
 ##
@@ -194,6 +195,7 @@ __services::define_services() {
             -- "@app" \
             -- "@watchexec" \
             -- "@{producer-pid-file}" \
+            -- "@status-indicator" \
             -- "$WATCHEXEC_DEBUG"
 
     # consumers
@@ -268,6 +270,7 @@ __services::define_services() {
     container::add_service "excluding-producer" \
         "@{project-dir}/src/service/queue/producer" \
             -- "@{default-logger}" \
+            -- "@status-indicator" \
             -- "@bash-clash" \
             -- "@message-bus" \
             -- "@time-machine-exclude-topic" \
@@ -380,6 +383,12 @@ __services::define_services() {
             -- "@slack-webhook"
 
     # clients
+    container::add_service "anybar-client" \
+        "@{project-dir}/src/service/client/anybar-client" \
+            -- "${ANYBAR_PORT:-1738}" \
+            -- "@netcat" \
+            -- "@{default-logger}"
+
     container::add_service "slack-client" \
         "@{project-dir}/src/service/client/slack-client"
 
@@ -404,6 +413,11 @@ __services::define_services() {
         "@{project-dir}/src/service/scan/include-filter" \
             -- "@time-machine-editor" \
             -- "@{scan-logger}"
+
+    # status indicators
+    container::add_service "status-indicator" \
+        "@{project-dir}/src/indicator/status-indicator" \
+            -- "@anybar-client"
 }
 
 __services::define_config
