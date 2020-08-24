@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+source "${1:?"An indicator client is required"}"
+
+##
+# Sends an OK signal to the indicator client.
+##
+status_indicator::ok() {
+    indicator_client::indicate "green"
+}
+
+##
+# Sends an action signal to the indicator client.
+##
+status_indicator::action() {
+    indicator_client::indicate "blue"
+}
+
+##
+# Sends a caution signal to the indicator client.
+##
+status_indicator::caution() {
+    indicator_client::indicate "orange"
+}
+
+##
+# Sends a warning signal to the indicator client.
+##
+status_indicator::warn() {
+    indicator_client::indicate "red"
+}
+
+##
+# Sends a quit signal to the indicator client.
+##
+status_indicator::quit() {
+    indicator_client::indicate "quit"
+}
