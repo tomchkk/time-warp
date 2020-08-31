@@ -22,8 +22,7 @@ action::process_action() {
     local message_count=$(bash_clash::get "message_count")
     local throughput=$(__report_action::calculate_throughput $message_count $uptime)
 
-    # remove 1 hour from uptime so it displays the elapsed time
-    uptime=$(date -r $(( $uptime - 3600 )) +"%-Hh %-Mm %-Ss")
+    uptime=$(__report_action::format_uptime $uptime)
 
     echo -e "\n" > $enquirer
     echo -e "$(source $__report_action_view_dir/report-view)" | column -t -s="," > $enquirer
@@ -37,4 +36,17 @@ __report_action::calculate_throughput() {
     local seconds=${2:?"The uptime in microseconds is required"}
 
     printf "%.2fmps" $(echo "scale=2; $count / $seconds" | bc)
+}
+
+##
+# Formats the uptime as d(ays) h(ours) m(inutes) s(econds).
+##
+__report_action::format_uptime() {
+    local uptime=${1:?"The uptime in microseconds is required"}
+
+    # remove 1 hour from uptime so it displays the elapsed time
+    local elapsed=$(date -r $(( $uptime - 3600 )) +"%-Hh %-Mm %-Ss")
+    local days=$(($uptime / 86400))
+
+    echo "${days}d $elapsed"
 }
