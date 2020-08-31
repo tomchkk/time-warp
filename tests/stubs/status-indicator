@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+status_indicator::ok() {
+    :
+}
+
+status_indicator::action() {
+    :
+}

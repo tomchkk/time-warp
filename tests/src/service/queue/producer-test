@@ -6,10 +6,12 @@ source "$__script_dir/../../../bootstrap"
 producer_test::before_each() {
     local producer_args=(
         "$__test_dir/stubs/bash-logger"
+        "$__test_dir/stubs/status-indicator"
         "$__bash_clash"
         "/dev/null" # message-bus
         "test-topic"
         "$__script_dir/stubs/profile-matcher"
+        "/dev/null"
         "create" "rename" "meta"
     )
     source "$__project_dir/src/service/queue/producer" ${producer_args[@]}

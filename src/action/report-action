@@ -32,6 +32,7 @@ action::process_action() {
     local message_count=$(bash_clash::get "message_count")
     local throughput=$(__report_action::calculate_throughput $message_count $uptime)
 
+    # remove 1 hour from uptime so it displays the elapsed time
     uptime=$(date -r $(( $uptime - 3600 )) +"%-Hh %-Mm %-Ss")
 
     echo -e "\n" > $enquirer
