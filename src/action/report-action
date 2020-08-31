@@ -4,16 +4,6 @@ __report_action_bash_clash="${1:?"bash-clash is a required parameter"}"
 __report_action_view_dir="${2:?"view-dir is a required parameter"}"
 
 ##
-# Calculates the consumer throughput in messages per second.
-#
-__report_action::calculate_throughput() {
-    local count=${1:?"A count of messages is required"}
-    local seconds=${2:?"The uptime - in seconds - is required"}
-
-    printf "%.2fmps" $(echo "scale=2; $count / $seconds" | bc)
-}
-
-##
 # Echos a report view to the $enquirer.
 ##
 action::process_action() {
@@ -37,4 +27,14 @@ action::process_action() {
 
     echo -e "\n" > $enquirer
     echo -e "$(source $__report_action_view_dir/report-view)" | column -t -s="," > $enquirer
+}
+
+##
+# Calculates the consumer throughput in messages per second.
+#
+__report_action::calculate_throughput() {
+    local count=${1:?"A count of messages is required"}
+    local seconds=${2:?"The uptime in microseconds is required"}
+
+    printf "%.2fmps" $(echo "scale=2; $count / $seconds" | bc)
 }
