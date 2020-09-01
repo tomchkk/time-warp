@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
-__anybar_client_port=${1:?"A port for AnyBar is required"}
-__anybar_client_netcat="${2:?"Netcat is required"}"
-source "${3:?"A logger is required"}"
+__anybar_client_port="${1:?"A port for AnyBar is required"}"
+__anybar_client_title="${2:?"A title for AnyBar is required"}"
+__anybar_client_netcat="${3:?"Netcat is required"}"
+
+source "${4:?"A logger is required"}"
 
 ##
 # Sends an indication signal to AnyBar, starting the application if it's not
@@ -56,7 +58,12 @@ __anybar_client::open() {
         return 0
     fi
 
-    if ! $(ANYBAR_PORT=$__anybar_client_port open -na AnyBar 2>/dev/null); then
+    local anybar_env=(
+        ANYBAR_PORT="$__anybar_client_port"
+        ANYBAR_TITLE="$__anybar_client_title"
+    )
+
+    if ! $(env "${anybar_env[@]}" open -na AnyBar 2>/dev/null); then
         log::debug "AnyBar is not installed!"
 
         return 1

@@ -386,6 +386,7 @@ __services::define_services() {
     container::add_service "anybar-client" \
         "@{project-dir}/src/service/client/anybar-client" \
             -- "${ANYBAR_PORT:-1738}" \
+            -- "${APP_NAME}" \
             -- "@netcat" \
             -- "@{default-logger}"
 
