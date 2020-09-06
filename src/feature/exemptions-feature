@@ -8,22 +8,25 @@ source "$__exemptions_feature_editor"
 
 ##
 # Add the given path to the exemptions list and re-include it in Time Machine
-# backups.
+# backups, if the path exists.
 ##
 feature::add() {
     local item="${1:?"An item to add is required"}"
 
-    if $(exemptions_service::add_item "$item"); then
-        time_machine_editor::include "$item"
+    if ! $(exemptions_service::add_item "$item"); then
+        echo "'$item' is already exempted from $APP_NAME monitoring" >&2
 
-        echo "'$item' was exempted from $APP_NAME monitoring and re-included in Time Machine backups"
-
-        return 0
+        return 1
     fi
 
-    echo "'$item' is already exempted from $APP_NAME monitoring" >&2
+    local message="'$item' was exempted from $APP_NAME monitoring"
 
-    return 1
+    if [[ -e "$item" ]]; then
+        time_machine_editor::include "$item"
+        message+=" and re-included in Time Machine backups"
+    fi
+
+    echo "$message"
 }
 
 ##
