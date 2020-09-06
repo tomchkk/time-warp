@@ -7,7 +7,7 @@ source "$__exemptions_feature_service"
 source "$__exemptions_feature_editor"
 
 ##
-# Add the given path to the exemptions list and re-includ it in Time Machine
+# Add the given path to the exemptions list and re-include it in Time Machine
 # backups.
 ##
 feature::add() {
