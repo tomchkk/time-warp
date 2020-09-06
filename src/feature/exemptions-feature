@@ -58,7 +58,7 @@ feature::remove() {
 # Removes all items from the exemeptions list.
 ##
 feature::remove_all() {
-    read -p "Remove all exempted items? (y|n) " -n 1 -r && echo
+    read -p "Remove all exempted items? (y|n) " -r && echo
 
     if [[ $REPLY =~ ^[Yy](es)?$ ]]; then
         exemptions_service::remove_all
