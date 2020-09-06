@@ -28,7 +28,7 @@ __services::define_parameters() {
     # files
     container::add_scalar "excluding-pipe" "@{org-tmp}/excluding-pipe"
     container::add_scalar "scanning-pipe" "@{org-tmp}/scanning-pipe"
-    container::add_scalar "exemptions-file" "@{var-dir}/watch-exemptions"
+    container::add_scalar "exemptions-file" "@{user-config-dir}/watch-exemptions"
     container::add_scalar "producer-pid-file" "@{var-dir}/producer.pid"
 
     # message routing
