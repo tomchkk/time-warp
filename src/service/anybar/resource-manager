@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+__anybar_resource_manager_project_dir="${1:?"The project dir is required"}"
+__anybar_resource_manager_resource_dir="${2:?"The resource dir is required"}"
+__anybar_resource_manager_config_dir="${3:?"The Anybar config dir is required"}"
+source "${4:?"A logger is required"}"
+
+##
+# Creates anybar adaptor resources.
+##
+anybar_resource_manager::load() {
+    local make_anybar=(
+        --file="$__anybar_resource_manager_project_dir/Makefile"
+        --warn-undefined-variables
+        anybar
+        resource_dir="$__anybar_resource_manager_resource_dir"
+        anybar_config_dir="$__anybar_resource_manager_config_dir"
+    )
+
+    make "${make_anybar[@]}"
+}
+
+##
+# Determines if a required adaptor resource is available.
+##
+anybar_resource_manager::loaded() {
+    local resource="${1:?"A resource name is required"}"
+    local path="${__anybar_resource_manager_config_dir}/${resource}@2x.png"
+
+    if [[ ! -f "$path" ]]; then
+        log::error "The '$resource' AnyBar resource does not exist!"
+
+        return 1
+    fi
+
+    return 0
+}

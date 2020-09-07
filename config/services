@@ -388,7 +388,8 @@ __services::define_services() {
             -- "${ANYBAR_PORT:-1738}" \
             -- "${APP_NAME}" \
             -- "@netcat" \
-            -- "@{default-logger}"
+            -- "@{default-logger}" \
+            -- "@anybar-signal-adaptor"
 
     container::add_service "slack-client" \
         "@{project-dir}/src/service/client/slack-client"
@@ -419,6 +420,19 @@ __services::define_services() {
     container::add_service "status-indicator" \
         "@{project-dir}/src/indicator/status-indicator" \
             -- "@anybar-client"
+
+    # anybar adaptor services
+    container::add_service "anybar-signal-adaptor" \
+        "@{project-dir}/src/service/anybar/signal-adaptor" \
+            -- "@anybar-resource-manager" \
+            -- "@{default-logger}"
+
+    container::add_service "anybar-resource-manager" \
+        "@{project-dir}/src/service/anybar/resource-manager" \
+            -- "@project-dir" \
+            -- "@resource-dir" \
+            -- "${ANYBAR_CONFIG:-"$HOME/.AnyBar"}" \
+            -- "@{default-logger}"
 }
 
 __services::define_config

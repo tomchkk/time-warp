@@ -3,8 +3,8 @@
 __anybar_client_port="${1:?"A port for AnyBar is required"}"
 __anybar_client_title="${2:?"A title for AnyBar is required"}"
 __anybar_client_netcat="${3:?"Netcat is required"}"
-
 source "${4:?"A logger is required"}"
+__anybar_client_signal_adaptor="${5}"
 
 ##
 # Sends an indication signal to AnyBar, starting the application if it's not
@@ -23,11 +23,15 @@ indicator_client::indicate() {
         return 1
     fi
 
-    local nc_args=(
-        -4u -w0 localhost "$__anybar_client_port"
+    if [[ "$signal" != "quit" ]]; then
+        signal=$(__anybar_client::adapt_signal "$signal")
+    fi
+
+    local request=(
+        "$__anybar_client_netcat" -4u -w0 localhost "$__anybar_client_port"
     )
 
-    echo -n "$signal" | "$__anybar_client_netcat" "${nc_args[@]}"
+    echo -n "$signal" | "${request[@]}"
 }
 
 ##
@@ -107,4 +111,23 @@ __anybar_client::wait_until_open() {
     done
 
     return 0
+}
+
+##
+# Adapts the given signal if an adaptor is provided.
+##
+__anybar_client::adapt_signal() {
+    local signal="${1:?"A signal value is required to adapt"}"
+
+    if [[ -z "$__anybar_client_signal_adaptor" ]]; then
+        log::debug "No AnyBar signal adaptor was provided"
+
+        echo "$signal"
+
+        return 1
+    fi
+
+    source "$__anybar_client_signal_adaptor"
+
+    echo "$(anybar_signal_adaptor::adapt "$signal")"
 }

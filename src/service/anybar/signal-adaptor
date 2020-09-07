@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+source "${1:?"A resource manager is required"}"
+source "${2:?"A logger is required"}"
+
+##
+# Adapts a standard AnyBar signal using available alternate resources.
+##
+anybar_signal_adaptor::adapt() {
+    local signal="${1:?"A signal value is required to adapt"}"
+    local adapted="vortex-$signal"
+
+    anybar_resource_manager::load
+
+    if ! $(anybar_resource_manager::loaded "$adapted"); then
+        echo "$signal"
+
+        return 1
+    fi
+
+    echo "$adapted"
+}

@@ -34,4 +34,11 @@ user_config_dir:
 	@mkdir -p ${user_config_dir}
 
 
+anybar: anybar_config_dir
+	@cp -R ${resource_dir}/anybar/* ${anybar_config_dir}/
+
+anybar_config_dir:
+	@mkdir -p ${anybar_config_dir}
+
+
 test: org_tmp
