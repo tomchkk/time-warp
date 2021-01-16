@@ -34,4 +34,4 @@ jobs:
         run: submarine install --all
         
       - name: Run tests
-        run: ./submodules/bin/bash-test ./test
+        run: ./submodules/bin/bash-test ./tests
