@@ -25,6 +25,8 @@ producer_test::test_produce() {
     local actual expected message
     local profiles="/dev/null"
 
+    bash_test::assert_equals 1 0
+
     # method exits cleanly if no modifications are detected
     actual=$(producer::produce "$profiles"; echo $?)
     bash_test::assert_equals 0 "$actual"
