@@ -1,3 +1,5 @@
+![time-warp tests](https://github.com/tomchkk/time-warp/workflows/time-warp%20tests/badge.svg)
+
 TIME WARP
 =========
 
