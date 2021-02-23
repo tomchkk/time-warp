@@ -6,21 +6,23 @@ TIME WARP
 A MacOS Time Machine Tinkerer
 -----------------------------
 
-Ever wish Time Machine for MacOS didn't back-up all of your composer or npm dependencies?
+Ever wish Time Machine for MacOS didn't back-up all of your composer, npm or git submodule dependencies?
 
 ## Intro
 
-Time Warp monitors your filesystem for dependency directories and excluding them from Time Machine backups.
+Time Warp monitors your filesystem for dependency directories and excludes those found from Time Machine backups.
 
 ## What
 
 At its heart Time Warp is a cli that can be used to set up a watch on chosen filesystem paths for changes to defined target files or directories, excluding from Time Machine backups those that are identified.
 
-Targets are defined by configurable (and extendable) profiles, and the profiles are then used both to filter paths for the watch process and to positively identify new matching paths as targets for exclusion.
+Targets are defined by configurable (and extendable) profiles, and the profiles are then used both to filter paths for the watch process and to positively identify newly created paths as targets for exclusion.
 
 ## File Profiles
 
 File profiles – located by default in `~/.config/time-warp/profiles` – are used to dynamically identify filesystem paths as a target to be excluded from backups.
+
+Additional profiles can be added to the default directory which, following a restart of any running _watch_ process, will extend Time Warp's monitoring to other files.
 
 A file profile is made up of `filters` and `predicates`.
 
@@ -40,7 +42,7 @@ Time Warp uses [watchexec](https://github.com/watchexec/watchexec) under the hoo
       can  be  specified  multiple  times,  and a match on any pattern
       causes the path to be ignored.
 
-Both the short- and long-form options are allowed and **the equal sign joinng an option handle to its value is required**.
+Both the short- and long-form options are allowed and **the equal sign joining an option handle to its value is required**.
 
 
 **Valid**:
