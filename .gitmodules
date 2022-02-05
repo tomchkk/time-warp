@@ -5,6 +5,7 @@
 	super = self
 	dev = true
 	version = ^0.6.0
+	commit = 936b7f5f0c208097df320c568354d0b5086f3cbb
 [submodule "tomchkk/bash-container"]
 	path = submodules/tomchkk/bash-container
 	url = https://github.com/tomchkk/bash-container
@@ -12,6 +13,7 @@
 	super = self
 	version = ^0.6.0
 	dependency = submodules/tomchkk/bash-clash
+	commit = 6ce5b6475daabeacc5b2fb5d5832003217ac34d5
 [submodule "tomchkk/bash-clash"]
 	path = submodules/tomchkk/bash-clash
 	url = https://github.com/tomchkk/bash-clash
@@ -19,9 +21,11 @@
 	super = self
 	version = ^1.1.0
 	super = submodules/tomchkk/bash-container
+	commit = 69f3d6bd891ac9b692434073e5ab1c73b07d50d9
 [submodule "tomchkk/bash-logger"]
 	path = submodules/tomchkk/bash-logger
 	url = https://github.com/tomchkk/bash-logger
 	branch = master
 	super = self
 	version = ^1.1.0
+	commit = 9951c9cb72102abd960f47f8c756f347e5731a50
